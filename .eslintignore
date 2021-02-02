@@ -1,0 +1,11 @@
+.git
+node_modules
+public
+.gitignore
+.eslintrc
+.eslintignore
+dist
+
+packages/
+typings/
+github-actions-reporter.js

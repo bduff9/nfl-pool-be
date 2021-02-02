@@ -1,0 +1,9 @@
+version: '3'
+services:
+  mysql-movies:
+    image: mysql:5.7.12
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: media_tracker
+    ports:
+      - '3308:3306'
