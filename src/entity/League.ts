@@ -6,6 +6,7 @@ import {
 	DeleteDateColumn,
 	Entity,
 	Index,
+	JoinColumn,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
@@ -16,7 +17,7 @@ import { User } from './User';
 import { UserLeague } from './UserLeague';
 
 @Index('uk_LeagueName', ['leagueName'], { unique: true })
-@Entity('LeaguesRaw', { schema: 'NFL' })
+@Entity('Leagues', { schema: 'NFL' })
 @ObjectType()
 export class League extends BaseEntity {
 	@Field(() => Int, { nullable: false })
@@ -39,6 +40,7 @@ export class League extends BaseEntity {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
+	@JoinColumn({ name: 'LeagueAdmin' })
 	public admin!: User;
 
 	@Field(() => Date, { nullable: false })

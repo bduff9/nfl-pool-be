@@ -14,7 +14,7 @@ import {
 import TeamConference from './TeamConference';
 import TeamDivision from './TeamDivision';
 
-@Entity('TeamsRaw', { schema: 'NFL' })
+@Entity('Teams', { schema: 'NFL' })
 @Index('uk_Team', ['teamCity', 'teamName'], { unique: true })
 @Index('uk_TeamName', ['teamName'], { unique: true })
 @Index('uk_TeamShort', ['teamShortName'], { unique: true })

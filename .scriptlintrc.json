@@ -2,6 +2,7 @@
   "rules": {
     "alphabetic-order": true,
     "correct-casing": true,
+    "mandatory-dev": false,
     "natural-order": true,
     "no-aliases": true,
     "prepost-trigger-defined": true

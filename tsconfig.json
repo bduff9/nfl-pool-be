@@ -21,11 +21,12 @@
     ],
     "module": "CommonJS",
     "moduleResolution": "node",
-    "noEmit": true,
+    "noEmit": false,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "outDir": ".build",
     "preserveConstEnums": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -38,13 +39,5 @@
     "target": "ES2019"
   },
   "exclude": ["node_modules"],
-  "include": [
-    ".eslintrc.js",
-    "next.config.js",
-    "**/*.ts",
-    "**/*.tsx",
-    "github-actions-reporter.js",
-    "ormconfig.js",
-    "setupTests.js"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "ormconfig.js"]
 }
