@@ -13,9 +13,9 @@ const config = {
 	username,
 	synchronize: false,
 	logging: true,
-	entities: ['src/entity/**/*.js'],
-	migrations: ['src/migration/**/*.js'],
-	subscribers: ['src/subscriber/**/*.js'],
+	entities: ['.build/src/entity/**/*.js'],
+	migrations: ['.build/src/migration/**/*.js'],
+	subscribers: ['.build/src/subscriber/**/*.js'],
 	cli: {
 		entitiesDir: 'src/entity',
 		migrationsDir: 'src/migration',

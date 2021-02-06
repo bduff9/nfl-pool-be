@@ -19,7 +19,7 @@ import PaymentType from './PaymentType';
 import { UserLeague } from './UserLeague';
 
 @Index('uk_UserEmail', ['userEmail'], { unique: true })
-@Entity('UsersRaw', { schema: 'NFL' })
+@Entity('Users', { schema: 'NFL' })
 @ObjectType()
 export class User extends BaseEntity {
 	@Field(() => Int, { nullable: false })
@@ -129,6 +129,20 @@ export class User extends BaseEntity {
 	})
 	public userAutoPickStrategy!: AutoPickStrategy | null;
 
+	@Field(() => Notification)
+	@OneToMany(() => Notification, (notification) => notification.user, {
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	})
+	public notifications!: Notification[];
+
+	@Field(() => [UserLeague])
+	@OneToMany(() => UserLeague, (userLeague) => userLeague.league, {
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	})
+	public userLeagues!: UserLeague[];
+
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({
 		default: () => 'CURRENT_TIMESTAMP',
@@ -186,132 +200,4 @@ export class User extends BaseEntity {
 		type: 'varchar',
 	})
 	public userDeletedBy!: null | string;
-
-	@Field(() => Notification)
-	@OneToMany(() => Notification, (notification) => notification.user, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	public notifications!: Notification[];
-
-	@Field(() => [UserLeague])
-	@OneToMany(() => UserLeague, (userLeague) => userLeague.league, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	public userLeagues!: UserLeague[];
 }
-
-/* TODO: remove if we don't need views
-@ViewEntity({
-	expression:
-		'SELECT `UserID`, `UserEmail`, `UserPhone`,	`UserFirstName`, `UserLastName`, `UserTeamName`, `UserReferredByRaw`, `UserReferredBy`, `UserVerified`, `UserTrusted`, `UserDoneRegistering`,	`UserIsAdmin`, `UserPlaysSurvivor`, `UserPaymentType`, `UserPaymentAccount`, `UserPaid`, `UserSelectedWeek`, `UserAutoPicksLeft`, `UserAutoPickStrategy` FROM `UsersRaw`	WHERE `UserDeleted` IS NULL',
-	name: 'Users',
-})
-@ObjectType()
-export class User {
-	@Field(() => Int, { nullable: false })
-	//@ts-ignore
-	@ViewColumn({ name: 'UserID', type: 'integer' })
-	public userID!: number;
-
-	@Field(() => String, { nullable: false })
-	@ViewColumn({ name: 'UserEmail' })
-	public userEmail!: string;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({ name: 'UserPhone' })
-	public userPhone!: null | string;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({ name: 'UserFirstName' })
-	public userFirstName!: null | string;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({ name: 'UserLastName' })
-	public UserLastName!: null | string;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({ name: 'UserTeamName' })
-	public userTeamName!: null | string;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({ name: 'UserReferredByRaw' })
-	public userReferredByRaw!: null | string;
-
-	@Field(() => User, { nullable: true })
-	@ViewColumn({ name: 'UserReferredBy' })
-	@ManyToOne(() => User, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	public userReferredBy!: null | User;
-
-	@Field(() => Boolean, { nullable: false })
-	@ViewColumn({ name: 'UserVerified' })
-	public userVerified!: boolean;
-
-	@Field(() => Boolean, { nullable: true })
-	@ViewColumn({ name: 'UserTrusted' })
-	public userTrusted!: boolean | null;
-
-	@Field(() => Boolean, { nullable: false })
-	@ViewColumn({
-		name: 'UserDoneRegistering',
-	})
-	public userDoneRegistering!: boolean;
-
-	@Field(() => Boolean, { nullable: false })
-	@ViewColumn({ name: 'UserIsAdmin' })
-	public userIsAdmin!: boolean;
-
-	@Field(() => Boolean, { nullable: false })
-	@ViewColumn({
-		name: 'UserPlaysSurvivor',
-	})
-	public userPlaysSurvivor!: boolean;
-
-	@Field(() => PaymentType, { nullable: false })
-	@ViewColumn({
-		name: 'UserPaymentType',
-	})
-	public userPaymentType!: PaymentType;
-
-	@Field(() => String, { nullable: true })
-	@ViewColumn({
-		name: 'UserPaymentAccount',
-	})
-	public userPaymentAccount!: null | string;
-
-	@Field(() => Number, { nullable: false })
-	@ViewColumn({
-		name: 'UserPaid',
-	})
-	public userPaid!: number;
-
-	@Field(() => Int, { nullable: false })
-	@ViewColumn({ name: 'UserSelectedWeek' })
-	public userSelectedWeek!: number;
-
-	@Field(() => Int, { nullable: false })
-	@ViewColumn({ name: 'UserAutoPicksLeft' })
-	public userAutoPicksLeft!: number;
-
-	@Field(() => AutoPickStrategy, { nullable: true })
-	@ViewColumn({
-		name: 'UserAutoPickStrategy',
-	})
-	public userAutoPickStrategy!: AutoPickStrategy | null;
-
-	@Field(() => Notification)
-	@OneToMany(() => Notification, notification => notification.user, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	public notifications!: Notification[];
-
-	@Field(() => [League])
-	@ManyToMany(() => League)
-	public leagues!: League[];
-}
- */

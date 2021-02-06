@@ -5,7 +5,10 @@ public
 .eslintrc
 .eslintignore
 dist
+.build
 
 packages/
 typings/
 github-actions-reporter.js
+setupTests.js
+.eslintrc.js

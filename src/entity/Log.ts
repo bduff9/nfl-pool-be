@@ -20,7 +20,7 @@ import { League, User } from '.';
 @Index('idx_LogAction', ['logAction'])
 @Index('idx_LogDate', ['logDate'])
 @Index('uk_LogMessage', ['userID', 'logAction', 'logDate'], { unique: true })
-@Entity('LogsRaw', { schema: 'NFL' })
+@Entity('Logs', { schema: 'NFL' })
 @ObjectType()
 export class Log extends BaseEntity {
 	@Field(() => Int, { nullable: false })
@@ -82,7 +82,7 @@ export class Log extends BaseEntity {
 	public user!: null | User;
 
 	@Column({ name: 'LeagueID', nullable: true, type: 'int' })
-	public leagueID!: number;
+	public leagueID!: null | number;
 
 	@Field(() => League, { nullable: true })
 	@ManyToOne(() => League, {
@@ -90,7 +90,7 @@ export class Log extends BaseEntity {
 		onUpdate: 'CASCADE',
 	})
 	@JoinColumn({ name: 'LeagueID' })
-	public league!: League;
+	public league!: null | League;
 
 	@Field(() => Boolean, { nullable: true })
 	@Column('boolean', {

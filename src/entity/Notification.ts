@@ -16,7 +16,7 @@ import NotificationType from './NotificationType';
 import { User } from './User';
 
 @Index('uk_UserNotification', ['userID', 'notificationType'], { unique: true })
-@Entity('NotificationsRaw', { schema: 'NFL' })
+@Entity('Notifications', { schema: 'NFL' })
 @ObjectType()
 export class Notification extends BaseEntity {
 	@Field(() => Int, { nullable: false })

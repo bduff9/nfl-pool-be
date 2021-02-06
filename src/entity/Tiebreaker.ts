@@ -21,7 +21,7 @@ import { League, User } from '.';
 @Index('uk_Tiebreaker', ['userID', 'leagueID', 'tiebreakerWeek'], {
 	unique: true,
 })
-@Entity('TiebreakersRaw', { schema: 'NFL' })
+@Entity('Tiebreakers', { schema: 'NFL' })
 @ObjectType()
 export class Tiebreaker extends BaseEntity {
 	@Field(() => Int, { nullable: false })

@@ -6,11 +6,11 @@ import { League, User, UserLeague } from '../entity';
 export class UserLeagueResolver {
 	@FieldResolver()
 	async user (@Root() userLeague: UserLeague): Promise<undefined | User> {
-		return await User.findOne(userLeague.userID);
+		return User.findOne(userLeague.userID);
 	}
 
 	@FieldResolver()
 	async league (@Root() userLeague: UserLeague): Promise<League | undefined> {
-		return await League.findOne(userLeague.leagueID);
+		return League.findOne(userLeague.leagueID);
 	}
 }

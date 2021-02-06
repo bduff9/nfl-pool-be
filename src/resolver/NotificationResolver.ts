@@ -17,7 +17,7 @@ export class NotificationResolver {
 	async getNotificationsForUser (
 		@Arg('UserID', () => Int) userID: number,
 	): Promise<Notification[]> {
-		return await Notification.find({
+		return Notification.find({
 			relations: ['user'],
 			where: { userID },
 		});

@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 
 import { ApolloServer } from '@saeris/apollo-server-vercel';
+import * as Sentry from '@sentry/node';
+//import * as Tracing from '@sentry/tracing';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { buildSchema } from 'type-graphql';
 import { createConnection, Connection } from 'typeorm';
@@ -10,6 +12,12 @@ import * as resolvers from '../src/resolver';
 import { customAuthChecker } from '../src/util/auth';
 
 const { database, host, password, port, username, VERCEL_ENV } = process.env;
+
+Sentry.init({
+	dsn:
+		'https://708add808e164cdcba60226cafaa258e@o502207.ingest.sentry.io/5620440',
+	tracesSampleRate: 1.0,
+});
 
 export interface Context {
 	user: unknown;
@@ -76,7 +84,18 @@ export default async (
 	req: VercelRequest,
 	res: VercelResponse,
 ): Promise<void> => {
-	const apolloServerHandler = await getApolloServerHandler();
+	const transaction = Sentry.startTransaction({
+		op: 'GQL',
+		name: 'GraphQL request',
+	});
 
-	return apolloServerHandler(req, res);
+	try {
+		const apolloServerHandler = await getApolloServerHandler();
+
+		return apolloServerHandler(req, res);
+	} catch (e) {
+		Sentry.captureException(e);
+	} finally {
+		transaction.finish();
+	}
 };
