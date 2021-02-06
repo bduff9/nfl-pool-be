@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateSystemValuesTable1612576251404
 	implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table SystemValues
         (
             SystemValueID int auto_increment
@@ -21,7 +21,7 @@ export class CreateSystemValuesTable1612576251404
         charset=utf8mb4`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	async down (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table SystemValues`);
 	}
 }

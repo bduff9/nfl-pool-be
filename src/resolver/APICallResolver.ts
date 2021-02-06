@@ -9,7 +9,7 @@ export class APICallResolver {
 	async getAPICallsForWeek (
 		@Arg('Week', () => Int) week: number,
 	): Promise<APICall[]> {
-		return await APICall.find({
+		return APICall.find({
 			where: { apiCallWeek: week },
 		});
 	}

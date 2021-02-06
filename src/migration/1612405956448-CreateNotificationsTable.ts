@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateNotificationsTable1612405956448
 	implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Notifications
         (
             NotificationID int auto_increment
@@ -25,7 +25,7 @@ export class CreateNotificationsTable1612405956448
         charset=utf8mb4`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	async down (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table Notifications`);
 	}
 }

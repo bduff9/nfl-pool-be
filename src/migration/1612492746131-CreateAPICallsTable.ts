@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateAPICallsTable1612492746131 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table APICalls
         (
             APICallID int auto_increment
@@ -24,7 +24,7 @@ export class CreateAPICallsTable1612492746131 implements MigrationInterface {
         charset=utf8mb4`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	async down (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table APICalls`);
 	}
 }

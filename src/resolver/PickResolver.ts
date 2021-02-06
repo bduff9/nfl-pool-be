@@ -18,7 +18,7 @@ export class PickResolver {
 	async getAllPicksForWeek (
 		@Arg('Week', () => Int) week: number,
 	): Promise<Pick[]> {
-		return await getRepository(Pick)
+		return getRepository(Pick)
 			.createQueryBuilder('Pick')
 			.leftJoinAndSelect('Pick.game', 'Game')
 			.where('Game.gameWeek = :week', { week })
@@ -31,7 +31,7 @@ export class PickResolver {
 		@Arg('Week', () => Int) week: number,
 		@Arg('UserID', () => Int) userID: number,
 	): Promise<Pick[]> {
-		return await getRepository(Pick)
+		return getRepository(Pick)
 			.createQueryBuilder('Pick')
 			.leftJoinAndSelect('Pick.game', 'Game')
 			.where('Game.gameWeek = :week', { week })
@@ -41,21 +41,21 @@ export class PickResolver {
 
 	@FieldResolver()
 	async user (@Root() pick: Pick): Promise<User> {
-		return await User.findOneOrFail({ where: { userID: pick.userID } });
+		return User.findOneOrFail({ where: { userID: pick.userID } });
 	}
 
 	@FieldResolver()
 	async league (@Root() pick: Pick): Promise<League> {
-		return await League.findOneOrFail({ where: { leagueID: pick.leagueID } });
+		return League.findOneOrFail({ where: { leagueID: pick.leagueID } });
 	}
 
 	@FieldResolver()
 	async game (@Root() pick: Pick): Promise<Game> {
-		return await Game.findOneOrFail({ where: { gameID: pick.gameID } });
+		return Game.findOneOrFail({ where: { gameID: pick.gameID } });
 	}
 
 	@FieldResolver()
 	async team (@Root() pick: Pick): Promise<undefined | Team> {
-		return await Team.findOne({ where: { teamID: pick.teamID } });
+		return Team.findOne({ where: { teamID: pick.teamID } });
 	}
 }

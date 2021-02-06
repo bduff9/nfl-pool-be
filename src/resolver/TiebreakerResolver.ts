@@ -17,17 +17,17 @@ export class TiebreakerResolver {
 	async getTiebreakersForWeek (
 		@Arg('Week', () => Int) week: number,
 	): Promise<Tiebreaker[]> {
-		return await Tiebreaker.find({ where: { tiebreakerWeek: week } });
+		return Tiebreaker.find({ where: { tiebreakerWeek: week } });
 	}
 
 	@FieldResolver()
 	async user (@Root() tiebreaker: Tiebreaker): Promise<User> {
-		return await User.findOneOrFail({ where: { userID: tiebreaker.userID } });
+		return User.findOneOrFail({ where: { userID: tiebreaker.userID } });
 	}
 
 	@FieldResolver()
 	async league (@Root() tiebreaker: Tiebreaker): Promise<League> {
-		return await League.findOneOrFail({
+		return League.findOneOrFail({
 			where: { leagueID: tiebreaker.leagueID },
 		});
 	}

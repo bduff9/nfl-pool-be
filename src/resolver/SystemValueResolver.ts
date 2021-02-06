@@ -9,7 +9,7 @@ export class SystemValueResolver {
 	async getSystemValue (
 		@Arg('Name', () => String) name: string,
 	): Promise<SystemValue> {
-		return await SystemValue.findOneOrFail({
+		return SystemValue.findOneOrFail({
 			where: { systemValueName: name },
 		});
 	}

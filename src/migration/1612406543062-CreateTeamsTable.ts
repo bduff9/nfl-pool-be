@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateTeamsTable1612406543062 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Teams
         (
             TeamID int not null
@@ -31,7 +31,7 @@ export class CreateTeamsTable1612406543062 implements MigrationInterface {
         charset=utf8mb4`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	async down (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table Teams`);
 	}
 }

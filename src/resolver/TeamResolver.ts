@@ -9,7 +9,7 @@ export class TeamResolver {
 	async getTeam (
 		@Arg('TeamShort', () => String) teamShort: string,
 	): Promise<Team> {
-		return await Team.findOneOrFail({
+		return Team.findOneOrFail({
 			where: [{ teamShortName: teamShort }, { teamAltShortName: teamShort }],
 		});
 	}
@@ -17,6 +17,6 @@ export class TeamResolver {
 	@Authorized('user')
 	@Query(() => [Team])
 	async getTeams (): Promise<Team[]> {
-		return await Team.find();
+		return Team.find();
 	}
 }

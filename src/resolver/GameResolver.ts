@@ -15,7 +15,7 @@ export class GameResolver {
 	@Authorized('user')
 	@Query(() => Game)
 	async getGame (@Arg('GameID', () => Int) gameID: number): Promise<Game> {
-		return await Game.findOneOrFail({
+		return Game.findOneOrFail({
 			where: { gameID },
 		});
 	}
@@ -23,31 +23,31 @@ export class GameResolver {
 	@Authorized('user')
 	@Query(() => [Game])
 	async getGames (): Promise<Game[]> {
-		return await Game.find();
+		return Game.find();
 	}
 
 	@FieldResolver()
 	async homeTeam (@Root() game: Game): Promise<Team> {
-		return await Team.findOneOrFail({ where: { teamID: game.homeTeamID } });
+		return Team.findOneOrFail({ where: { teamID: game.homeTeamID } });
 	}
 
 	@FieldResolver()
 	async visitorTeam (@Root() game: Game): Promise<Team> {
-		return await Team.findOneOrFail({ where: { teamID: game.visitorTeamID } });
+		return Team.findOneOrFail({ where: { teamID: game.visitorTeamID } });
 	}
 
 	@FieldResolver()
 	async winnerTeam (@Root() game: Game): Promise<undefined | Team> {
-		return await Team.findOne({ where: { teamID: game.winnerTeamID } });
+		return Team.findOne({ where: { teamID: game.winnerTeamID } });
 	}
 
 	@FieldResolver()
 	async teamHasPossession (@Root() game: Game): Promise<undefined | Team> {
-		return await Team.findOne({ where: { teamID: game.gameHasPossession } });
+		return Team.findOne({ where: { teamID: game.gameHasPossession } });
 	}
 
 	@FieldResolver()
 	async teamInRedzone (@Root() game: Game): Promise<undefined | Team> {
-		return await Team.findOne({ where: { teamID: game.gameInRedzone } });
+		return Team.findOne({ where: { teamID: game.gameInRedzone } });
 	}
 }

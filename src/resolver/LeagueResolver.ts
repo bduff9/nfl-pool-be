@@ -6,7 +6,7 @@ import { League, UserLeague } from '../entity';
 export class LeagueResolver {
 	@Query(() => [League])
 	async getAllLeagues (): Promise<League[]> {
-		return await League.find();
+		return League.find();
 	}
 
 	@Authorized('user')
@@ -14,7 +14,7 @@ export class LeagueResolver {
 	async getLeaguesForUser (
 		@Arg('UserID', () => Int) userID: number,
 	): Promise<UserLeague[]> {
-		return await UserLeague.find({
+		return UserLeague.find({
 			relations: ['user'],
 			where: { userID },
 		});
