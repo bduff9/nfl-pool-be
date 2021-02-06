@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class CreateHistoryTable1612574930907 implements MigrationInterface {
 	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table History

@@ -19,15 +19,16 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 });
 
-export interface Context {
-	user: unknown;
-}
+// export interface Context {
+// 	user: unknown;
+// }
 export type TCustomContext = {
 	dbConnection: Connection;
 	headers: Record<string, string>;
 };
-export type TUserType = 'admin' | 'user';
+// export type TUserType = 'admin' | 'user';
 
+// ts-prune-ignore-next
 export const config = {
 	api: {
 		bodyParser: false,
@@ -80,6 +81,7 @@ const getApolloServerHandler = async (): Promise<TApolloServerHandler> => {
 	return apolloServerHandler;
 };
 
+// ts-prune-ignore-next
 export default async (
 	req: VercelRequest,
 	res: VercelResponse,

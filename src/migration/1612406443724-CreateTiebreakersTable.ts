@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class CreateTiebreakersTable1612406443724 implements MigrationInterface {
 	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Tiebreakers

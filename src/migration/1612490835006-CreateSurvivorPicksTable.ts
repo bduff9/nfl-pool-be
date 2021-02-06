@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class CreateSurvivorPicksTable1612490835006
 	implements MigrationInterface {
 	async up (queryRunner: QueryRunner): Promise<void> {
