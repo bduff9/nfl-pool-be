@@ -6,12 +6,12 @@ export class AlterUsersForNextAuth1614529558362 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Users drop key uk_UserEmail`);
 		await queryRunner.query(
+			`alter table Users modify column UserEmail varchar(255) not null`,
+		);
+		await queryRunner.query(
 			`alter table Users
 				add constraint uk_UserEmail
 					unique (UserEmail(250))`,
-		);
-		await queryRunner.query(
-			`alter table Users modify column UserEmail varchar(255) not null`,
 		);
 		await queryRunner.query(
 			`alter table Users add column UserName varchar(255) after UserPhone`,
@@ -29,8 +29,14 @@ export class AlterUsersForNextAuth1614529558362 implements MigrationInterface {
 	}
 
 	public async down (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table Users drop key uk_UserEmail`);
 		await queryRunner.query(
 			`alter table Users modify column UserEmail varchar(100) not null`,
+		);
+		await queryRunner.query(
+			`alter table Users
+				add constraint uk_UserEmail
+					unique (UserEmail)`,
 		);
 		await queryRunner.query(`alter table Users drop column UserName`);
 		await queryRunner.query(`alter table Users drop column UserImage`);
