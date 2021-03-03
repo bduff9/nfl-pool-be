@@ -4,6 +4,12 @@ export class AlterUsersForNextAuth1614529558362 implements MigrationInterface {
 	name = 'AlterUsersForNextAuth1614529558362';
 
 	public async up (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table Users drop key uk_UserEmail`);
+		await queryRunner.query(
+			`alter table Users
+				add constraint uk_UserEmail
+					unique (UserEmail(250))`,
+		);
 		await queryRunner.query(
 			`alter table Users modify column UserEmail varchar(255) not null`,
 		);
