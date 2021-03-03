@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { History, League, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(History)
 export class HistoryResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [History])
 	async getHistoryForYear (
 		@Arg('Year', () => Int) year: number,

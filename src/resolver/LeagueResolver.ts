@@ -1,6 +1,7 @@
 import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
 import { League, UserLeague } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(League)
 export class LeagueResolver {
@@ -9,7 +10,7 @@ export class LeagueResolver {
 		return League.find();
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [UserLeague])
 	async getLeaguesForUser (
 		@Arg('UserID', () => Int) userID: number,

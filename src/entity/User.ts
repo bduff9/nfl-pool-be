@@ -27,12 +27,16 @@ export class User extends BaseEntity {
 	public userID!: number;
 
 	@Field(() => String, { nullable: false })
-	@Column('varchar', { name: 'UserEmail', nullable: false, length: 100 })
+	@Column('varchar', { name: 'UserEmail', nullable: false, length: 255 })
 	public userEmail!: string;
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', { name: 'UserPhone', nullable: true, length: 20 })
 	public userPhone!: null | string;
+
+	@Field(() => String, { nullable: true })
+	@Column('varchar', { name: 'UserName', nullable: true, length: 255 })
+	public userName!: null | string;
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', { name: 'UserFirstName', nullable: true, length: 50 })
@@ -47,6 +51,10 @@ export class User extends BaseEntity {
 	public userTeamName!: null | string;
 
 	@Field(() => String, { nullable: true })
+	@Column('varchar', { name: 'UserImage', nullable: true, length: 255 })
+	public userImage!: null | string;
+
+	@Field(() => String, { nullable: true })
 	@Column('varchar', { name: 'UserReferredByRaw', nullable: true, length: 100 })
 	public userReferredByRaw!: null | string;
 
@@ -58,9 +66,13 @@ export class User extends BaseEntity {
 	@JoinColumn({ name: 'UserReferredBy' })
 	public userReferredBy!: null | User;
 
-	@Field(() => Boolean, { nullable: false })
-	@Column('boolean', { name: 'UserVerified', nullable: false, default: false })
-	public userVerified!: boolean;
+	@Field(() => Date, { nullable: true })
+	@Column('timestamp', {
+		name: 'UserEmailVerified',
+		nullable: true,
+		default: null,
+	})
+	public userEmailVerified!: null | Date;
 
 	@Field(() => Boolean, { nullable: true })
 	@Column('boolean', { name: 'UserTrusted', nullable: true })

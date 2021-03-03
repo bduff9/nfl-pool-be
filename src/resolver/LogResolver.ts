@@ -1,10 +1,11 @@
 import { Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 
 import { League, Log, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Log)
 export class LogResolver {
-	@Authorized('admin')
+	@Authorized<TUserType>('admin')
 	@Query(() => [Log])
 	async getLogs (): Promise<Log[]> {
 		return Log.find();

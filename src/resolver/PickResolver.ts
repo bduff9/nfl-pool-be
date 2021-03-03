@@ -10,10 +10,11 @@ import {
 import { getRepository } from 'typeorm';
 
 import { Game, League, Pick, Team, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Pick)
 export class PickResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Pick])
 	async getAllPicksForWeek (
 		@Arg('Week', () => Int) week: number,
@@ -25,7 +26,7 @@ export class PickResolver {
 			.getMany();
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Pick])
 	async getMyPicksForWeek (
 		@Arg('Week', () => Int) week: number,

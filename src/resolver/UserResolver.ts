@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { Notification, User, UserLeague } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(User)
 export class UserResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => User)
 	async getUser (@Arg('UserID', () => Int) userID: number): Promise<User> {
 		return User.findOneOrFail(userID, {
@@ -20,7 +21,7 @@ export class UserResolver {
 		});
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [User])
 	async getUsers (): Promise<User[]> {
 		return User.find();

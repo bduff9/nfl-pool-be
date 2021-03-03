@@ -1,10 +1,11 @@
 import { Arg, Authorized, Query, Resolver } from 'type-graphql';
 
 import { Team } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Team)
 export class TeamResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => Team)
 	async getTeam (
 		@Arg('TeamShort', () => String) teamShort: string,
@@ -14,7 +15,7 @@ export class TeamResolver {
 		});
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Team])
 	async getTeams (): Promise<Team[]> {
 		return Team.find();

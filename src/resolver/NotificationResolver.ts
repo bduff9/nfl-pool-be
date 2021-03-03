@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { Notification, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Notification)
 export class NotificationResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Notification])
 	async getNotificationsForUser (
 		@Arg('UserID', () => Int) userID: number,

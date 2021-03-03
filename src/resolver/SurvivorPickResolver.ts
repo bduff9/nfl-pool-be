@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { Game, League, SurvivorPick, Team, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(SurvivorPick)
 export class SurvivorPickResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [SurvivorPick])
 	async getAllSurvivorPicksForWeek (
 		@Arg('Week', () => Int) week: number,
@@ -20,7 +21,7 @@ export class SurvivorPickResolver {
 		return SurvivorPick.find({ where: { survivorPickWeek: week } });
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [SurvivorPick])
 	async getMySurvivorPicks (
 		@Arg('UserID', () => Int) userID: number,

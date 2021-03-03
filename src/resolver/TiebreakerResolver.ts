@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { League, Tiebreaker, User } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
 export class TiebreakerResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Tiebreaker])
 	async getTiebreakersForWeek (
 		@Arg('Week', () => Int) week: number,

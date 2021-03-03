@@ -5,28 +5,28 @@ import * as Sentry from '@sentry/node';
 //import * as Tracing from '@sentry/tracing';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { buildSchema } from 'type-graphql';
-import { createConnection, Connection } from 'typeorm';
+import { createConnection } from 'typeorm';
 
 import * as entities from '../src/entity';
 import * as resolvers from '../src/resolver';
-import { customAuthChecker } from '../src/util/auth';
+import { customAuthChecker, getUserFromContext } from '../src/util/auth';
+import { TCustomContext } from '../src/util/types';
 
-const { database, host, password, port, username, VERCEL_ENV } = process.env;
+const {
+	database,
+	domain,
+	host,
+	password,
+	port,
+	username,
+	VERCEL_ENV,
+} = process.env;
 
 Sentry.init({
 	dsn:
 		'https://708add808e164cdcba60226cafaa258e@o502207.ingest.sentry.io/5620440',
 	tracesSampleRate: 1.0,
 });
-
-// export interface Context {
-// 	user: unknown;
-// }
-export type TCustomContext = {
-	dbConnection: Connection;
-	headers: Record<string, string>;
-};
-// export type TUserType = 'admin' | 'user';
 
 // ts-prune-ignore-next
 export const config = {
@@ -67,37 +67,94 @@ const getApolloServerHandler = async (): Promise<TApolloServerHandler> => {
 
 		apolloServerHandler = new ApolloServer({
 			context: ({ req }): TCustomContext => {
+				const userObj = getUserFromContext(req);
+
 				return {
 					dbConnection,
 					headers: req.headers,
+					userObj,
 				};
 			},
 			introspection: true,
 			playground: true,
 			schema,
-		}).createHandler();
+		}).createHandler({
+			cors: {
+				allowedHeaders: [
+					'X-CSRF-Token',
+					'X-Requested-With',
+					'Accept',
+					'Accept-Version',
+					'authorization',
+					'Content-Length',
+					'Content-MD5',
+					'Content-Type',
+					'Date',
+					'X-Api-Version',
+				],
+				credentials: true,
+				methods: ['OPTIONS', 'POST'],
+				origin: domain,
+			},
+			onHealthCheck: async (_req: VercelRequest): Promise<unknown> => {
+				try {
+					await dbConnection.query('SELECT CURRENT_TIMESTAMP');
+
+					return {
+						database: 'UP',
+						server: 'UP',
+					};
+				} catch (error) {
+					console.error('Error communicating with database', error);
+
+					return {
+						database: 'ERROR',
+						server: 'UP',
+					};
+				}
+			},
+		});
 	}
 
 	return apolloServerHandler;
 };
 
-// ts-prune-ignore-next
-export default async (
-	req: VercelRequest,
-	res: VercelResponse,
-): Promise<void> => {
-	const transaction = Sentry.startTransaction({
-		op: 'GQL',
-		name: 'GraphQL request',
-	});
+const allowCors = (
+	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
+) => async (req: VercelRequest, res: VercelResponse): Promise<void> => {
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+	res.setHeader('Access-Control-Allow-Origin', domain || '');
+	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
+	res.setHeader(
+		'Access-Control-Allow-Headers',
+		'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, authorization, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+	);
 
-	try {
-		const apolloServerHandler = await getApolloServerHandler();
+	if (req.method === 'OPTIONS') {
+		res.status(200).end();
 
-		return apolloServerHandler(req, res);
-	} catch (e) {
-		Sentry.captureException(e);
-	} finally {
-		transaction.finish();
+		return;
 	}
+
+	return await fn(req, res);
 };
+
+// ts-prune-ignore-next
+export default allowCors(
+	async (req: VercelRequest, res: VercelResponse): Promise<void> => {
+		const transaction = Sentry.startTransaction({
+			op: 'GQL',
+			name: 'GraphQL request',
+		});
+
+		try {
+			const apolloServerHandler = await getApolloServerHandler();
+
+			return apolloServerHandler(req, res);
+		} catch (e) {
+			Sentry.captureException(e);
+		} finally {
+			transaction.finish();
+		}
+	},
+);

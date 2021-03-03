@@ -9,10 +9,11 @@ import {
 } from 'type-graphql';
 
 import { Game, Team } from '../entity';
+import { TUserType } from '../util/types';
 
 @Resolver(Game)
 export class GameResolver {
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => Game)
 	async getGame (@Arg('GameID', () => Int) gameID: number): Promise<Game> {
 		return Game.findOneOrFail({
@@ -20,7 +21,7 @@ export class GameResolver {
 		});
 	}
 
-	@Authorized('user')
+	@Authorized<TUserType>('user')
 	@Query(() => [Game])
 	async getGames (): Promise<Game[]> {
 		return Game.find();
