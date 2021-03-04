@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class AlterUsersForNextAuth1614529558362 implements MigrationInterface {
 	name = 'AlterUsersForNextAuth1614529558362';
 

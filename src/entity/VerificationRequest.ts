@@ -10,6 +10,7 @@ import {
 	UpdateDateColumn,
 } from 'typeorm';
 
+// ts-prune-ignore-next
 @Index('uk_VerificationRequestToken', ['verificationRequestToken'], {
 	unique: true,
 })

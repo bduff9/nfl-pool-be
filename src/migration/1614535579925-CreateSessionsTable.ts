@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class CreateSessionsTable1614535579925 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Sessions

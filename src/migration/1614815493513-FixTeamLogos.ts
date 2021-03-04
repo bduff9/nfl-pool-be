@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class FixTeamLogos1614815493513 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Teams drop column TeamLogoSmall`);

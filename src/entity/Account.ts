@@ -14,6 +14,7 @@ import {
 
 import { User } from '.';
 
+// ts-prune-ignore-next
 @Index('uk_AccountCompoundID', ['accountCompoundID'], {
 	unique: true,
 })
