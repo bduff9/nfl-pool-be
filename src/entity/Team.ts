@@ -92,15 +92,6 @@ export class Team extends BaseEntity {
 
 	@Field(() => String, { nullable: false })
 	@Column({
-		length: 100,
-		name: 'TeamLogoSmall',
-		nullable: false,
-		type: 'varchar',
-	})
-	public teamLogoSmall!: string;
-
-	@Field(() => String, { nullable: false })
-	@Column({
 		length: 7,
 		name: 'TeamPrimaryColor',
 		nullable: false,
