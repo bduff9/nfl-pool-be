@@ -38,8 +38,8 @@
   "config": {},
   "dependencies": {
     "@saeris/apollo-server-vercel": "0.4.0",
-    "@sentry/node": "6.2.1",
-    "@sentry/tracing": "6.2.1",
+    "@sentry/node": "6.2.2",
+    "@sentry/tracing": "6.2.2",
     "class-validator": "0.13.1",
     "graphql": "15.5.0",
     "jwt-simple": "0.5.6",
