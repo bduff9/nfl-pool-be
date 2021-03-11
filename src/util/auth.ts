@@ -1,10 +1,30 @@
-import { VercelRequest } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { decode } from 'jwt-simple';
 import { AuthChecker } from 'type-graphql';
 
 import { TCustomContext, TUserType } from './types';
 
-const { JWT_SECRET } = process.env;
+const { domain, JWT_SECRET } = process.env;
+
+export const allowCors = (
+	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
+) => async (req: VercelRequest, res: VercelResponse): Promise<void> => {
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+	res.setHeader('Access-Control-Allow-Origin', domain || '');
+	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
+	res.setHeader(
+		'Access-Control-Allow-Headers',
+		'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, authorization, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+	);
+
+	if (req.method === 'OPTIONS') {
+		res.status(200).end();
+
+		return;
+	}
+
+	return await fn(req, res);
+};
 
 export const getUserFromContext = (
 	req: VercelRequest,

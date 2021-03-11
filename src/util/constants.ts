@@ -1,0 +1,15 @@
+export const {
+	AWS_ACCESS_KEY,
+	AWS_REGION,
+	AWS_SECRET_ACCESS_KEY,
+	EMAIL_FROM,
+	JWT_SECRET,
+	NEXT_PUBLIC_SENTRY_DSN,
+	VERCEL_ENV,
+	database,
+	domain,
+	host,
+	password,
+	port,
+	username,
+} = process.env;
