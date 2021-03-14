@@ -1,4 +1,5 @@
 export * from './APICallResolver';
+export * from './EmailResolver';
 export * from './GameResolver';
 export * from './HistoryResolver';
 export * from './LeagueResolver';

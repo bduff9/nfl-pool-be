@@ -2,8 +2,10 @@ import 'reflect-metadata';
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
+import EmailType from '../src/entity/EmailType';
 import { allowCors } from '../src/util/auth';
 import { domain as baseUrl } from '../src/util/constants';
+import { EmailModel } from '../src/util/dynamodb';
 import { emailSender, formatPreview, getEmailID } from '../src/util/email';
 import { Sentry } from '../src/util/error';
 
@@ -17,9 +19,6 @@ export default allowCors(
 
 		try {
 			const { email, url } = req.query;
-			const emailID = getEmailID();
-
-			//TODO: create email record in DDB
 
 			if (
 				typeof email === 'string' &&
@@ -28,16 +27,33 @@ export default allowCors(
 				url
 			) {
 				const domain = new URL(url).hostname;
-				const result = await emailSender.send({
+				const emailID = getEmailID();
+				const SUBJECT = `Sign in to ${domain}`;
+				const PREVIEW = formatPreview(
+					`Open this to finish your login to ${domain}`,
+				);
+
+				try {
+					await EmailModel.create({
+						emailID,
+						emailType: EmailType.verification,
+						to: new Set([email]),
+						subject: SUBJECT,
+					});
+				} catch (error) {
+					console.error('Failed to create email record in DynamoDB:', error);
+				}
+
+				const {
+					originalMessage: { html, subject, text },
+				} = await emailSender.send({
 					template: 'verification',
 					locals: {
 						browserLink: `${baseUrl}/api/email/${emailID}`,
 						domain,
 						email,
-						PREVIEW: formatPreview(
-							`Open this to finish your login to ${domain}`,
-						),
-						SUBJECT: `Sign in to ${domain}`,
+						PREVIEW,
+						SUBJECT,
 						url,
 					},
 					message: {
@@ -45,8 +61,14 @@ export default allowCors(
 					},
 				});
 
-				//TODO: update DB record with HTML, text and subject
-				console.log(result);
+				try {
+					await EmailModel.update(
+						{ emailID },
+						{ html, textOnly: text, subject },
+					);
+				} catch (error) {
+					console.error('Failed to update email record in DynamoDB:', error);
+				}
 			} else {
 				console.error('Invalid query params passed:', { email, url });
 			}

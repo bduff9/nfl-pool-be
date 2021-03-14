@@ -12,3 +12,4 @@ typings/
 github-actions-reporter.js
 setupTests.js
 .eslintrc.js
+coverage

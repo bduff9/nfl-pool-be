@@ -7,24 +7,19 @@ import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-	AWS_ACCESS_KEY,
-	AWS_REGION,
-	AWS_SECRET_ACCESS_KEY,
-	EMAIL_FROM,
-} from './constants';
+import { AWS_AK_ID, AWS_R, AWS_SAK_ID, EMAIL_FROM } from './constants';
 
-if (!AWS_ACCESS_KEY) throw new Error('Missing AWS Access Key!');
+if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
 
-if (!AWS_SECRET_ACCESS_KEY) throw new Error('Missing AWS Secret Access Key!');
+if (!AWS_SAK_ID) throw new Error('Missing AWS Secret Access Key!');
 
 const transport = {
 	SES: new SES({
 		apiVersion: '2010-12-01',
-		region: AWS_REGION,
+		region: AWS_R,
 		credentials: {
-			accessKeyId: AWS_ACCESS_KEY,
-			secretAccessKey: AWS_SECRET_ACCESS_KEY,
+			accessKeyId: AWS_AK_ID,
+			secretAccessKey: AWS_SAK_ID,
 		},
 	}),
 };

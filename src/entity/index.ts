@@ -1,4 +1,5 @@
 export * from './APICall';
+export * from './Email';
 export * from './Game';
 export * from './History';
 export * from './League';

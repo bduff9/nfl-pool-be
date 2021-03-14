@@ -2,9 +2,8 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { decode } from 'jwt-simple';
 import { AuthChecker } from 'type-graphql';
 
+import { domain, JWT_SECRET } from './constants';
 import { TCustomContext, TUserType } from './types';
-
-const { domain, JWT_SECRET } = process.env;
 
 export const allowCors = (
 	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
@@ -54,3 +53,18 @@ export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 
 	return onlyAnonymous || !!context.userObj.sub;
 };
+
+// export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
+// 	{ context: { user } },
+// 	roles,
+// ) => {
+// 	if (roles.length === 0) {
+// 		return user !== undefined;
+// 	}
+
+// 	if (!user) {
+// 		return false;
+// 	}
+
+// 	return user.roles.some((role) => roles.includes(role));
+// };
