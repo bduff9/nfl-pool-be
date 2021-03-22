@@ -15,7 +15,7 @@ export class CreateGamesTable1612481565687 implements MigrationInterface {
             GameVisitorSpread decimal(4,2) null,
             WinnerTeamID int null,
             GameStatus enum('P', 'I', '1', '2', 'H', '3', '4', 'C') default 'P' not null,
-            GameKickoff timestamp not null,
+            GameKickoff timestamp not null default 0,
             GameTimeLeftInSeconds int default 3600 not null,
             GameHasPossession int null,
             GameInRedzone int null,
