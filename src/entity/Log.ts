@@ -35,6 +35,9 @@ export class Log extends BaseEntity {
 	@Column('enum', {
 		enum: [
 			'404',
+			'AUTH_ERROR',
+			'CREATE_ACCOUNT',
+			'LINK_ACCOUNT',
 			'LOGIN',
 			'LOGOUT',
 			'MESSAGE',
