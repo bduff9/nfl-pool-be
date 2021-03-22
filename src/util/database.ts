@@ -8,7 +8,7 @@ import {
 	password,
 	port,
 	username,
-	VERCEL_ENV,
+	// VERCEL_ENV,
 } from './constants';
 
 export const connectionPromise = createConnection({
@@ -19,7 +19,7 @@ export const connectionPromise = createConnection({
 	password,
 	port: port !== undefined ? +port : port,
 	username,
-	synchronize: VERCEL_ENV === 'development',
+	synchronize: false, // VERCEL_ENV === 'development',
 	logging: true,
 	entities: Object.values(entities),
 	migrations: [],
