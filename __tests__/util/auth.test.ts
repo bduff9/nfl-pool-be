@@ -33,7 +33,9 @@ describe('customAuthChecker', () => {
 	});
 
 	it('allows access to registered users', () => {
-		const context = ({ userObj: { sub: '1' } } as unknown) as TCustomContext;
+		const context = ({
+			userObj: { sub: '1', doneRegistering: true },
+		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['registered'],
@@ -43,7 +45,9 @@ describe('customAuthChecker', () => {
 	});
 
 	it('allows access to survivor players', () => {
-		const context = ({ userObj: { sub: '1' } } as unknown) as TCustomContext;
+		const context = ({
+			userObj: { sub: '1', hasSurvivor: true },
+		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['survivorPlayer'],
@@ -53,7 +57,9 @@ describe('customAuthChecker', () => {
 	});
 
 	it('allows admin access to signed in users', () => {
-		const context = ({ userObj: { sub: '1' } } as unknown) as TCustomContext;
+		const context = ({
+			userObj: { sub: '1', isAdmin: true },
+		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['admin'],

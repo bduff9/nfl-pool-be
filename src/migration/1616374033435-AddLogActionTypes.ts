@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// ts-prune-ignore-next
 export class AddLogActionTypes1616374033435 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
