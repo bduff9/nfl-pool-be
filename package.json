@@ -42,7 +42,7 @@
     "@sentry/tracing": "6.2.2",
     "aws-sdk": "2.863.0",
     "class-validator": "0.13.1",
-    "dynamoose": "2.7.2",
+    "dynamoose": "2.7.3",
     "email-templates": "8.0.3",
     "graphql": "15.5.0",
     "handlebars": "4.7.7",
