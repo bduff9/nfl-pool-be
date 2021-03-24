@@ -1,7 +1,35 @@
-import { Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import {
+	Arg,
+	Authorized,
+	Ctx,
+	Field,
+	FieldResolver,
+	InputType,
+	Int,
+	Mutation,
+	Query,
+	Resolver,
+	Root,
+} from 'type-graphql';
 
 import { League, Log, User } from '../entity';
-import { TUserType } from '../util/types';
+import LogAction from '../entity/LogAction';
+import { TCustomContext, TUserType } from '../util/types';
+
+@InputType({ description: 'New log data' })
+class WriteLogInput implements Partial<Log> {
+	@Field(() => LogAction, { nullable: false })
+	logAction!: LogAction;
+
+	@Field(() => String, { nullable: false })
+	logMessage!: string;
+
+	@Field(() => Int, { nullable: true })
+	leagueID?: null | number;
+
+	@Field(() => String, { nullable: true })
+	sub?: null | string;
+}
 
 @Resolver(Log)
 export class LogResolver {
@@ -9,6 +37,34 @@ export class LogResolver {
 	@Query(() => [Log])
 	async getLogs (): Promise<Log[]> {
 		return Log.find();
+	}
+
+	@Authorized<TUserType>('anonymous')
+	@Mutation(() => Log)
+	async writeLog (
+		@Arg('data') newLogData: WriteLogInput,
+		@Ctx() ctx: TCustomContext,
+	): Promise<Log> {
+		const user = ctx.userObj;
+		const userIDStr = user.sub || newLogData.sub;
+		const userID = userIDStr ? parseInt(userIDStr, 10) : null;
+		const auditUser = userIDStr || 'unknown';
+		const result = await Log.createQueryBuilder()
+			.insert()
+			.into(Log)
+			.values({
+				leagueID: newLogData.leagueID,
+				logAction: newLogData.logAction,
+				logAddedBy: auditUser,
+				logMessage: newLogData.logMessage,
+				logUpdatedBy: auditUser,
+				userID,
+			})
+			.execute();
+
+		console.log(result);
+
+		return await Log.findOneOrFail(result.identifiers[0].logID);
 	}
 
 	@FieldResolver()

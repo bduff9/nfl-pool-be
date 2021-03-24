@@ -3,7 +3,7 @@ import { decode } from 'jwt-simple';
 import { AuthChecker } from 'type-graphql';
 
 import { domain, JWT_SECRET } from './constants';
-import { TCustomContext, TUserType } from './types';
+import { TCustomContext, TUserObj, TUserType } from './types';
 
 export const allowCors = (
 	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
@@ -25,9 +25,7 @@ export const allowCors = (
 	return await fn(req, res);
 };
 
-export const getUserFromContext = (
-	req: VercelRequest,
-): Record<string, string> => {
+export const getUserFromContext = (req: VercelRequest): TUserObj => {
 	const token = req.cookies['next-auth.session-token'];
 	let userObj = {};
 
@@ -48,23 +46,25 @@ export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 	{ context },
 	roles,
 ) => {
-	//TODO: add in actual rules here
+	const { userObj } = context;
+
+	if (roles.length === 0) return true;
+
 	const onlyAnonymous = roles.every((role): boolean => role === 'anonymous');
 
-	return onlyAnonymous || !!context.userObj.sub;
+	if (onlyAnonymous) return true;
+
+	const userRoles: TUserType[] = [];
+
+	if (userObj.doneRegistering) {
+		userRoles.push('registered');
+	} else if (userObj.sub) {
+		userRoles.push('user');
+	}
+
+	if (userObj.hasSurvivor) userRoles.push('survivorPlayer');
+
+	if (userObj.isAdmin) userRoles.push('admin');
+
+	return userRoles.some((role) => roles.includes(role));
 };
-
-// export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
-// 	{ context: { user } },
-// 	roles,
-// ) => {
-// 	if (roles.length === 0) {
-// 		return user !== undefined;
-// 	}
-
-// 	if (!user) {
-// 		return false;
-// 	}
-
-// 	return user.roles.some((role) => roles.includes(role));
-// };
