@@ -59,7 +59,7 @@
   "devDependencies": {
     "@types/email-templates": "8.0.2",
     "@types/eslint": "7.2.7",
-    "@types/jest": "26.0.20",
+    "@types/jest": "26.0.22",
     "@types/mjml": "4.7.0",
     "@types/node": "14.14.34",
     "@types/node-sass": "4.11.1",
