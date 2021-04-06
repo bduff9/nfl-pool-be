@@ -1,12 +1,7 @@
 import * as SentryTool from '@sentry/node';
 //import * as Tracing from '@sentry/tracing';
-import LogRocketTool from 'logrocket';
 
 import { NEXT_PUBLIC_SENTRY_DSN } from './constants';
-
-LogRocketTool.init('xba8kt/nfl-pool-be');
-
-const LogRocket = LogRocketTool;
 
 SentryTool.init({
 	dsn: NEXT_PUBLIC_SENTRY_DSN,
@@ -14,9 +9,3 @@ SentryTool.init({
 });
 
 export const Sentry = SentryTool;
-
-LogRocket.getSessionURL((sessionURL): void => {
-	Sentry.configureScope((scope): void => {
-		scope.setExtra('sessionURL', sessionURL);
-	});
-});
