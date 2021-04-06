@@ -17,15 +17,24 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# node
+node_modules/
+.eslintcache
+
 # TypeORM
+ormconfig.json
+
+# VS Code
 .idea/
 .vscode/
-node_modules/
-.build/
-.next/
 tmp/
 temp/
-ormconfig.json
+
+# Vercel
 .now
-.dccache
 .vercel
+.build/
+.next/
+
+# DeepCode
+.dccache
