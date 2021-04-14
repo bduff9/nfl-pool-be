@@ -36,7 +36,7 @@ export class SystemValue extends BaseEntity {
 	@Field(() => String, { nullable: true })
 	@Column({
 		default: null,
-		length: 99,
+		length: 255,
 		name: 'SystemValueValue',
 		nullable: true,
 		type: 'varchar',
