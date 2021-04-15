@@ -57,7 +57,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@types/email-templates": "8.0.2",
+    "@types/email-templates": "8.0.3",
     "@types/eslint": "7.2.8",
     "@types/jest": "26.0.22",
     "@types/mjml": "4.7.0",
