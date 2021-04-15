@@ -4,8 +4,14 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class InsertSupportSystemValues1618273038423
 	implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table SystemValues drop key uk_SystemValue`);
 		await queryRunner.query(
 			`alter table SystemValues modify column SystemValueValue varchar(255) null`,
+		);
+		await queryRunner.query(
+			`alter table SystemValues
+				add constraint uk_SystemValue
+					unique (SystemValueName, SystemValueValue(250))`,
 		);
 		await queryRunner.query(
 			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SupportEmail', 'info@asitewithnoname.com', 'Admin', 'Admin')`,
