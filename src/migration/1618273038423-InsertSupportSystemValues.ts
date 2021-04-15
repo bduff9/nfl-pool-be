@@ -11,7 +11,7 @@ export class InsertSupportSystemValues1618273038423
 		await queryRunner.query(
 			`alter table SystemValues
 				add constraint uk_SystemValue
-					unique (SystemValueName, SystemValueValue(250))`,
+					unique (SystemValueName, SystemValueValue(230))`,
 		);
 		await queryRunner.query(
 			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SupportEmail', 'info@asitewithnoname.com', 'Admin', 'Admin')`,
