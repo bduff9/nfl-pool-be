@@ -62,8 +62,6 @@ export class LogResolver {
 			})
 			.execute();
 
-		console.log(result);
-
 		return await Log.findOneOrFail(result.identifiers[0].logID);
 	}
 

@@ -52,6 +52,7 @@
     "mysql2": "2.2.5",
     "node-sass": "5.0.0",
     "reflect-metadata": "0.1.13",
+    "tslog": "3.2.0",
     "type-graphql": "1.1.1",
     "typeorm": "0.2.32",
     "uuid": "8.3.2"
