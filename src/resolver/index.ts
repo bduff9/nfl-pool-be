@@ -14,3 +14,4 @@ export * from './TeamResolver';
 export * from './TiebreakerResolver';
 export * from './UserResolver';
 export * from './UserLeagueResolver';
+export * from './WeekResolver';

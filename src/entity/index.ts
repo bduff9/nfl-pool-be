@@ -15,3 +15,4 @@ export * from './Team';
 export * from './Tiebreaker';
 export * from './User';
 export * from './UserLeague';
+export * from './Week';
