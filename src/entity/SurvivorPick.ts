@@ -58,8 +58,8 @@ export class SurvivorPick extends BaseEntity {
 	@Max(17)
 	public survivorPickWeek!: number;
 
-	@Column({ default: null, name: 'GameID', nullable: true, type: 'int' })
-	public gameID!: null | number;
+	@Column({ default: null, name: 'GameID', nullable: false, type: 'int' })
+	public gameID!: number;
 
 	@Field(() => Game, { nullable: true })
 	@ManyToOne(() => Game, {
