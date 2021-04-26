@@ -1,9 +1,10 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { decode } from 'jwt-simple';
 import { AuthChecker } from 'type-graphql';
 
-import { domain, JWT_SECRET } from './constants';
-import { TCustomContext, TUserObj, TUserType } from './types';
+import { User } from '../entity';
+
+import { domain } from './constants';
+import { TCustomContext, TUserType } from './types';
 
 export const allowCors = (
 	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
@@ -25,28 +26,26 @@ export const allowCors = (
 	return await fn(req, res);
 };
 
-export const getUserFromContext = (req: VercelRequest): TUserObj => {
+export const getUserFromContext = async (
+	req: VercelRequest,
+): Promise<null | User> => {
 	const token = req.cookies['next-auth.session-token'];
-	let userObj = {};
 
-	if (!JWT_SECRET) throw new Error('Missing JWT secret');
+	if (!token) return null;
 
-	if (!token) return userObj;
+	const user = await User.createQueryBuilder('u')
+		.innerJoin('Sessions', 's', 'u.UserID = s.UserID')
+		.where('s.SessionToken = :token', { token })
+		.getOne();
 
-	try {
-		userObj = decode(token, JWT_SECRET, false, 'HS256');
-	} catch (error) {
-		console.debug('Failed to decode JWT', error);
-	}
-
-	return userObj;
+	return user || null;
 };
 
 export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 	{ context },
 	roles,
 ) => {
-	const { userObj } = context;
+	const { user } = context;
 
 	if (roles.length === 0) return true;
 
@@ -54,17 +53,19 @@ export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 
 	if (onlyAnonymous) return true;
 
+	if (!user) return false;
+
 	const userRoles: TUserType[] = [];
 
-	if (userObj.doneRegistering) {
+	if (user.userDoneRegistering) {
 		userRoles.push('registered');
-	} else if (userObj.sub) {
+	} else if (user.userID) {
 		userRoles.push('user');
 	}
 
-	if (userObj.hasSurvivor) userRoles.push('survivorPlayer');
+	if (user.userPlaysSurvivor) userRoles.push('survivorPlayer');
 
-	if (userObj.isAdmin) userRoles.push('admin');
+	if (user.userIsAdmin) userRoles.push('admin');
 
 	return userRoles.some((role) => roles.includes(role));
 };

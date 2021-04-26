@@ -3,7 +3,7 @@ import { TCustomContext } from '../../src/util/types';
 
 describe('customAuthChecker', () => {
 	it('allows read access to all', () => {
-		const context = { userObj: {} } as TCustomContext;
+		const context = { user: {} } as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['anonymous'],
@@ -13,7 +13,7 @@ describe('customAuthChecker', () => {
 	});
 
 	it('allows editor access to signed in users', () => {
-		const context = ({ userObj: { sub: '1' } } as unknown) as TCustomContext;
+		const context = ({ user: { sub: '1' } } as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['user'],
@@ -23,7 +23,7 @@ describe('customAuthChecker', () => {
 	});
 
 	it('denies editor access to unknown users', () => {
-		const context = { userObj: {} } as TCustomContext;
+		const context = { user: {} } as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['user'],
@@ -34,7 +34,7 @@ describe('customAuthChecker', () => {
 
 	it('allows access to registered users', () => {
 		const context = ({
-			userObj: { sub: '1', doneRegistering: true },
+			user: { userID: 1, userDoneRegistering: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
@@ -46,7 +46,7 @@ describe('customAuthChecker', () => {
 
 	it('allows access to survivor players', () => {
 		const context = ({
-			userObj: { sub: '1', hasSurvivor: true },
+			user: { userID: 1, userPlaysSurvivor: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
@@ -58,7 +58,7 @@ describe('customAuthChecker', () => {
 
 	it('allows admin access to signed in users', () => {
 		const context = ({
-			userObj: { sub: '1', isAdmin: true },
+			user: { userID: 1, userIsAdmin: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },

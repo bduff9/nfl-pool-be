@@ -1,6 +1,7 @@
 import {
 	Arg,
 	Authorized,
+	Ctx,
 	FieldResolver,
 	Int,
 	Query,
@@ -9,15 +10,29 @@ import {
 } from 'type-graphql';
 
 import { League, Tiebreaker, User } from '../entity';
-import { TUserType } from '../util/types';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
 export class TiebreakerResolver {
-	@Authorized<TUserType>('user')
+	@Authorized<TUserType>('registered')
+	@Query(() => Tiebreaker)
+	async getMyTiebreakerForWeek (
+		@Arg('Week', () => Int) week: number,
+		@Ctx() context: TCustomContext,
+	): Promise<Tiebreaker> {
+		const { user } = context;
+
+		return Tiebreaker.findOneOrFail({
+			where: { tiebreakerWeek: week, userID: user?.userID },
+		});
+	}
+
+	@Authorized<TUserType>('registered')
 	@Query(() => [Tiebreaker])
 	async getTiebreakersForWeek (
 		@Arg('Week', () => Int) week: number,
 	): Promise<Tiebreaker[]> {
+		//FIXME: prevent users who haven't submitted this week from running this
 		return Tiebreaker.find({ where: { tiebreakerWeek: week } });
 	}
 

@@ -12,6 +12,7 @@ import {
 } from '../src/util/auth';
 import { connectionPromise } from '../src/util/database';
 import { Sentry } from '../src/util/error';
+import { log } from '../src/util/logging';
 import { TCustomContext } from '../src/util/types';
 
 const { domain } = process.env;
@@ -41,13 +42,15 @@ const getApolloServerHandler = async (): Promise<TApolloServerHandler> => {
 		});
 
 		apolloServerHandler = new ApolloServer({
-			context: ({ req }): TCustomContext => {
-				const userObj = getUserFromContext(req);
+			context: async ({ req }): Promise<TCustomContext> => {
+				const user = await getUserFromContext(req);
+
+				log.debug('User object:', { user });
 
 				return {
 					dbConnection,
 					headers: req.headers,
-					userObj,
+					user,
 				};
 			},
 			introspection: true,

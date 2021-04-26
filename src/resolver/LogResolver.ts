@@ -45,19 +45,22 @@ export class LogResolver {
 		@Arg('data') newLogData: WriteLogInput,
 		@Ctx() ctx: TCustomContext,
 	): Promise<Log> {
-		const user = ctx.userObj;
-		const userIDStr = user.sub || newLogData.sub;
-		const userID = userIDStr ? parseInt(userIDStr, 10) : null;
-		const auditUser = userIDStr || 'unknown';
+		const user = ctx.user;
+		const userID = user?.userID
+			? user.userID
+			: newLogData.sub
+			? parseInt(newLogData.sub, 10)
+			: null;
+		const auditUser = userID || 'unknown';
 		const result = await Log.createQueryBuilder()
 			.insert()
 			.into(Log)
 			.values({
 				leagueID: newLogData.leagueID,
 				logAction: newLogData.logAction,
-				logAddedBy: auditUser,
+				logAddedBy: `${auditUser}`,
 				logMessage: newLogData.logMessage,
-				logUpdatedBy: auditUser,
+				logUpdatedBy: `${auditUser}`,
 				userID,
 			})
 			.execute();

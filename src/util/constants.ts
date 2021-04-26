@@ -3,7 +3,6 @@ export const {
 	AWS_R,
 	AWS_SAK_ID,
 	EMAIL_FROM,
-	JWT_SECRET,
 	NEXT_PUBLIC_SENTRY_DSN,
 	VERCEL_ENV,
 	database,

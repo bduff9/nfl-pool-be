@@ -1,32 +1,67 @@
 import {
 	Arg,
 	Authorized,
+	Ctx,
 	FieldResolver,
 	Int,
 	Query,
 	Resolver,
 	Root,
 } from 'type-graphql';
+import { Brackets } from 'typeorm';
 
 import { Game, League, SurvivorPick, Team, User } from '../entity';
-import { TUserType } from '../util/types';
+import { log } from '../util/logging';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorPick)
 export class SurvivorPickResolver {
-	@Authorized<TUserType>('user')
+	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
 	async getAllSurvivorPicksForWeek (
 		@Arg('Week', () => Int) week: number,
 	): Promise<SurvivorPick[]> {
+		const [{ hasStarted }] = await Game.createQueryBuilder('g')
+			.select('CURRENT_TIMESTAMP > g.GameKickoff', 'hasStarted')
+			.where('g.GameWeek = :week', { week })
+			.execute();
+
+		if (!hasStarted) {
+			throw new Error(`Week ${week} has not started yet!`);
+		}
+
 		return SurvivorPick.find({ where: { survivorPickWeek: week } });
 	}
 
-	@Authorized<TUserType>('user')
+	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
 	async getMySurvivorPicks (
-		@Arg('UserID', () => Int) userID: number,
+		@Ctx() context: TCustomContext,
 	): Promise<SurvivorPick[]> {
-		return SurvivorPick.find({ where: { userID } });
+		const { user } = context;
+
+		return SurvivorPick.find({ where: { userID: user?.userID } });
+	}
+
+	@Authorized<TUserType>('survivorPlayer')
+	@Query(() => Boolean)
+	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('sp')
+			.select('COUNT(*)', 'incorrect')
+			.leftJoinAndSelect(Game, 'g', 'sp.GameID = g.GameID')
+			.where('sp.UserID = :userID', { userID: user?.userID })
+			.andWhere('g.GameStatus <> :status', { status: 'P' })
+			.andWhere(
+				new Brackets((qb) => {
+					qb.where('g.WinnerTeamID <> sp.TeamID').orWhere('sp.TeamID is null');
+				}),
+			)
+			.execute();
+
+		log.debug({ incorrect });
+
+		return incorrect === 0;
 	}
 
 	@FieldResolver()

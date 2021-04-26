@@ -1,21 +1,11 @@
 import { Connection } from 'typeorm';
 
-export type TUserObj = {
-	doneRegistering?: boolean;
-	email?: string;
-	hasSurvivor?: boolean;
-	isAdmin?: boolean;
-	isNewUser?: boolean;
-	isTrusted?: boolean;
-	name?: null | string;
-	picture?: null | string;
-	sub?: string;
-};
+import { User } from '../entity';
 
 export type TCustomContext = {
 	dbConnection: Connection;
 	headers: string[];
-	userObj: TUserObj;
+	user: null | User;
 };
 
 export type TUserType =
