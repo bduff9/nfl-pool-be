@@ -126,10 +126,6 @@ export class User extends BaseEntity {
 	public userPaid!: number;
 
 	@Field(() => Int, { nullable: false })
-	@Column('int', { name: 'UserSelectedWeek', nullable: false })
-	public userSelectedWeek!: number;
-
-	@Field(() => Int, { nullable: false })
 	@Column('int', { default: 3, name: 'UserAutoPicksLeft', nullable: false })
 	public userAutoPicksLeft!: number;
 
