@@ -13,7 +13,7 @@ describe('customAuthChecker', () => {
 	});
 
 	it('allows editor access to signed in users', () => {
-		const context = ({ user: { sub: '1' } } as unknown) as TCustomContext;
+		const context = ({ user: { userID: 1 } } as unknown) as TCustomContext;
 		const result = customAuthChecker(
 			{ args: {}, context, info: {} as any, root: {} },
 			['user'],
