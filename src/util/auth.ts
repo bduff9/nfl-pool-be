@@ -4,7 +4,6 @@ import { AuthChecker } from 'type-graphql';
 import { User } from '../entity';
 
 import { domain } from './constants';
-import { log } from './logging';
 import { TCustomContext, TUserType } from './types';
 
 export const allowCors = (
@@ -30,17 +29,14 @@ export const allowCors = (
 export const getUserFromContext = async (
 	req: VercelRequest,
 ): Promise<null | User> => {
-	const token = req.cookies['next-auth.session-token'];
-	const token2 = req.headers.authorization;
+	const token = req.headers.authorization?.replace('Bearer ', '');
 
-	log.info({ cookies: req.cookies, token, token2 });
-
-	if (!token2) return null;
+	if (!token) return null;
 
 	const user = await User.createQueryBuilder('u')
 		.innerJoin('Sessions', 's', 'u.UserID = s.UserID')
 		.where('s.SessionAccessToken = :token', {
-			token: token2.replace('Bearer ', ''),
+			token,
 		})
 		.getOne();
 
