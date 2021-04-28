@@ -31,14 +31,17 @@ export const getUserFromContext = async (
 	req: VercelRequest,
 ): Promise<null | User> => {
 	const token = req.cookies['next-auth.session-token'];
+	const token2 = req.headers.authorization;
 
-	log.info({ cookies: req.cookies, token });
+	log.info({ cookies: req.cookies, token, token2 });
 
-	if (!token) return null;
+	if (!token2) return null;
 
 	const user = await User.createQueryBuilder('u')
 		.innerJoin('Sessions', 's', 'u.UserID = s.UserID')
-		.where('s.SessionToken = :token', { token })
+		.where('s.SessionAccessToken = :token', {
+			token: token2.replace('Bearer ', ''),
+		})
 		.getOne();
 
 	return user || null;
