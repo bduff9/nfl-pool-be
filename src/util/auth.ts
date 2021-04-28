@@ -4,6 +4,7 @@ import { AuthChecker } from 'type-graphql';
 import { User } from '../entity';
 
 import { domain } from './constants';
+import { log } from './logging';
 import { TCustomContext, TUserType } from './types';
 
 export const allowCors = (
@@ -30,6 +31,8 @@ export const getUserFromContext = async (
 	req: VercelRequest,
 ): Promise<null | User> => {
 	const token = req.cookies['next-auth.session-token'];
+
+	log.info({ cookies: req.cookies, token });
 
 	if (!token) return null;
 
