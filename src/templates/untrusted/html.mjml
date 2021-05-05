@@ -1,0 +1,47 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ SUBJECT }}</mj-title>
+    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .container {
+        max-width: 600px;
+      }
+
+      .link {
+        text-decoration: none;
+        font-size: 16px;
+        color: #346df1;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-section background-color="#F9F9F9" full-width="full-width">
+      <mj-column width="100%" css-class="container">
+        <mj-text align="center" padding="0 0 25px 0" font-size="22px">
+          <strong>{{ domain }}</strong>
+          &nbsp; | &nbsp;
+          <a href="{{ browserLink }}" class="link">View online version</a>
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text padding="30px 0 15px 0" font-size="18px" align="left">
+          Hello {{ admin.userFirstName }},
+          <br /><br />
+          A new user needs your approval:
+          <br />
+          {{ newUser.userName }} just registered with email {{ newUser.userEmail }}.
+          <br />
+          They claim to be referred by {{ newUser.userReferredByRaw }}.
+          <br /><br />
+          You can approve/remove them using the below link:
+        </mj-text>
+        <mj-button padding="20px 0" border-radius="5px" background-color="#346df1" href="{{ domain }}/admin/users" font-size="18px" color="#fff" border="1px solid #346df1" font-weight="bold">
+          Manage User
+        </mj-button>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

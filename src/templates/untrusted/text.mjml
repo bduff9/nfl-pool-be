@@ -1,0 +1,9 @@
+Hello {{ admin.userFirstName }},
+
+A new user needs your approval:
+{{ newUser.userName }} just registered with email {{ newUser.userEmail }}.
+
+They claim to be referred by {{ newUser.userReferredByRaw }}.
+
+You can approve/remove them from the below url:
+{{ domain }}/admin/users
