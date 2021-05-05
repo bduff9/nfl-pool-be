@@ -1,12 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 import { getRepository } from 'typeorm';
 
 import { Game, League, Pick, Team, User } from '../entity';
@@ -16,9 +8,7 @@ import { TUserType } from '../util/types';
 export class PickResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => [Pick])
-	async getAllPicksForWeek (
-		@Arg('Week', () => Int) week: number,
-	): Promise<Pick[]> {
+	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Pick[]> {
 		return getRepository(Pick)
 			.createQueryBuilder('Pick')
 			.leftJoinAndSelect('Pick.game', 'Game')

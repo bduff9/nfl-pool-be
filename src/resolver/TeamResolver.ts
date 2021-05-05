@@ -7,9 +7,7 @@ import { TUserType } from '../util/types';
 export class TeamResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => Team)
-	async getTeam (
-		@Arg('TeamShort', () => String) teamShort: string,
-	): Promise<Team> {
+	async getTeam (@Arg('TeamShort', () => String) teamShort: string): Promise<Team> {
 		return Team.findOneOrFail({
 			where: [{ teamShortName: teamShort }, { teamAltShortName: teamShort }],
 		});

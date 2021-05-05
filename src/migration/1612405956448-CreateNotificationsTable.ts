@@ -1,8 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
-export class CreateNotificationsTable1612405956448
-	implements MigrationInterface {
+export class CreateNotificationsTable1612405956448 implements MigrationInterface {
 	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Notifications
         (

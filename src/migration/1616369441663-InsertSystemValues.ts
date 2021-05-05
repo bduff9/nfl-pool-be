@@ -30,9 +30,7 @@ export class InsertSystemValues1616369441663 implements MigrationInterface {
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'PaymentDueWeek'`,
 		);
-		await queryRunner.query(
-			`delete from SystemValues where SystemValueName = 'PoolCost'`,
-		);
+		await queryRunner.query(`delete from SystemValues where SystemValueName = 'PoolCost'`);
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'SurvivorCost'`,
 		);

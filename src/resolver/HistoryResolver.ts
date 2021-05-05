@@ -1,12 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 
 import { History, League, User } from '../entity';
 import { TUserType } from '../util/types';
@@ -15,9 +7,7 @@ import { TUserType } from '../util/types';
 export class HistoryResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => [History])
-	async getHistoryForYear (
-		@Arg('Year', () => Int) year: number,
-	): Promise<History[]> {
+	async getHistoryForYear (@Arg('Year', () => Int) year: number): Promise<History[]> {
 		return History.find({ where: { historyYear: year } });
 	}
 

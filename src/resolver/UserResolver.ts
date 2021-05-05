@@ -99,7 +99,7 @@ export class UserResolver {
 			user.userDoneRegistering = true;
 		}
 
-		const promises = [];
+		const promises: Array<Promise<unknown>> = [];
 
 		if (user.userDoneRegistering) {
 			promises.push(populateUserData(context.user.userID, data.userPlaysSurvivor));

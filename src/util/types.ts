@@ -8,9 +8,4 @@ export type TCustomContext = {
 	user: null | User;
 };
 
-export type TUserType =
-	| 'admin'
-	| 'anonymous'
-	| 'registered'
-	| 'survivorPlayer'
-	| 'user';
+export type TUserType = 'admin' | 'anonymous' | 'registered' | 'survivorPlayer' | 'user';

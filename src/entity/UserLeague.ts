@@ -31,7 +31,7 @@ export class UserLeague extends BaseEntity {
 	public userID!: number;
 
 	@Field(() => User, { nullable: false })
-	@ManyToOne(() => User, (user) => user.userLeagues, {
+	@ManyToOne(() => User, user => user.userLeagues, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
@@ -42,7 +42,7 @@ export class UserLeague extends BaseEntity {
 	public leagueID!: number;
 
 	@Field(() => League, { nullable: false })
-	@ManyToOne(() => League, (league) => league.userLeagues, {
+	@ManyToOne(() => League, league => league.userLeagues, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})

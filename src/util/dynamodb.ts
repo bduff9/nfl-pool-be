@@ -65,13 +65,9 @@ const emailSchema = new dynamoose.Schema(
 		timestamps: true,
 	},
 );
-export const EmailModel = dynamoose.model<EmailClass>(
-	`Emails-${VERCEL_ENV}`,
-	emailSchema,
-	{
-		create: true, //false,
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		//@ts-ignore
-		waitForActive: false,
-	},
-);
+export const EmailModel = dynamoose.model<EmailClass>(`Emails-${VERCEL_ENV}`, emailSchema, {
+	create: true, //false,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	//@ts-ignore
+	waitForActive: false,
+});

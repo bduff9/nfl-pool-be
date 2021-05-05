@@ -1,12 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 
 import { Notification, User } from '../entity';
 import { TUserType } from '../util/types';

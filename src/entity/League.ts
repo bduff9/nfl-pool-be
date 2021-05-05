@@ -102,7 +102,7 @@ export class League extends BaseEntity {
 	public leagueDeletedBy!: null | string;
 
 	@Field(() => [UserLeague])
-	@OneToMany(() => UserLeague, (userLeague) => userLeague.user, {
+	@OneToMany(() => UserLeague, userLeague => userLeague.user, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})

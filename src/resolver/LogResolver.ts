@@ -49,8 +49,8 @@ export class LogResolver {
 		const userID = user?.userID
 			? user.userID
 			: newLogData.sub
-			? parseInt(newLogData.sub, 10)
-			: null;
+				? parseInt(newLogData.sub, 10)
+				: null;
 		const auditUser = userID || 'unknown';
 		const result = await Log.createQueryBuilder()
 			.insert()

@@ -1,12 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 
 import { Game, Team } from '../entity';
 import { WEEKS_IN_SEASON } from '../util/constants';

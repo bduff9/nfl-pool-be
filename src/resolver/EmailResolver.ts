@@ -1,11 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { In } from 'typeorm/find-options/operator/In';
 
 import { User } from '../entity';
@@ -17,9 +10,7 @@ import { TUserType } from '../util/types';
 export class EmailResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Email)
-	async getEmail (
-		@Arg('EmailID', () => String) emailID: string,
-	): Promise<Email> {
+	async getEmail (@Arg('EmailID', () => String) emailID: string): Promise<Email> {
 		return EmailModel.get(emailID);
 	}
 

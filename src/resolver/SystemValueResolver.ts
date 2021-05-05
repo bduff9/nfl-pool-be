@@ -7,9 +7,7 @@ import { TUserType } from '../util/types';
 export class SystemValueResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => SystemValue)
-	async getSystemValue (
-		@Arg('Name', () => String) name: string,
-	): Promise<SystemValue> {
+	async getSystemValue (@Arg('Name', () => String) name: string): Promise<SystemValue> {
 		return SystemValue.findOneOrFail({
 			where: { systemValueName: name },
 		});

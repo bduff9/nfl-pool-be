@@ -7,9 +7,7 @@ import { TUserType } from '../util/types';
 export class APICallResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => [APICall])
-	async getAPICallsForWeek (
-		@Arg('Week', () => Int) week: number,
-	): Promise<APICall[]> {
+	async getAPICallsForWeek (@Arg('Week', () => Int) week: number): Promise<APICall[]> {
 		return APICall.find({
 			where: { apiCallWeek: week },
 		});

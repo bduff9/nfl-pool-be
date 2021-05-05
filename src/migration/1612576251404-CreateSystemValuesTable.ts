@@ -1,8 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
-export class CreateSystemValuesTable1612576251404
-	implements MigrationInterface {
+export class CreateSystemValuesTable1612576251404 implements MigrationInterface {
 	async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table SystemValues
         (

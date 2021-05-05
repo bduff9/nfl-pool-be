@@ -1,8 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
-export class InsertSupportSystemValues1618273038423
-	implements MigrationInterface {
+export class InsertSupportSystemValues1618273038423 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table SystemValues drop key uk_SystemValue`);
 		await queryRunner.query(
@@ -25,9 +24,7 @@ export class InsertSupportSystemValues1618273038423
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'SupportEmail'`,
 		);
-		await queryRunner.query(
-			`delete from SystemValues where SystemValueName = 'SlackLink'`,
-		);
+		await queryRunner.query(`delete from SystemValues where SystemValueName = 'SlackLink'`);
 		await queryRunner.query(
 			`alter table SystemValues modify column SystemValueValue varchar(99) null`,
 		);
