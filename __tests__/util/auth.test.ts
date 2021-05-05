@@ -5,6 +5,7 @@ describe('customAuthChecker', () => {
 	it('allows read access to all', () => {
 		const context = { user: {} } as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['anonymous'],
 		);
@@ -15,6 +16,7 @@ describe('customAuthChecker', () => {
 	it('allows editor access to signed in users', () => {
 		const context = ({ user: { userID: 1 } } as unknown) as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['user'],
 		);
@@ -25,6 +27,7 @@ describe('customAuthChecker', () => {
 	it('denies editor access to unknown users', () => {
 		const context = { user: {} } as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['user'],
 		);
@@ -37,6 +40,7 @@ describe('customAuthChecker', () => {
 			user: { userID: 1, userDoneRegistering: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['registered'],
 		);
@@ -49,6 +53,7 @@ describe('customAuthChecker', () => {
 			user: { userID: 1, userPlaysSurvivor: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['survivorPlayer'],
 		);
@@ -61,6 +66,7 @@ describe('customAuthChecker', () => {
 			user: { userID: 1, userIsAdmin: true },
 		} as unknown) as TCustomContext;
 		const result = customAuthChecker(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{ args: {}, context, info: {} as any, root: {} },
 			['admin'],
 		);
