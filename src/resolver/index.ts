@@ -1,3 +1,4 @@
+export * from './AccountResolver';
 export * from './APICallResolver';
 export * from './EmailResolver';
 export * from './FAQResolver';

@@ -35,25 +35,26 @@ export class SurvivorPickResolver {
 
 	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
-	async getMySurvivorPicks (
-		@Ctx() context: TCustomContext,
-	): Promise<SurvivorPick[]> {
+	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<SurvivorPick[]> {
 		const { user } = context;
 
 		return SurvivorPick.find({ where: { userID: user?.userID } });
 	}
 
-	@Authorized<TUserType>('survivorPlayer')
+	@Authorized<TUserType>('registered')
 	@Query(() => Boolean)
 	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
 		const { user } = context;
+
+		if (!user?.userPlaysSurvivor) return false;
+
 		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('sp')
 			.select('COUNT(*)', 'incorrect')
-			.leftJoinAndSelect(Game, 'g', 'sp.GameID = g.GameID')
+			.leftJoin(Game, 'g', 'sp.GameID = g.GameID')
 			.where('sp.UserID = :userID', { userID: user?.userID })
 			.andWhere('g.GameStatus <> :status', { status: 'P' })
 			.andWhere(
-				new Brackets((qb) => {
+				new Brackets(qb => {
 					qb.where('g.WinnerTeamID <> sp.TeamID').orWhere('sp.TeamID is null');
 				}),
 			)

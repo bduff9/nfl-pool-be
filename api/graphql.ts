@@ -5,11 +5,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { buildSchema } from 'type-graphql';
 
 import * as resolvers from '../src/resolver';
-import {
-	allowCors,
-	customAuthChecker,
-	getUserFromContext,
-} from '../src/util/auth';
+import { allowCors, customAuthChecker, getUserFromContext } from '../src/util/auth';
 import { connectionPromise } from '../src/util/database';
 import { Sentry } from '../src/util/error';
 import { log } from '../src/util/logging';
@@ -24,10 +20,7 @@ export const config = {
 	},
 };
 
-type TApolloServerHandler = (
-	req: VercelRequest,
-	res: VercelResponse,
-) => Promise<void>;
+type TApolloServerHandler = (req: VercelRequest, res: VercelResponse) => Promise<void>;
 
 let apolloServerHandler: TApolloServerHandler;
 
@@ -83,7 +76,7 @@ const getApolloServerHandler = async (): Promise<TApolloServerHandler> => {
 						server: 'UP',
 					};
 				} catch (error) {
-					console.error('Error communicating with database', error);
+					log.error('Error communicating with database', error);
 
 					return {
 						database: 'ERROR',
@@ -109,8 +102,9 @@ export default allowCors(
 			const apolloServerHandler = await getApolloServerHandler();
 
 			return apolloServerHandler(req, res);
-		} catch (e) {
-			Sentry.captureException(e);
+		} catch (error) {
+			Sentry.captureException(error);
+			log.trace('Error during GQL call: ', error);
 		} finally {
 			transaction.finish();
 		}

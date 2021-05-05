@@ -1,12 +1,4 @@
-import {
-	Arg,
-	Authorized,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 import { Not } from 'typeorm';
 
 import { Game, Week } from '../entity';
@@ -15,12 +7,9 @@ import { TUserType } from '../util/types';
 
 @Resolver(Week)
 export class WeekResolver {
-	//FIXME: Set to user auth
-	@Authorized<TUserType>('anonymous')
+	@Authorized<TUserType>('registered')
 	@Query(() => Week)
-	async getWeek (
-		@Arg('Week', () => Int, { nullable: true }) week: number,
-	): Promise<Week> {
+	async getWeek (@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
 		if (!week) {
 			week = (
 				await Game.findOneOrFail({

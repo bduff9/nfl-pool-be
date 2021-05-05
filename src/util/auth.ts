@@ -26,9 +26,7 @@ export const allowCors = (
 	return await fn(req, res);
 };
 
-export const getUserFromContext = async (
-	req: VercelRequest,
-): Promise<null | User> => {
+export const getUserFromContext = async (req: VercelRequest): Promise<null | User> => {
 	const token = req.headers.authorization?.replace('Bearer ', '');
 
 	if (!token) return null;
@@ -59,15 +57,13 @@ export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 
 	const userRoles: TUserType[] = [];
 
-	if (user.userDoneRegistering) {
-		userRoles.push('registered');
-	} else if (user.userID) {
-		userRoles.push('user');
-	}
+	if (user.userDoneRegistering) userRoles.push('registered');
+
+	if (user.userID) userRoles.push('user');
 
 	if (user.userPlaysSurvivor) userRoles.push('survivorPlayer');
 
 	if (user.userIsAdmin) userRoles.push('admin');
 
-	return userRoles.some((role) => roles.includes(role));
+	return userRoles.some(role => roles.includes(role));
 };
