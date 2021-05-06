@@ -1,0 +1,11 @@
+Hello {{ admin.userFirstName }},
+
+This is just a notice that a new user has just registered with the following information:
+
+Name: {{ newUser.userFirstName }} {{ newUser.userLastName }}
+Team Name: {{ newUser.userTeamName }}
+Email: {{ newUser.userEmail }}
+Referred By: {{ newUser.userReferredByRaw }}
+
+You can maintain this user below:
+{{ domain }}/admin/users

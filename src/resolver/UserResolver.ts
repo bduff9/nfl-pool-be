@@ -14,6 +14,7 @@ import {
 import { Not } from 'typeorm/find-options/operator/Not';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
+import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
 import { Notification, User, UserLeague } from '../entity';
 import PaymentType from '../entity/PaymentType';
@@ -79,6 +80,7 @@ export class UserResolver {
 			...data,
 			userUpdatedBy: context.user.userEmail,
 		};
+		const promises: Array<Promise<unknown>> = [];
 
 		if (!context.user.userTrusted) {
 			const referredByUser = await User.findOne({
@@ -93,16 +95,15 @@ export class UserResolver {
 				user.userTrusted = true;
 				user.userDoneRegistering = true;
 			} else {
-				await sendUntrustedEmail({ ...context.user, ...data } as User);
+				promises.push(sendUntrustedEmail({ ...context.user, ...data } as User));
 			}
 		} else {
 			user.userDoneRegistering = true;
 		}
 
-		const promises: Array<Promise<unknown>> = [];
-
 		if (user.userDoneRegistering) {
 			promises.push(populateUserData(context.user.userID, data.userPlaysSurvivor));
+			promises.push(sendNewUserEmail({ ...context.user, ...data } as User));
 		}
 
 		promises.push(
