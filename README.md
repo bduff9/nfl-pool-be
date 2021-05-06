@@ -22,3 +22,11 @@ Clone this locally and then run `npm run setup` to install dependencies. Either 
 [Datadog](https://app.datadoghq.com/help/quick_start) - We are currently evaluating this log collecting tool
 [Sematext](https://apps.sematext.com/ui/integrations/apps) - We are currently evaluating this log collecting tool
 [Heliohost](https://www.heliohost.org/login/) - This provides free web hosting, we are using it currently for our MySQL database
+
+## Monitoring
+
+We use Sentry and Logflare for monitoring. Logflare captures all logging. Sentry captures all errors.
+
+## License
+
+This project is licensed under the terms of the GPL 3.0 license.

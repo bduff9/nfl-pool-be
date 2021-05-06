@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * NFL Confidence Pool BE - the backend implementation of an NFL confidence pool.
+ * Copyright (C) 2015-present Brian Duffey and Billy Alexander
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see {http://www.gnu.org/licenses/}.
+ * Home: https://asitewithnoname.com/
+ */
 import { ObjectType, Field, Int } from 'type-graphql';
 import {
 	BaseEntity,
@@ -44,7 +59,7 @@ export class User extends BaseEntity {
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', { name: 'UserLastName', nullable: true, length: 50 })
-	public UserLastName!: null | string;
+	public userLastName!: null | string;
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', { name: 'UserTeamName', nullable: true, length: 100 })
@@ -58,13 +73,16 @@ export class User extends BaseEntity {
 	@Column('varchar', { name: 'UserReferredByRaw', nullable: true, length: 100 })
 	public userReferredByRaw!: null | string;
 
+	@Column({ name: 'UserReferredBy', nullable: true, type: 'int' })
+	public userReferredBy!: null | number;
+
 	@Field(() => User, { nullable: true })
 	@ManyToOne(() => User, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
 	@JoinColumn({ name: 'UserReferredBy' })
-	public userReferredBy!: null | User;
+	public userReferredByUser!: null | User;
 
 	@Field(() => Date, { nullable: true })
 	@Column('timestamp', {
@@ -98,14 +116,14 @@ export class User extends BaseEntity {
 	})
 	public userPlaysSurvivor!: boolean;
 
-	@Field(() => PaymentType, { nullable: false })
+	@Field(() => PaymentType, { nullable: true })
 	@Column('enum', {
-		default: 'Cash',
-		enum: ['Cash', 'Paypal', 'Venmo', 'Zelle'],
+		default: null,
+		enum: ['Paypal', 'Venmo', 'Zelle'],
 		name: 'UserPaymentType',
-		nullable: false,
+		nullable: true,
 	})
-	public userPaymentType!: PaymentType;
+	public userPaymentType!: null | PaymentType;
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', {
@@ -138,14 +156,14 @@ export class User extends BaseEntity {
 	public userAutoPickStrategy!: AutoPickStrategy | null;
 
 	@Field(() => Notification)
-	@OneToMany(() => Notification, (notification) => notification.user, {
+	@OneToMany(() => Notification, notification => notification.user, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
 	public notifications!: Notification[];
 
 	@Field(() => [UserLeague])
-	@OneToMany(() => UserLeague, (userLeague) => userLeague.league, {
+	@OneToMany(() => UserLeague, userLeague => userLeague.league, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})

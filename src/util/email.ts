@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * NFL Confidence Pool BE - the backend implementation of an NFL confidence pool.
+ * Copyright (C) 2015-present Brian Duffey and Billy Alexander
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see {http://www.gnu.org/licenses/}.
+ * Home: https://asitewithnoname.com/
+ */
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -7,7 +22,11 @@ import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AWS_AK_ID, AWS_R, AWS_SAK_ID, EMAIL_FROM } from './constants';
+import EmailType from '../entity/EmailType';
+
+import { AWS_AK_ID, AWS_R, AWS_SAK_ID, domain, EMAIL_FROM } from './constants';
+import { EmailModel } from './dynamodb';
+import { log } from './logging';
 
 if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
 
@@ -38,7 +57,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 		: { errors: [], html: mjml };
 
 	errors.forEach((error): void => {
-		console.error('Error when compiling MJML:', error);
+		log.error('Error when compiling MJML:', error);
 	});
 
 	return html;
@@ -75,4 +94,67 @@ export const formatPreview = (previewText: string): string => {
 	while (toAdd--) formatted += '&zwnj;&nbsp;';
 
 	return formatted;
+};
+
+type TSendEmailProps = {
+	locals: Record<string, unknown> & {
+		browserLink?: never;
+		domain?: never;
+		PREVIEW?: never;
+		SUBJECT?: never;
+	};
+	PREVIEW: string;
+	SUBJECT: string;
+	type: EmailType;
+} & ({ bcc: string[]; to?: never } | { bcc?: never; to: string[] });
+
+export const sendEmail = async ({
+	bcc,
+	locals,
+	PREVIEW,
+	SUBJECT,
+	to,
+	type,
+}: TSendEmailProps): Promise<void> => {
+	const emailID = getEmailID();
+	const emails = bcc || to || [];
+
+	try {
+		await EmailModel.create({
+			emailID,
+			emailType: type,
+			to: new Set(emails),
+			subject: SUBJECT,
+		});
+	} catch (error) {
+		log.error('Failed to create email record in DynamoDB:', {
+			emailID,
+			emailType: type,
+			error,
+			to: new Set(emails),
+			subject: SUBJECT,
+		});
+	}
+
+	const {
+		originalMessage: { html, subject, text },
+	} = await emailSender.send({
+		template: type,
+		locals: {
+			...locals,
+			browserLink: `${domain}/api/email/${emailID}`,
+			domain,
+			PREVIEW,
+			SUBJECT,
+		},
+		message: {
+			to: emails,
+		},
+	});
+
+	try {
+		await EmailModel.update({ emailID }, { html, textOnly: text, subject });
+	} catch (error) {
+		log.error('Failed to update email record in DynamoDB:', { emailID, error });
+	}
 };

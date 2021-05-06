@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * NFL Confidence Pool BE - the backend implementation of an NFL confidence pool.
+ * Copyright (C) 2015-present Brian Duffey and Billy Alexander
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see {http://www.gnu.org/licenses/}.
+ * Home: https://asitewithnoname.com/
+ */
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { AuthChecker } from 'type-graphql';
 
@@ -26,16 +41,16 @@ export const allowCors = (
 	return await fn(req, res);
 };
 
-export const getUserFromContext = async (
-	req: VercelRequest,
-): Promise<null | User> => {
-	const token = req.cookies['next-auth.session-token'];
+export const getUserFromContext = async (req: VercelRequest): Promise<null | User> => {
+	const token = req.headers.authorization?.replace('Bearer ', '');
 
 	if (!token) return null;
 
 	const user = await User.createQueryBuilder('u')
 		.innerJoin('Sessions', 's', 'u.UserID = s.UserID')
-		.where('s.SessionToken = :token', { token })
+		.where('s.SessionAccessToken = :token', {
+			token,
+		})
 		.getOne();
 
 	return user || null;
@@ -57,15 +72,13 @@ export const customAuthChecker: AuthChecker<TCustomContext, TUserType> = (
 
 	const userRoles: TUserType[] = [];
 
-	if (user.userDoneRegistering) {
-		userRoles.push('registered');
-	} else if (user.userID) {
-		userRoles.push('user');
-	}
+	if (user.userDoneRegistering) userRoles.push('registered');
+
+	if (user.userID) userRoles.push('user');
 
 	if (user.userPlaysSurvivor) userRoles.push('survivorPlayer');
 
 	if (user.userIsAdmin) userRoles.push('admin');
 
-	return userRoles.some((role) => roles.includes(role));
+	return userRoles.some(role => roles.includes(role));
 };
