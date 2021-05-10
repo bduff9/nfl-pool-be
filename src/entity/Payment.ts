@@ -13,22 +13,24 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export * from './AccountResolver';
-export * from './APICallResolver';
-export * from './EmailResolver';
-export * from './FAQResolver';
-export * from './GameResolver';
-export * from './HistoryResolver';
-export * from './LeagueResolver';
-export * from './LogResolver';
-export * from './NotificationResolver';
-export * from './PaymentResolver';
-export * from './PickResolver';
-export * from './RuleResolver';
-export * from './SurvivorPickResolver';
-export * from './SystemValueResolver';
-export * from './TeamResolver';
-export * from './TiebreakerResolver';
-export * from './UserResolver';
-export * from './UserLeagueResolver';
-export * from './WeekResolver';
+import { ObjectType, Field, Int, Float } from 'type-graphql';
+
+import { User } from '.';
+
+// ts-prune-ignore-next
+@ObjectType()
+export class Payment {
+	@Field(() => String, { nullable: false })
+	public paymentDescription!: string;
+
+	@Field(() => Int, { nullable: true })
+	public paymentWeek!: null | number;
+
+	@Field(() => Float, { nullable: false })
+	public paymentAmount!: number;
+
+	public userID!: number;
+
+	@Field(() => User, { nullable: false })
+	public paymentUser!: User;
+}
