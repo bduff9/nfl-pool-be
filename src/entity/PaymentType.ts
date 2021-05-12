@@ -16,7 +16,7 @@
 import { registerEnumType } from 'type-graphql';
 
 enum PaymentType {
-	Paypal = 'PayPal',
+	Paypal = 'Paypal',
 	Venmo = 'Venmo',
 	Zelle = 'Zelle',
 }
