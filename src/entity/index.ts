@@ -22,6 +22,7 @@ export * from './History';
 export * from './League';
 export * from './Log';
 export * from './Notification';
+export * from './NotificationType';
 export * from './Payment';
 export * from './Pick';
 export * from './Rule';

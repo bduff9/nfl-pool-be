@@ -13,51 +13,18 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export const {
-	AWS_AK_ID,
-	AWS_R,
-	AWS_SAK_ID,
-	EMAIL_FROM,
-	NEXT_PUBLIC_SENTRY_DSN,
-	VERCEL_ENV,
-	database,
-	domain,
-	host,
-	password,
-	port,
-	username,
-} = process.env;
+import { Authorized, Query, Resolver } from 'type-graphql';
 
-/**
- * Number of days in a week, used for conversions
- */
-// ts-prune-ignore-next
-export const DAYS_IN_WEEK = 7;
+import { NotificationType } from '../entity';
+import { TUserType } from '../util/types';
 
-/**
- * Number of hours in a day, used for conversions
- */
-// ts-prune-ignore-next
-export const HOURS_IN_DAY = 24;
-
-/**
- * Number of minutes in an hour, used for conversions
- */
-// ts-prune-ignore-next
-export const MINUTES_IN_HOUR = 60;
-
-/**
- * Number of seconds in a minute, used for conversions
- */
-// ts-prune-ignore-next
-export const SECONDS_IN_MINUTE = 60;
-
-/**
- * The total number of weeks in an NFL regular season
- */
-export const WEEKS_IN_SEASON = 17;
-
-/**
- * The user to use for default AddedBy/UpdatedBy audit fields
- */
-export const ADMIN_USER = 'Admin';
+@Resolver(NotificationType)
+export class NotificationTypeResolver {
+	@Authorized<TUserType>('admin')
+	@Query(() => [NotificationType])
+	async getNotificationTypes (): Promise<NotificationType[]> {
+		return NotificationType.find({
+			order: { notificationType: 'ASC' },
+		});
+	}
+}

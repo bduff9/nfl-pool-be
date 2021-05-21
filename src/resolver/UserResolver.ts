@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { isEmail, Matches, MinLength } from 'class-validator';
+import { isEmail, IsOptional, IsPhoneNumber, Matches, MinLength } from 'class-validator';
 import {
 	Arg,
 	Authorized,
@@ -32,6 +32,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
 import { Notification, User, UserLeague } from '../entity';
+import AutoPickStrategy from '../entity/AutoPickStrategy';
 import PaymentType from '../entity/PaymentType';
 import { TCustomContext, TUserType } from '../util/types';
 import { populateUserData } from '../util/user';
@@ -65,6 +66,34 @@ class FinishRegistrationInput implements Partial<User> {
 
 	@Field(() => String, { nullable: true })
 	userTeamName!: null | string;
+}
+
+@InputType({ description: 'User profile data' })
+class EditMyProfileInput implements Partial<User> {
+	@Field(() => String, { nullable: false })
+	@MinLength(2)
+	userFirstName!: string;
+
+	@Field(() => String, { nullable: false })
+	@MinLength(2)
+	userLastName!: string;
+
+	@Field(() => String, { nullable: false })
+	userPaymentAccount!: string;
+
+	@Field(() => PaymentType, { nullable: false })
+	userPaymentType!: PaymentType;
+
+	@Field(() => String, { nullable: true })
+	userTeamName!: null | string;
+
+	@Field(() => String, { nullable: true })
+	@IsPhoneNumber('US', {})
+	@IsOptional()
+	userPhone!: null | string;
+
+	@Field(() => AutoPickStrategy, { nullable: true })
+	userAutoPickStrategy!: AutoPickStrategy | null;
 }
 
 @Resolver(User)
@@ -130,6 +159,34 @@ export class UserResolver {
 		);
 
 		await Promise.all(promises);
+
+		return User.findOneOrFail(context.user.userID);
+	}
+
+	@Authorized<TUserType>('registered')
+	@Mutation(() => User)
+	async editMyProfile (
+		@Arg('data') data: EditMyProfileInput,
+		@Ctx() context: TCustomContext,
+	): Promise<User> {
+		if (!context.user) throw new Error('Missing user data!');
+
+		if (data.userPaymentType !== 'Venmo' && !isEmail(data.userPaymentAccount)) {
+			throw new Error(
+				`Invalid payment account for ${data.userPaymentType}: ${data.userPaymentAccount}`,
+			);
+		}
+
+		const user: QueryDeepPartialEntity<User> = {
+			...data,
+			userUpdatedBy: context.user.userEmail,
+		};
+
+		await User.createQueryBuilder()
+			.update()
+			.set(user)
+			.where('UserID = :userID', { userID: context.user.userID })
+			.execute();
 
 		return User.findOneOrFail(context.user.userID);
 	}

@@ -63,7 +63,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	return html;
 };
 
-export const emailSender = new Email<{
+const emailSender = new Email<{
 	SUBJECT: string;
 	PREVIEW: string;
 	[key: string]: unknown;
@@ -83,7 +83,7 @@ export const emailSender = new Email<{
 	},
 });
 
-export const getEmailID = (): string => uuidv4().replace(/-/g, '');
+const getEmailID = (): string => uuidv4().replace(/-/g, '');
 
 export const formatPreview = (previewText: string): string => {
 	const PREVIEW_LENGTH = 200;

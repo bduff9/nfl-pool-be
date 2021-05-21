@@ -15,35 +15,27 @@
  */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-import { ADMIN_USER } from '../util/constants';
-
 // ts-prune-ignore-next
-export class InsertSupportSystemValues1618273038423 implements MigrationInterface {
+export class AddNotificationEnabledCol1621037143779 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.query(`alter table SystemValues drop key uk_SystemValue`);
+		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
 		await queryRunner.query(
-			`alter table SystemValues modify column SystemValueValue varchar(255) null`,
+			`alter table Notifications add column NotificationEnabled boolean not null default false after NotificationHoursBefore`,
+		);
+		await queryRunner.query(`update Notifications set NotificationEnabled = true`);
+		await queryRunner.query(
+			`alter table Notifications add constraint uk_UserNotification unique (UserID, NotificationType, NotificationEnabled)`,
 		);
 		await queryRunner.query(
-			`alter table SystemValues
-				add constraint uk_SystemValue
-					unique (SystemValueName, SystemValueValue(230))`,
-		);
-		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SupportEmail', 'info@asitewithnoname.com', '${ADMIN_USER}', '${ADMIN_USER}')`,
-		);
-		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SlackLink', 'https://join.slack.com/t/asitewithnoname/shared_invite/enQtNDIyNzUxNTAxMzk0LTIxNmFjOWVkMDk2N2Q2ZDNmMjIxMjQ1NzgwMzUzZTFhMmU3OWIyZmVmZmQ1ZDViZmU5YTJhNmQwYjIxMjYwY2E', '${ADMIN_USER}', '${ADMIN_USER}')`,
+			`alter table Notifications add constraint fk_NotificationUserID foreign key (UserID) references Users (UserID) on update cascade on delete cascade`,
 		);
 	}
 
 	public async down (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
+		await queryRunner.query(`alter table Notifications drop column NotificationEnabled`);
 		await queryRunner.query(
-			`delete from SystemValues where SystemValueName = 'SupportEmail'`,
-		);
-		await queryRunner.query(`delete from SystemValues where SystemValueName = 'SlackLink'`);
-		await queryRunner.query(
-			`alter table SystemValues modify column SystemValueValue varchar(99) null`,
+			`alter table Notifications add constraint uk_Notifications unique (UserID, NotificationType)`,
 		);
 	}
 }

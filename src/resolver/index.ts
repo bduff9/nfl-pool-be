@@ -22,6 +22,7 @@ export * from './HistoryResolver';
 export * from './LeagueResolver';
 export * from './LogResolver';
 export * from './NotificationResolver';
+export * from './NotificationTypeResolver';
 export * from './PaymentResolver';
 export * from './PickResolver';
 export * from './RuleResolver';

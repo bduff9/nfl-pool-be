@@ -13,51 +13,22 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export const {
-	AWS_AK_ID,
-	AWS_R,
-	AWS_SAK_ID,
-	EMAIL_FROM,
-	NEXT_PUBLIC_SENTRY_DSN,
-	VERCEL_ENV,
-	database,
-	domain,
-	host,
-	password,
-	port,
-	username,
-} = process.env;
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-/**
- * Number of days in a week, used for conversions
- */
 // ts-prune-ignore-next
-export const DAYS_IN_WEEK = 7;
+export class DefaultUserAutoPickStrategy1621471159928 implements MigrationInterface {
+	public async up (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(
+			`update Users set UserAutoPickStrategy = 'Random' where UserAutoPickStrategy is null`,
+		);
+		await queryRunner.query(
+			`alter table Users modify UserAutoPickStrategy enum('Away', 'Home', 'Random') default 'Random' not null`,
+		);
+	}
 
-/**
- * Number of hours in a day, used for conversions
- */
-// ts-prune-ignore-next
-export const HOURS_IN_DAY = 24;
-
-/**
- * Number of minutes in an hour, used for conversions
- */
-// ts-prune-ignore-next
-export const MINUTES_IN_HOUR = 60;
-
-/**
- * Number of seconds in a minute, used for conversions
- */
-// ts-prune-ignore-next
-export const SECONDS_IN_MINUTE = 60;
-
-/**
- * The total number of weeks in an NFL regular season
- */
-export const WEEKS_IN_SEASON = 17;
-
-/**
- * The user to use for default AddedBy/UpdatedBy audit fields
- */
-export const ADMIN_USER = 'Admin';
+	public async down (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(
+			`alter table Users modify UserAutoPickStrategy enum('Away', 'Home', 'Random') default null`,
+		);
+	}
+}

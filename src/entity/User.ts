@@ -155,6 +155,14 @@ export class User extends BaseEntity {
 	})
 	public userAutoPickStrategy!: AutoPickStrategy | null;
 
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', {
+		default: false,
+		name: 'UserCommunicationsOptedOut',
+		nullable: false,
+	})
+	public userCommunicationsOptedOut!: boolean;
+
 	@Field(() => Notification)
 	@OneToMany(() => Notification, notification => notification.user, {
 		onDelete: 'CASCADE',
