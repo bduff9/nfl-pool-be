@@ -13,25 +13,21 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export * from './AccountResolver';
-export * from './APICallResolver';
-export * from './EmailResolver';
-export * from './FAQResolver';
-export * from './GameResolver';
-export * from './HistoryResolver';
-export * from './LeagueResolver';
-export * from './LogResolver';
-export * from './NotificationResolver';
-export * from './NotificationTypeResolver';
-export * from './OverallMVResolver';
-export * from './PaymentResolver';
-export * from './PickResolver';
-export * from './RuleResolver';
-export * from './SurvivorPickResolver';
-export * from './SystemValueResolver';
-export * from './TeamResolver';
-export * from './TiebreakerResolver';
-export * from './UserResolver';
-export * from './UserLeagueResolver';
-export * from './WeeklyMVResolver';
-export * from './WeekResolver';
+import { Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+
+import { OverallMV, User } from '../entity';
+import { TUserType } from '../util/types';
+
+@Resolver(OverallMV)
+export class OverallMVResolver {
+	@Authorized<TUserType>('registered')
+	@Query(() => [OverallMV])
+	async getOverallDashboard (): Promise<Array<OverallMV>> {
+		return OverallMV.find({ order: { rank: 'ASC' } });
+	}
+
+	@FieldResolver()
+	async user (@Root() overallMV: OverallMV): Promise<User> {
+		return User.findOneOrFail({ where: { userID: overallMV.userID } });
+	}
+}

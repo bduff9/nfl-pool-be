@@ -77,6 +77,14 @@ export class Game extends BaseEntity {
 	})
 	public gameHomeSpread!: number;
 
+	@Field(() => Number, { nullable: false })
+	@Column('int', {
+		default: 0,
+		name: 'GameHomeScore',
+		nullable: false,
+	})
+	public gameHomeScore!: number;
+
 	@Column({ name: 'VisitorTeamID', nullable: false, type: 'int' })
 	public visitorTeamID!: number;
 
@@ -97,6 +105,14 @@ export class Game extends BaseEntity {
 		default: null,
 	})
 	public gameVisitorSpread!: number;
+
+	@Field(() => Number, { nullable: false })
+	@Column('int', {
+		default: 0,
+		name: 'GameVisitorScore',
+		nullable: false,
+	})
+	public gameVisitorScore!: number;
 
 	@Column({ name: 'WinnerTeamID', nullable: true, type: 'int' })
 	public winnerTeamID!: null | number;
