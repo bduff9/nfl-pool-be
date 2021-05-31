@@ -13,34 +13,17 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { ObjectType, Field, Int } from 'type-graphql';
+import { registerEnumType } from 'type-graphql';
 
-import SeasonStatus from './SeasonStatus';
-import WeekStatus from './WeekStatus';
-
-import { Game } from '.';
-
-// ts-prune-ignore-next
-@ObjectType()
-export class Week {
-	@Field(() => Int, { nullable: false })
-	public weekNumber!: number;
-
-	@Field(() => Date, { nullable: false })
-	public weekStarts!: Date;
-
-	@Field(() => WeekStatus, { nullable: false })
-	public weekStatus!: WeekStatus;
-
-	@Field(() => SeasonStatus, { nullable: false })
-	public seasonStatus!: SeasonStatus;
-
-	@Field(() => Game, { nullable: false })
-	public weekFirstGame!: Game;
-
-	@Field(() => Game, { nullable: false })
-	public weekLastGame!: Game;
-
-	@Field(() => Int, { nullable: false })
-	public weekNumberOfGames!: number;
+enum SeasonStatus {
+	Complete = 'Complete',
+	InProgress = 'In Progress',
+	NotStarted = 'Not Started',
 }
+
+registerEnumType(SeasonStatus, {
+	description: 'The status of the season',
+	name: 'SeasonStatus',
+});
+
+export default SeasonStatus;

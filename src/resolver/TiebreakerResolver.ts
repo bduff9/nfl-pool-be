@@ -30,15 +30,21 @@ import { TCustomContext, TUserType } from '../util/types';
 @Resolver(Tiebreaker)
 export class TiebreakerResolver {
 	@Authorized<TUserType>('registered')
-	@Query(() => Tiebreaker)
+	@Query(() => Tiebreaker, { nullable: true })
 	async getMyTiebreakerForWeek (
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
-	): Promise<Tiebreaker> {
+	): Promise<Tiebreaker | undefined> {
+		if (week === 0) return;
+
 		const { user } = context;
 
+		if (!user) {
+			throw new Error('Missing user from context!');
+		}
+
 		return Tiebreaker.findOneOrFail({
-			where: { tiebreakerWeek: week, userID: user?.userID },
+			where: { tiebreakerWeek: week, userID: user.userID },
 		});
 	}
 

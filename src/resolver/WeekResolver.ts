@@ -17,6 +17,12 @@ import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type
 import { Not } from 'typeorm';
 
 import { Game, Week } from '../entity';
+import SeasonStatus from '../entity/SeasonStatus';
+import {
+	MILLISECONDS_IN_SECOND,
+	MINUTES_IN_HOUR,
+	SECONDS_IN_MINUTE,
+} from '../util/constants';
 import { log } from '../util/logging';
 import { TUserType } from '../util/types';
 
@@ -26,16 +32,57 @@ export class WeekResolver {
 	@Query(() => Week)
 	async getWeek (@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
 		if (!week) {
-			week = (
-				await Game.findOneOrFail({
+			try {
+				/**
+				 * Get next game (first not completed game)
+				 */
+				const nextGame = await Game.findOneOrFail({
 					order: { gameKickoff: 'ASC' },
 					where: { gameStatus: Not('C') },
-				})
-			).gameWeek;
+				});
+
+				/**
+				 * If week was passed in as zero (meaning it is looking for
+				 * selected week not current week) and the next upcoming game
+				 * is game 1, see if its within 36 hours of kickoff,
+				 * otherwise go back to last week so people can view their
+				 * results.
+				 */
+				if (week === 0 && nextGame.gameNumber === 1) {
+					const now = new Date();
+					const buffer = new Date(
+						nextGame.gameKickoff.getTime() -
+							36 * MINUTES_IN_HOUR * SECONDS_IN_MINUTE * MILLISECONDS_IN_SECOND,
+					);
+
+					if (now < buffer) {
+						week = nextGame.gameWeek - 1;
+					}
+				}
+
+				/**
+				 * If we still haven't set a week yet by the time we get
+				 * here, go with next game's week.
+				 */
+				if (!week) {
+					week = nextGame.gameWeek;
+				}
+			} catch (_) {
+				/**
+				 * If the above fails, it's because all games are complete,
+				 * meaning the season is over.  Just get the highest week
+				 * number we have and use that.
+				 */
+				week = (
+					await Game.findOneOrFail({
+						order: { gameWeek: 'DESC' },
+					})
+				).gameWeek;
+			}
 		}
 
 		const weekStatusSubquery = Game.createQueryBuilder('g1')
-			.select('COUNT(*)')
+			.select('count(*)')
 			.where('g1.GameWeek = :week', { week })
 			.andWhere(`g1.GameStatus <> 'C'`);
 		const gameCountSubquery = Game.createQueryBuilder('g2')
@@ -52,11 +99,11 @@ export class WeekResolver {
 			.where('g.GameWeek = :week', { week })
 			.orderBy('g.GameKickoff', 'ASC')
 			.limit(1)
-			.execute();
+			.getRawOne<Week>();
 
-		log.debug(weekObj[0]);
+		log.debug(weekObj);
 
-		return weekObj[0];
+		return weekObj;
 	}
 
 	@FieldResolver()
@@ -65,6 +112,24 @@ export class WeekResolver {
 			order: { gameKickoff: 'ASC', gameID: 'ASC' },
 			where: { gameWeek: week.weekNumber },
 		});
+	}
+
+	@FieldResolver()
+	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
+		const { Completed, InProgress, NotStarted } = await Game.createQueryBuilder()
+			.select(`sum(case when GameStatus = 'P' then 1 else 0 end)`, 'NotStarted')
+			.addSelect(`sum(case when GameStatus = 'C' then 1 else 0 end)`, 'Completed')
+			.addSelect(
+				`sum(case when GameStatus not in ('C', 'P') then 1 else 0 end)`,
+				'InProgress',
+			)
+			.getRawOne<{ Completed: number; InProgress: number; NotStarted: number }>();
+
+		if (+Completed + +InProgress === 0) return SeasonStatus.NotStarted;
+
+		if (+NotStarted + +InProgress === 0) return SeasonStatus.Complete;
+
+		return SeasonStatus.InProgress;
 	}
 
 	@FieldResolver()

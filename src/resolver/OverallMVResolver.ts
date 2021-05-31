@@ -13,17 +13,51 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import { Authorized, Ctx, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
 
 import { OverallMV, User } from '../entity';
-import { TUserType } from '../util/types';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(OverallMV)
 export class OverallMVResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [OverallMV])
-	async getOverallDashboard (): Promise<Array<OverallMV>> {
+	async getOverallRankings (): Promise<Array<OverallMV>> {
 		return OverallMV.find({ order: { rank: 'ASC' } });
+	}
+
+	@Authorized<TUserType>('registered')
+	@Query(() => OverallMV, { nullable: true })
+	async getMyOverallDashboard (
+		@Ctx() context: TCustomContext,
+	): Promise<undefined | OverallMV> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		return OverallMV.findOne({ where: { userID: user.userID } });
+	}
+
+	@Authorized<TUserType>('registered')
+	@Query(() => Int)
+	async getOverallTiedWithMeCount (@Ctx() context: TCustomContext): Promise<number> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		return (
+			await OverallMV.createQueryBuilder('O1')
+				.select('count(*)', 'tied')
+				.innerJoin(OverallMV, 'O2', 'O1.UserID <> O2.UserID and O1.Rank = O2.Rank')
+				.where('O1.UserID = :userID', { userID: user.userID })
+				.getRawOne<{ tied: number }>()
+		).tied;
+	}
+
+	@Authorized<TUserType>('registered')
+	@Query(() => Int)
+	async getOverallRankingsTotalCount (): Promise<number> {
+		return OverallMV.count();
 	}
 
 	@FieldResolver()
