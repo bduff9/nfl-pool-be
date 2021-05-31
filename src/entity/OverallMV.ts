@@ -37,6 +37,7 @@ export class OverallMV extends BaseEntity {
 	@Column({ default: false, name: 'Tied', type: 'boolean' })
 	public tied!: boolean;
 
+	@Field(() => Int, { nullable: false })
 	@PrimaryColumn({ name: 'UserID', nullable: false, type: 'int' })
 	public userID!: number;
 
