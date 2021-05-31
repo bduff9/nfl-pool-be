@@ -45,7 +45,7 @@
     "aws-sdk": "2.904.0",
     "class-validator": "0.13.1",
     "dynamoose": "2.7.3",
-    "email-templates": "8.0.4",
+    "email-templates": "8.0.7",
     "graphql": "15.5.0",
     "handlebars": "4.7.7",
     "mjml": "4.9.3",
