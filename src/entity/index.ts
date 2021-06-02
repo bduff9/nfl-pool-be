@@ -34,6 +34,7 @@ export * from './SystemValue';
 export * from './Team';
 export * from './Tiebreaker';
 export * from './User';
+export * from './UserHistory';
 export * from './UserLeague';
 export * from './VerificationRequest';
 export * from './Week';

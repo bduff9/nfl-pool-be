@@ -31,7 +31,15 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import { Game, Notification, SystemValue, User, UserLeague } from '../entity';
+import {
+	Game,
+	League,
+	Notification,
+	SystemValue,
+	User,
+	UserHistory,
+	UserLeague,
+} from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import PaymentType from '../entity/PaymentType';
 import { TCustomContext, TUserType } from '../util/types';
@@ -195,6 +203,29 @@ export class UserResolver {
 		if (user.userDoneRegistering) {
 			promises.push(populateUserData(context.user.userID, data.userPlaysSurvivor));
 			promises.push(sendNewUserEmail({ ...context.user, ...data } as User));
+			const league = await League.findOneOrFail();
+
+			promises.push(
+				UserLeague.createQueryBuilder()
+					.insert()
+					.values({
+						userID: context.user.userID,
+						leagueID: league.leagueID,
+						userLeagueAddedBy: `${context.user.userID}`,
+						userLeagueUpdatedBy: `${context.user.userID}`,
+					})
+					.execute(),
+			);
+			promises.push(
+				UserHistory.createQueryBuilder()
+					.insert()
+					.values({
+						userID: context.user.userID,
+						leagueID: league.leagueID,
+						userHistoryYear: new Date().getFullYear(),
+					})
+					.execute(),
+			);
 		}
 
 		promises.push(
