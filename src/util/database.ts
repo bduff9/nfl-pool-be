@@ -17,14 +17,7 @@ import { createConnection } from 'typeorm';
 
 import * as entities from '../entity';
 
-import {
-	database,
-	host,
-	password,
-	port,
-	username,
-	// VERCEL_ENV,
-} from './constants';
+import { database, host, password, port, username } from './constants';
 
 export const connectionPromise = createConnection({
 	name: 'default',
@@ -40,3 +33,13 @@ export const connectionPromise = createConnection({
 	migrations: [],
 	subscribers: [],
 });
+
+export const getBackupName = (): string => {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = `${now.getMonth() + 1}`.padStart(2, '0');
+	const day = `${now.getDate()}`.padStart(2, '0');
+	const amPm = now.getHours() < 12 ? 'AM' : 'PM';
+
+	return `NFLBackup-${year}-${month}-${day}-${amPm}.sql`;
+};

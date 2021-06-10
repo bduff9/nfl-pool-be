@@ -19,7 +19,7 @@
     "url": "https://github.com/bduff9/nfl-be"
   },
   "scripts": {
-    "build:azure": "tsc -p azure",
+    "build:azure": "rm -rf azure/dist && tsc -p azure",
     "env": "sync-dotenv",
     "gql:download": "apollo client:download-schema src/schema.graphql --endpoint=http://localhost:4000/dev/graphql",
     "license": "license-check-and-add add -f license-check-and-add-config.json",
@@ -28,9 +28,10 @@
     "lint:script": "scriptlint && npmPkgJsonLint .",
     "lint:script:fix": "scriptlint --fix",
     "prepare": "husky install",
+    "prestart:azure": "npm run build:azure",
     "setup": "npx typesync && npm i && npm prune",
     "start": "vercel dev",
-    "start:azure": "func start",
+    "start:azure": "cd azure && func start",
     "test": "jest",
     "test:ci": "jest --ci --coverage --reporters='default' --reporters='./github-actions-reporter'",
     "test:coverage": "jest --coverage --env=jsdom",
