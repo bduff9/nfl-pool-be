@@ -15,6 +15,7 @@
  */
 import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
+import { APICallModel } from '../dynamodb/apiCall';
 import { APICall } from '../entity';
 import { TUserType } from '../util/types';
 
@@ -22,9 +23,7 @@ import { TUserType } from '../util/types';
 export class APICallResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => [APICall])
-	async getAPICallsForWeek (@Arg('Week', () => Int) week: number): Promise<APICall[]> {
-		return APICall.find({
-			where: { apiCallWeek: week },
-		});
+	async getAPICallsForWeek (@Arg('Week', () => Int) week: number): Promise<Array<APICall>> {
+		return APICallModel.query('apiCallWeek').eq(week).exec();
 	}
 }

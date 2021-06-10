@@ -16,9 +16,8 @@
 import { Arg, Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { In } from 'typeorm/find-options/operator/In';
 
-import { User } from '../entity';
-import { Email } from '../entity/Email';
-import { EmailModel } from '../util/dynamodb';
+import { EmailModel } from '../dynamodb/email';
+import { Email, User } from '../entity';
 import { TUserType } from '../util/types';
 
 @Resolver(Email)

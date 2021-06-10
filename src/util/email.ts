@@ -20,12 +20,12 @@ import { SES } from 'aws-sdk';
 import Email from 'email-templates';
 import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
-import { v4 as uuidv4 } from 'uuid';
 
+import { getID } from '../dynamodb';
+import { EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
 
 import { AWS_AK_ID, AWS_R, AWS_SAK_ID, domain, EMAIL_FROM } from './constants';
-import { EmailModel } from './dynamodb';
 import { log } from './logging';
 
 if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
@@ -83,8 +83,6 @@ const emailSender = new Email<{
 	},
 });
 
-const getEmailID = (): string => uuidv4().replace(/-/g, '');
-
 export const formatPreview = (previewText: string): string => {
 	const PREVIEW_LENGTH = 200;
 	const currentLength = previewText.length;
@@ -116,7 +114,7 @@ export const sendEmail = async ({
 	to,
 	type,
 }: TSendEmailProps): Promise<void> => {
-	const emailID = getEmailID();
+	const emailID = getID();
 	const emails = bcc || to || [];
 
 	try {
