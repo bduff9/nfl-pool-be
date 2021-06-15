@@ -17,6 +17,7 @@ import { either, Either, isRight, left, right, Right } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 const getIsCodec = <T extends t.Any>(tag: string) => (codec: t.Any): codec is T =>
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(codec as any)._tag === tag;
 const isInterfaceCodec = getIsCodec<t.InterfaceType<t.Props>>('InterfaceType');
 const isPartialCodec = getIsCodec<t.PartialType<t.Props>>('PartialType');
@@ -57,7 +58,7 @@ const getExcessTypeName = (codec: t.Any): string => {
 	return `Excess<${codec.name}>`;
 };
 
-const stripKeys = <T = any>(o: T, props: t.Props): Either<Array<string>, T> => {
+const stripKeys = <T = unknown>(o: T, props: t.Props): Either<Array<string>, T> => {
 	const keys = Object.getOwnPropertyNames(o);
 	const propsKeys = Object.getOwnPropertyNames(props);
 
@@ -93,7 +94,7 @@ export const excess = <C extends t.HasProps>(
 					),
 				),
 			),
-		a => codec.encode((stripKeys(a, props) as Right<any>).right),
+		a => codec.encode((stripKeys(a, props) as Right<unknown>).right),
 		codec,
 	);
 };

@@ -21,6 +21,7 @@ import { getCurrentWeekInProgress } from './game';
 import { getPublicLeague } from './league';
 import { getSystemYear } from './systemValues';
 
+// ts-prune-ignore-next
 export const populateWinnerHistory = async (): Promise<void> => {
 	const year = await getSystemYear();
 	const leagueID = await getPublicLeague();

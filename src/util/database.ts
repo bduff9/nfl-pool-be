@@ -27,13 +27,14 @@ export const connectionPromise = createConnection({
 	password,
 	port: port !== undefined ? +port : port,
 	username,
-	synchronize: false, // VERCEL_ENV === 'development',
+	synchronize: false,
 	logging: true,
 	entities: Object.values(entities),
 	migrations: [],
 	subscribers: [],
 });
 
+// ts-prune-ignore-next
 export const getBackupName = (): string => {
 	const now = new Date();
 	const year = now.getFullYear();

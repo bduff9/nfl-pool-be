@@ -25,6 +25,7 @@ export const getSystemYear = async (): Promise<number> => {
 	return 0;
 };
 
+// ts-prune-ignore-next
 export const updateSystemYear = async (year: number): Promise<void> => {
 	await SystemValue.update(
 		{ systemValueName: 'YearUpdated' },

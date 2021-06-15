@@ -33,6 +33,7 @@ const getCurrentSeasonYear = (): number => {
 	return currYear;
 };
 
+// ts-prune-ignore-next
 export const verifySeasonYearForReset = async (): Promise<null | number> => {
 	const nextSeasonYear = getCurrentSeasonYear();
 	const currentSeasonYear = await getSystemYear();

@@ -31,6 +31,7 @@ const getAPIUrl = (year: number, week?: number): string => {
 	return `fflnetdynamic${year}/nfl_sched.json`;
 };
 
+// ts-prune-ignore-next
 export const getEntireSeasonFromAPI = async (
 	year?: number,
 ): Promise<TAPIAllWeeksResponse> => {

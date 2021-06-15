@@ -33,6 +33,7 @@ export const getCurrentWeekInProgress = async (): Promise<number> => {
 	return game.gameWeek;
 };
 
+// ts-prune-ignore-next
 export const populateGames = async (newSeason: TAPIAllWeeksResponse): Promise<void> => {
 	const teams = await getTeamsFromDB();
 

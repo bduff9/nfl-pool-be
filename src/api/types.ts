@@ -186,6 +186,8 @@ const APIResponseNFLWeek = excess(
 	]),
 );
 
+//TODO: see if used after week api calls are done
+// ts-prune-ignore-next
 export const APIResponse = excess(
 	t.type({
 		encoding: t.literal('utf-8'),

@@ -15,9 +15,9 @@
  */
 import { League, Notification, Pick, SurvivorPick, Tiebreaker, User } from '../entity';
 
-import { DEFAULT_AUTO_PICKS } from './constants';
 import { log } from './logging';
 
+// ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
 	const subQuery = User.createQueryBuilder('U')
 		.select('U.UserID')
