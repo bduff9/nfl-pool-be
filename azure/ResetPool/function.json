@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 0 31 6 Mon"
+    }
+  ],
+  "scriptFile": "../dist/azure/ResetPool/index.js"
+}

@@ -13,9 +13,30 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { League, Pick, SurvivorPick, Tiebreaker, User } from '../entity';
+import { League, Notification, Pick, SurvivorPick, Tiebreaker, User } from '../entity';
 
+import { DEFAULT_AUTO_PICKS } from './constants';
 import { log } from './logging';
+
+export const clearOldUserData = async (): Promise<void> => {
+	const subQuery = User.createQueryBuilder('U')
+		.select('U.UserID')
+		.where('U.UserDoneRegistering = false')
+		.getQuery();
+
+	await Notification.createQueryBuilder()
+		.delete()
+		.where(`UserID in (${subQuery})`)
+		.execute();
+	await User.update(
+		{ userDoneRegistering: true },
+		{
+			userDoneRegistering: false,
+			userPlaysSurvivor: false,
+			userPaid: 0,
+		},
+	);
+};
 
 export const populateUserData = async (
 	userID: number,
