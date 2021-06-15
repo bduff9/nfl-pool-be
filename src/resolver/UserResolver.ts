@@ -42,6 +42,7 @@ import {
 } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import PaymentType from '../entity/PaymentType';
+import { DEFAULT_AUTO_PICKS } from '../util/constants';
 import { TCustomContext, TUserType } from '../util/types';
 import { populateUserData } from '../util/user';
 
@@ -227,6 +228,9 @@ export class UserResolver {
 					.execute(),
 			);
 		}
+
+		user.userAutoPicksLeft = DEFAULT_AUTO_PICKS;
+		user.userPaid = 0;
 
 		promises.push(
 			User.createQueryBuilder()

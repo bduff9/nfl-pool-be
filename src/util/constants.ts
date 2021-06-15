@@ -64,3 +64,8 @@ export const WEEKS_IN_SEASON = 18;
  * The user to use for default AddedBy/UpdatedBy audit fields
  */
 export const ADMIN_USER = 'Admin';
+
+/**
+ * The default amount of auto picks each user starts the season with
+ */
+export const DEFAULT_AUTO_PICKS = 3;
