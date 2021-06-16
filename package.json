@@ -30,7 +30,7 @@
     "prepare": "husky install",
     "prestart:azure": "npm run build:azure",
     "setup": "npx typesync && npm i && npm prune",
-    "start": "vercel dev",
+    "start": "rm -rf .next && vercel dev --listen 3001",
     "start:azure": "cd azure && func start",
     "test": "jest",
     "test:ci": "jest --ci --coverage --reporters='default' --reporters='./github-actions-reporter'",
@@ -44,9 +44,9 @@
   "dependencies": {
     "@azure/storage-blob": "12.6.0",
     "@saeris/apollo-server-vercel": "0.4.0",
-    "@sentry/node": "6.6.0",
-    "@sentry/tracing": "6.6.0",
-    "aws-sdk": "2.927.0",
+    "@sentry/node": "6.7.1",
+    "@sentry/tracing": "6.7.1",
+    "aws-sdk": "2.930.0",
     "axios": "0.21.1",
     "class-validator": "0.13.1",
     "dynamoose": "2.7.3",
@@ -74,8 +74,8 @@
     "@types/node": "15.12.2",
     "@types/node-sass": "4.11.1",
     "@types/uuid": "8.3.0",
-    "@typescript-eslint/eslint-plugin": "4.26.1",
-    "@typescript-eslint/parser": "4.26.1",
+    "@typescript-eslint/eslint-plugin": "4.27.0",
+    "@typescript-eslint/parser": "4.27.0",
     "eslint": "7.28.0",
     "eslint-plugin-graphql": "4.0.0",
     "eslint-plugin-import": "2.23.4",
@@ -86,12 +86,12 @@
     "license-check-and-add": "4.0.2",
     "lint-staged": "11.0.0",
     "npm-package-json-lint": "5.1.0",
-    "scriptlint": "2.1.5",
+    "scriptlint": "2.1.6",
     "sync-dotenv": "2.6.2",
     "ts-jest": "27.0.3",
     "typehole": "1.6.2",
     "typescript": "4.3.2",
-    "vercel": "23.0.0"
+    "vercel": "23.0.1"
   },
   "engines": {
     "node": "14.x"
