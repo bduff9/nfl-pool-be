@@ -17,7 +17,7 @@ import { createConnection } from 'typeorm';
 
 import * as entities from '../entity';
 
-import { database, host, password, port, username } from './constants';
+import { database, host, password, port, dbuser } from './constants';
 
 export const connectionPromise = createConnection({
 	name: 'default',
@@ -26,7 +26,7 @@ export const connectionPromise = createConnection({
 	host,
 	password,
 	port: port !== undefined ? +port : port,
-	username,
+	username: dbuser,
 	synchronize: false,
 	logging: true,
 	entities: Object.values(entities),

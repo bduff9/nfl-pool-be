@@ -31,7 +31,7 @@ const {
 	port,
 	//TODO: should be D:/local/Temp on Azure
 	tempDir,
-	username,
+	dbuser,
 } = process.env;
 
 if (!AzureWebJobsStorage)
@@ -49,7 +49,7 @@ if (!password) throw new Error('Missing password from environment');
 
 if (!port) throw new Error('Missing port from environment');
 
-if (!username) throw new Error('Missing user from environment');
+if (!dbuser) throw new Error('Missing user from environment');
 
 type Schedule = { adjustForDST: boolean };
 type ScheduleStatus = { last: string; next: string; lastUpdated: string };
@@ -76,7 +76,7 @@ const timerTrigger: AzureFunction = async (
 			host,
 			password,
 			port: +port,
-			user: username,
+			user: dbuser,
 		},
 		dump: {
 			data: {
@@ -84,8 +84,6 @@ const timerTrigger: AzureFunction = async (
 				verbose: true,
 			},
 			excludeTables: true,
-			//TODO: remove this once api calls is moved to dynamodb
-			tables: ['APICalls'],
 			schema: {
 				table: {
 					dropIfExist: true,
@@ -97,7 +95,6 @@ const timerTrigger: AzureFunction = async (
 		},
 		dumpToFile: dumpFile,
 	});
-	//const dump = getDumpString(result);
 	const blobServiceClient = BlobServiceClient.fromConnectionString(AzureWebJobsStorage);
 
 	context.log('\nDump finished!');

@@ -25,7 +25,7 @@ export const {
 	host,
 	password,
 	port,
-	username,
+	dbuser,
 } = process.env;
 
 /**

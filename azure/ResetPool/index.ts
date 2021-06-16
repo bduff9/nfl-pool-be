@@ -33,7 +33,7 @@ import { populateWinnerHistory } from '../../src/util/history';
 import { updateSystemYear } from '../../src/util/systemValues';
 import { clearOldUserData } from '../../src/util/user';
 
-const { database, host, password, port, username } = process.env;
+const { database, host, password, port, dbuser } = process.env;
 
 if (!database) throw new Error('Missing database from environment');
 
@@ -43,7 +43,7 @@ if (!password) throw new Error('Missing password from environment');
 
 if (!port) throw new Error('Missing port from environment');
 
-if (!username) throw new Error('Missing user from environment');
+if (!dbuser) throw new Error('Missing user from environment');
 
 type Schedule = { adjustForDST: boolean };
 type ScheduleStatus = { last: string; next: string; lastUpdated: string };

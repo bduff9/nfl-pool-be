@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-const { database, host, password, port, username } = process.env;
+const { database, host, password, port, dbuser } = process.env;
 
 /**
  * @type import("typeorm").ConnectionOptions c
@@ -25,7 +25,7 @@ const config = {
 	host,
 	password,
 	port: port !== undefined ? +port : port,
-	username,
+	username: dbuser,
 	synchronize: false,
 	logging: true,
 	entities: ['.build/src/entity/**/*.js'],
