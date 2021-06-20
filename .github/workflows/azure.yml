@@ -34,7 +34,7 @@ jobs:
         run: |
           npm ci
           npm run build:azure
-          cp -R node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
+          mv node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
 
       - name: Set environment variables
         run: |
