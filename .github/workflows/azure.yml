@@ -36,14 +36,15 @@ jobs:
         run: |
           switch ("${GITHUB_REF}")
           {
-            "main" {$DEPLOYMENT_SLOT = ""; Break}
-            "develop" {$DEPLOYMENT_SLOT = "dev"; Break}
+            "refs/heads/main" {$DEPLOYMENT_SLOT = ""; Break}
+            "refs/heads/develop" {$DEPLOYMENT_SLOT = "dev"; Break}
             default {$DEPLOYMENT_SLOT = "INVALID"; Break}
           }
           echo "DEPLOYMENT_SLOT=${DEPLOYMENT_SLOT}"
           echo "DEPLOYMENT_SLOT=${DEPLOYMENT_SLOT}" >> $GITHUB_ENV
 
       - name: "Run Azure Functions Action"
+        if: ${{ env.DEPLOYMENT_SLOT != 'INVALID' }}
         uses: Azure/functions-action@v1
         id: fa
         with:
