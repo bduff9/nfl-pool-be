@@ -13,7 +13,10 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { CreateTableInput } from 'aws-sdk/clients/dynamodb';
 import dynamoose from 'dynamoose';
+import { Document } from 'dynamoose/dist/Document';
+import { ModelType } from 'dynamoose/dist/General';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AWS_AK_ID, AWS_R, AWS_SAK_ID } from '../util/constants';
@@ -31,5 +34,24 @@ const dynamoDB = new dynamoose.aws.sdk.DynamoDB({
 });
 
 dynamoose.aws.ddb.set(dynamoDB);
+
+const createTable = async (table: CreateTableInput): Promise<void> => {
+	await dynamoDB.createTable(table).promise();
+};
+
+const deleteTable = async (TableName: string): Promise<void> => {
+	await dynamoDB.deleteTable({ TableName }).promise();
+	await dynamoDB.waitFor('tableNotExists', { TableName }).promise();
+};
+
+export const clearTable = async <T extends Document>(
+	table: ModelType<T>,
+): Promise<void> => {
+	const tableName = table.Model.name;
+	const tableStructure: CreateTableInput = await (table as any).table.create.request();
+
+	await deleteTable(tableName);
+	await createTable(tableStructure);
+};
 
 export const getID = (): string => uuidv4().replace(/-/g, '');

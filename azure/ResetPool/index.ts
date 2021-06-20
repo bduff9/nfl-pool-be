@@ -14,8 +14,12 @@
  * Home: https://asitewithnoname.com/
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import { getManager } from 'typeorm';
 
 import { getEntireSeasonFromAPI } from '../../src/api';
+import { clearTable } from '../../src/dynamodb';
+import { APICallModel } from '../../src/dynamodb/apiCall';
+import { EmailModel } from '../../src/dynamodb/email';
 import {
 	Game,
 	Log,
@@ -76,8 +80,12 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	// Clear/reset old data
+	const entityManager = getManager();
+	const apiCallsPromise = clearTable(APICallModel);
+	const emailsPromise = clearTable(EmailModel);
+
 	await populateWinnerHistory();
-	await Pick.query('SET FOREIGN_KEY_CHECKS = 0');
+	await entityManager.query('SET FOREIGN_KEY_CHECKS = 0');
 	await Log.clear();
 	await Pick.clear();
 	await Tiebreaker.clear();
@@ -88,11 +96,14 @@ const timerTrigger: AzureFunction = async (
 	await clearOldUserData();
 	await VerificationRequest.clear();
 	await Session.clear();
-	await Pick.query('SET FOREIGN_KEY_CHECKS = 1');
+	await entityManager.query('SET FOREIGN_KEY_CHECKS = 1');
 
 	// Populate new season data
 	await populateGames(newSeason);
 	await updateSystemYear(nextSeasonYear);
+
+	// Be sure DDB drop and create finishes
+	await Promise.all([apiCallsPromise, emailsPromise]);
 
 	context.log('Reset pool function ran!', timeStamp);
 };

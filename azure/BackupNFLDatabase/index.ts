@@ -29,7 +29,6 @@ const {
 	keepCount,
 	password,
 	port,
-	//TODO: should be D:/local/Temp on Azure
 	tempDir,
 	dbuser,
 } = process.env;
@@ -80,11 +79,12 @@ const timerTrigger: AzureFunction = async (
 		},
 		dump: {
 			data: {
-				lockTables: true,
+				format: false,
+				maxRowsPerInsertStatement: 9999,
 				verbose: true,
 			},
-			excludeTables: true,
 			schema: {
+				format: false,
 				table: {
 					dropIfExist: true,
 				},
@@ -104,10 +104,15 @@ const timerTrigger: AzureFunction = async (
 	const containerClient = blobServiceClient.getContainerClient(containerName);
 	const createContainerResponse = await containerClient.createIfNotExists();
 
-	context.log(
-		'Container was created successfully. requestId: ',
-		createContainerResponse.requestId,
-	);
+	if (createContainerResponse.requestId) {
+		context.log(
+			'Container was created successfully. requestId: ',
+			createContainerResponse.requestId,
+		);
+	} else {
+		context.log('Container already exists!');
+	}
+
 	const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
 	context.log('\nUploading to Azure storage as blob:\n\t', blobName);
