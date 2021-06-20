@@ -52,7 +52,7 @@
     "dynamoose": "2.7.3",
     "email-templates": "8.0.7",
     "fp-ts": "2.10.5",
-    "graphql": "15.5.0",
+    "graphql": "15.5.1",
     "handlebars": "4.7.7",
     "io-ts": "2.2.16",
     "mjml": "4.9.3",
