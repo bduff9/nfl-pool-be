@@ -27,6 +27,7 @@ export * from './OverallMVResolver';
 export * from './PaymentResolver';
 export * from './PickResolver';
 export * from './RuleResolver';
+export * from './SurvivorMVResolver';
 export * from './SurvivorPickResolver';
 export * from './SystemValueResolver';
 export * from './TeamResolver';

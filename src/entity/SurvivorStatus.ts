@@ -13,30 +13,17 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export * from './Account';
-export * from './APICall';
-export * from './Email';
-export * from './FAQ';
-export * from './Game';
-export * from './History';
-export * from './League';
-export * from './Log';
-export * from './Notification';
-export * from './NotificationType';
-export * from './OverallMV';
-export * from './Payment';
-export * from './Pick';
-export * from './Rule';
-export * from './Session';
-export * from './SupportContent';
-export * from './SurvivorMV';
-export * from './SurvivorPick';
-export * from './SystemValue';
-export * from './Team';
-export * from './Tiebreaker';
-export * from './User';
-export * from './UserHistory';
-export * from './UserLeague';
-export * from './VerificationRequest';
-export * from './Week';
-export * from './WeeklyMV';
+import { registerEnumType } from 'type-graphql';
+
+enum SurvivorStatus {
+	Alive = 'Alive',
+	Dead = 'Dead',
+	Waiting = 'Waiting',
+}
+
+registerEnumType(SurvivorStatus, {
+	description: 'The current status of a survivor player',
+	name: 'SurvivorStatus',
+});
+
+export default SurvivorStatus;
