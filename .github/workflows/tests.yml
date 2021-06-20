@@ -16,16 +16,21 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "14.15.4"
+
       - name: Install dependencies
         run: npm ci
+
       - name: Validate code is well-formatted
         run: npm run validate
+
       - name: Validate tests are successful
         run: npm run test:ci
+
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Analyze the code
         id: scc
         uses: iryanbell/scc-docker-action@v1.0.2
@@ -35,6 +40,7 @@ jobs:
         with:
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
           publishDeployment: 600
+
       - name: Set environment variables
         run: |
           case "${GITHUB_REF}" in
@@ -44,6 +50,7 @@ jobs:
           esac
           echo "DEPLOY_ENV=${DEPLOY_ENV}"
           echo "DEPLOY_ENV=${DEPLOY_ENV}" >> $GITHUB_ENV
+
       - name: Create Sentry release
         uses: getsentry/action-release@v1
         env:
@@ -52,6 +59,7 @@ jobs:
           SENTRY_PROJECT: nfl-pool-be
         with:
           environment: ${{ env.DEPLOY_ENV }}
+
       - name: Tests ✅
         if: ${{ success() }}
         run: |
@@ -61,6 +69,7 @@ jobs:
             "description": "Tests passed",
             "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }'
+
       - name: Tests 🚨
         if: ${{ failure() }}
         run: |
@@ -70,6 +79,7 @@ jobs:
             "description": "Tests failed",
             "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }'
+
       - name: Notify Slack
         if: always()
         uses: kpritam/slack-job-status-action@v1

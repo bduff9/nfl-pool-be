@@ -48,6 +48,7 @@ export const clearTable = async <T extends Document>(
 	table: ModelType<T>,
 ): Promise<void> => {
 	const tableName = table.Model.name;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const tableStructure: CreateTableInput = await (table as any).table.create.request();
 
 	await deleteTable(tableName);
