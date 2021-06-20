@@ -15,10 +15,15 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@v2
+
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PRINCIPAL }}
 
       - name: Setup Node ${{ env.NODE_VERSION }} Environment
         uses: actions/setup-node@v1
@@ -26,21 +31,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: "Resolve Project Dependencies Using Npm"
-        shell: pwsh
         run: |
           npm ci
           npm run build:azure
-          Move-Item node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
+          cp -R node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
 
       - name: Set environment variables
         run: |
           echo "GITHUB_REF=${GITHUB_REF}"
-          switch ("${GITHUB_REF}")
-          {
-            "refs/heads/main" {$DEPLOYMENT_SLOT = ""; Break}
-            "refs/heads/develop" {$DEPLOYMENT_SLOT = "dev"; Break}
-            default {$DEPLOYMENT_SLOT = "INVALID"; Break}
-          }
+          case "${GITHUB_REF}" in
+            "refs/heads/main") DEPLOYMENT_SLOT= ;;
+            "refs/heads/develop") DEPLOYMENT_SLOT=dev ;;
+            *) DEPLOYMENT_SLOT=INVALID ;;
+          esac
           echo "DEPLOYMENT_SLOT=${DEPLOYMENT_SLOT}"
           echo "DEPLOYMENT_SLOT=${DEPLOYMENT_SLOT}" >> $GITHUB_ENV
 
@@ -52,4 +55,3 @@ jobs:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           slot-name: "dev" # ${{ env.DEPLOYMENT_SLOT }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
