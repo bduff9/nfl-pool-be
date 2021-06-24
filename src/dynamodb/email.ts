@@ -33,6 +33,7 @@ class EmailClass extends Document {
 	updatedAt!: Date | null;
 }
 
+const emailTypes = Object.values(EmailType);
 const emailSchema = new dynamoose.Schema(
 	{
 		emailID: {
@@ -41,7 +42,7 @@ const emailSchema = new dynamoose.Schema(
 			type: String,
 		},
 		emailType: {
-			enum: ['verification'],
+			enum: emailTypes,
 			required: true,
 			type: String,
 		},

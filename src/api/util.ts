@@ -13,21 +13,27 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { History } from '../entity';
+import { TAPITeamResponse } from './types';
 
-import { ADMIN_USER } from './constants';
-import { getPublicLeague } from './league';
-import { getSystemYear } from './systemValue';
+/**
+ * Get home and visitor teams from API matchup
+ * @param teams The matchup from API
+ * @throws Error if API matchup does not have 1 home team (isHome === '1') and 1 visiting team (isHome === '0')
+ * @returns [Home team, Visiting team]
+ */
+export const parseTeamsFromApi = (
+	teams: Array<TAPITeamResponse>,
+): [TAPITeamResponse, TAPITeamResponse] => {
+	const [visitor, home] = teams.reduce(
+		(found, team) => {
+			found[+team.isHome] = team;
 
-// ts-prune-ignore-next
-export const populateWinnerHistory = async (): Promise<void> => {
-	const year = await getSystemYear();
-	const leagueID = await getPublicLeague();
+			return found;
+		},
+		[null, null] as [null | TAPITeamResponse, null | TAPITeamResponse],
+	);
 
-	await History.query(`insert into History (UserID, HistoryYear, LeagueID, HistoryType, HistoryWeek, HistoryPlace, HistoryAddedBy, HistoryUpdatedBy)
-	select UserID, ${year}, ${leagueID}, 'Overall', null, \`Rank\`, '${ADMIN_USER}', '${ADMIN_USER}' from OverallMV where \`Rank\` < 4
-	union
-	select UserID, ${year}, ${leagueID}, 'Weekly', Week, \`Rank\`, '${ADMIN_USER}', '${ADMIN_USER}' from WeeklyMV where \`Rank\` < 3
-	union
-	select UserID, ${year}, ${leagueID}, 'Survivor', null, \`Rank\`, '${ADMIN_USER}', '${ADMIN_USER}' from SurvivorMV where \`Rank\` < 3`);
+	if (!visitor || !home) throw new Error(`Missing visitor or home from API: ${teams}`);
+
+	return [home, visitor];
 };

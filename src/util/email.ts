@@ -144,9 +144,13 @@ export const sendEmail = async ({
 			domain,
 			PREVIEW,
 			SUBJECT,
+			unsubscribeLink: `${domain}/api/email/unsubscribe${
+				emails.length === 1 ? `?email=${encodeURIComponent(emails[0])}` : ''
+			}`,
 		},
 		message: {
-			to: emails,
+			bcc,
+			to,
 		},
 	});
 

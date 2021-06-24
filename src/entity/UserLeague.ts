@@ -50,7 +50,7 @@ export class UserLeague extends BaseEntity {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
-	@JoinColumn({ name: 'UserID' })
+	@JoinColumn({ name: 'UserID', referencedColumnName: 'userID' })
 	public user!: User;
 
 	@Column({ name: 'LeagueID', nullable: false, type: 'int' })
@@ -61,7 +61,7 @@ export class UserLeague extends BaseEntity {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 	})
-	@JoinColumn({ name: 'LeagueID' })
+	@JoinColumn({ name: 'LeagueID', referencedColumnName: 'leagueID' })
 	public league!: League;
 
 	@Field(() => Date, { nullable: false })

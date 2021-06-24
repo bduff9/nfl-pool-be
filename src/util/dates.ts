@@ -13,7 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { getSystemYear } from './systemValues';
+import { getSystemYear } from './systemValue';
+
+export const convertDateToEpoch = (date: Date): number => Math.floor(date.getTime() / 1000);
 
 export const convertEpoch = (epoch: number): Date => {
 	const d = new Date(0);

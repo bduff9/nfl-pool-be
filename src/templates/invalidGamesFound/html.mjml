@@ -1,0 +1,52 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ SUBJECT }}</mj-title>
+    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .container {
+        max-width: 600px;
+      }
+
+      .link {
+        text-decoration: none;
+        font-size: 16px;
+        color: #346df1;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-section background-color="#F9F9F9" full-width="full-width">
+      <mj-column width="100%" css-class="container">
+        <mj-text align="center" padding="0 0 25px 0" font-size="22px">
+          <strong>{{ domain }}</strong>
+          &nbsp; | &nbsp;
+          <a href="{{ browserLink }}" class="link">View online version</a>
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text padding="30px 0 15px 0" font-size="18px" align="left">
+          Hello {{ admin.userFirstName }},
+          <br /><br />
+          This is a notification that the following {{ messages.length }} games were found in week {{ week }} that could not be auto fixed:
+          <br /><br />
+          <ul>
+            {{#each messages}}
+              <li>Game: {{ this.game }}
+                <ul>
+                  <li>{{ this.reason }}</li>
+                </ul>
+              </li>
+            {{/each}}
+          </ul>
+          These will need to be manually fixed in the database. You can also click below to view all API calls for this week.
+        </mj-text>
+        <mj-button padding="20px 0" border-radius="5px" background-color="#346df1" href="{{ domain }}/admin/api" font-size="18px" color="#fff" border="1px solid #346df1" font-weight="bold">
+          View API Calls
+        </mj-button>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

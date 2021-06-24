@@ -1,0 +1,13 @@
+Hello {{ admin.userFirstName }},
+
+This is a notification that the following {{ messages.length }} games were found in week {{ week }} that could not be auto fixed:
+
+{{#each messages}}
+  Game: {{ this.game }}
+  {{ this.reason }}
+{{/each}}
+
+These will need to be manually fixed in the database. You can also click below to view all API calls for this week.
+
+You can view API calls here:
+{{ domain }}/admin/api

@@ -16,6 +16,7 @@
 import { registerEnumType } from 'type-graphql';
 
 enum EmailType {
+	invalidGamesFound = 'invalidGamesFound',
 	newUser = 'newUser',
 	untrusted = 'untrusted',
 	verification = 'verification',

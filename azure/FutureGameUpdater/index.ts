@@ -15,6 +15,12 @@
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 
+import { getEntireSeasonFromAPI } from '../../src/api';
+import { healPicks, healWeek } from '../../src/api/healing';
+import { WEEKS_IN_SEASON } from '../../src/util/constants';
+import { getCurrentWeek } from '../../src/util/game';
+import { getSystemYear } from '../../src/util/systemValue';
+
 const { database, host, password, port, dbuser } = process.env;
 
 if (!database) throw new Error('Missing database from environment');
@@ -40,14 +46,21 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	const timeStamp = new Date().toISOString();
+	const year = await getSystemYear();
+	const season = await getEntireSeasonFromAPI(year);
 
-	//TODO: get schedule for entire season from API
-	//TODO: loop over each week
-	//TODO: if week is in past, skip
-	//TODO: loop over each game
-	//TODO: validate game metadata matches in DB for things like kickoff, location, week, etc.
-	//TODO: if not, update game correctly (i.e. move to correct week, change kickoff, update game number, etc.)
-	//TODO: if changes occur, see if we need to notify
+	if (season.length === 0) {
+		context.log('API has no data for updating future weeks!');
+
+		return;
+	}
+
+	const currentWeek = await getCurrentWeek();
+
+	for (let week = currentWeek; week <= WEEKS_IN_SEASON; week++) {
+		await healWeek(week, season);
+		await healPicks(week);
+	}
 
 	context.log('Future game updater function ran!', timeStamp);
 };

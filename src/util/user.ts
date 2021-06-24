@@ -13,7 +13,15 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { League, Notification, Pick, SurvivorPick, Tiebreaker, User } from '../entity';
+import {
+	League,
+	Notification,
+	Pick,
+	SurvivorPick,
+	Tiebreaker,
+	User,
+	UserLeague,
+} from '../entity';
 
 import { log } from './logging';
 
@@ -36,6 +44,19 @@ export const clearOldUserData = async (): Promise<void> => {
 			userPaid: 0,
 		},
 	);
+};
+
+export const getAllRegisteredUsers = async (): Promise<Array<User>> => {
+	const users = await User.find({ where: { userDoneRegistering: true } });
+
+	for (const user of users) {
+		user.userLeagues = await UserLeague.find({
+			relations: ['league'],
+			where: { userID: user.userID },
+		});
+	}
+
+	return users;
 };
 
 export const populateUserData = async (

@@ -58,6 +58,13 @@ export class League extends BaseEntity {
 	@JoinColumn({ name: 'LeagueAdmin' })
 	public admin!: User;
 
+	@Field(() => [UserLeague])
+	@OneToMany(() => UserLeague, userLeague => userLeague.user, {
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	})
+	public userLeagues!: UserLeague[];
+
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({
 		default: () => 'CURRENT_TIMESTAMP',
@@ -115,11 +122,4 @@ export class League extends BaseEntity {
 		type: 'varchar',
 	})
 	public leagueDeletedBy!: null | string;
-
-	@Field(() => [UserLeague])
-	@OneToMany(() => UserLeague, userLeague => userLeague.user, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	public userLeagues!: UserLeague[];
 }

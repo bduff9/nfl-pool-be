@@ -15,6 +15,8 @@
  */
 import * as t from 'io-ts';
 
+import { WEEKS_IN_SEASON } from '../util/constants';
+
 import { excess } from './excess';
 
 const APIResponseBoolean = t.keyof({ '0': false, '1': true });
@@ -146,6 +148,8 @@ const APIResponseMatchup = excess(
 	]),
 );
 
+export type TAPIResponseMatchup = t.TypeOf<typeof APIResponseMatchup>;
+
 interface APIResponseNFLScheduleBrand {
 	readonly LastUpdated: unique symbol;
 	readonly Week: unique symbol;
@@ -169,7 +173,7 @@ const Week = t.brand(
 	(w: string): w is t.Branded<string, APIResponseNFLScheduleBrand> => {
 		const week = parseInt(w, 10);
 
-		return !isNaN(week) && week >= 1 && week <= 17;
+		return !isNaN(week) && week >= 1 && week <= WEEKS_IN_SEASON + 4;
 	},
 	'Week',
 );

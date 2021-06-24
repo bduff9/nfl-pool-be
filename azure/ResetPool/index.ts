@@ -17,6 +17,7 @@ import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 import { getManager } from 'typeorm';
 
 import { getEntireSeasonFromAPI } from '../../src/api';
+import { populateGames } from '../../src/api/initSeason';
 import { clearTable } from '../../src/dynamodb';
 import { APICallModel } from '../../src/dynamodb/apiCall';
 import { EmailModel } from '../../src/dynamodb/email';
@@ -32,9 +33,8 @@ import {
 	WeeklyMV,
 } from '../../src/entity';
 import { verifySeasonYearForReset } from '../../src/util/dates';
-import { populateGames } from '../../src/util/game';
 import { populateWinnerHistory } from '../../src/util/history';
-import { updateSystemYear } from '../../src/util/systemValues';
+import { updateSystemYear } from '../../src/util/systemValue';
 import { clearOldUserData } from '../../src/util/user';
 
 const { database, host, password, port, dbuser } = process.env;

@@ -18,7 +18,7 @@ import axios from 'axios';
 import { getID } from '../dynamodb';
 import { APICallModel } from '../dynamodb/apiCall';
 import { log } from '../util/logging';
-import { getSystemYear } from '../util/systemValues';
+import { getSystemYear } from '../util/systemValue';
 
 import { apiClient } from './client';
 import { APIResponseFull, TAPIAllWeeksResponse, TAPIFullResponse } from './types';
@@ -31,6 +31,21 @@ const getAPIUrl = (year: number, week?: number): string => {
 	return `fflnetdynamic${year}/nfl_sched.json`;
 };
 
+/**
+ * This is needed since the API returns an object instead of an
+ * array for the super bowl.  Really, really stupid since it breaks
+ * the api contract but it is what it is.
+ */
+const cleanData = (raw: TAPIFullResponse): TAPIFullResponse => {
+	const data = raw;
+
+	data.fullNflSchedule.nflSchedule = data.fullNflSchedule.nflSchedule.filter(week =>
+		Array.isArray(week.matchup),
+	);
+
+	return data;
+};
+
 // ts-prune-ignore-next
 export const getEntireSeasonFromAPI = async (
 	year?: number,
@@ -41,20 +56,22 @@ export const getEntireSeasonFromAPI = async (
 
 	try {
 		const result = await apiClient.get<TAPIFullResponse>(url);
-		const parsed = APIResponseFull.decode(result.data);
+		const data = cleanData(result.data);
+		const parsed = APIResponseFull.decode(data);
 
 		if (parsed._tag === 'Left') {
-			const errors = parsed.left.map(err => {
-				const last = err.context[err.context.length - 1];
+			const err = parsed.left[parsed.left.length - 1];
+			const last = err.context[err.context.length - 1];
 
-				log.error('Error when parsing full season JSON');
-				log.error('\t', err.context);
-				log.error('\t', last.actual);
+			log.error('Error when parsing full season JSON');
+			log.error('\t', err.context);
+			log.error('\t', last.actual);
 
-				return [err.context, last.actual];
-			});
+			const errors = [err.context, last.actual];
 
-			throw new Error(JSON.stringify(errors));
+			throw new Error(
+				`${parsed.left.length} errors found, last error: ${JSON.stringify(errors)}`,
+			);
 		}
 
 		try {

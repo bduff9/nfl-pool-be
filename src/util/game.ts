@@ -13,15 +13,23 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPIAllWeeksResponse } from '../api/types';
+import { MoreThan } from 'typeorm';
+
 import { Game } from '../entity';
-import GameStatus from '../entity/GameStatus';
 
-import { ADMIN_USER } from './constants';
-import { convertEpoch } from './dates';
-import { log } from './logging';
-import { getTeamsFromDB, updateTeamData } from './team';
+import { WEEKS_IN_SEASON } from './constants';
 
+export const findFutureGame = async (
+	homeTeamID: number,
+	visitorTeamID: number,
+	week: number,
+): Promise<Game> =>
+	Game.findOneOrFail({ where: { homeTeamID, visitorTeamID, week: MoreThan(week) } });
+
+/**
+ * Returns current week, with the method of a week is not current until its first game has started
+ * @returns number
+ */
 export const getCurrentWeekInProgress = async (): Promise<number> => {
 	const game = await Game.createQueryBuilder('G')
 		.select()
@@ -33,52 +41,21 @@ export const getCurrentWeekInProgress = async (): Promise<number> => {
 	return game.gameWeek;
 };
 
-// ts-prune-ignore-next
-export const populateGames = async (newSeason: TAPIAllWeeksResponse): Promise<void> => {
-	const teams = await getTeamsFromDB();
+/**
+ * Returns current week, with the method of a week is not current once its final game has completed
+ * @returns number
+ */
+export const getCurrentWeek = async (): Promise<number> => {
+	const game = await Game.createQueryBuilder()
+		.select()
+		.where(`GameStatus <> 'C'`)
+		.orderBy('GameKickoff', 'ASC')
+		.getOne();
 
-	for (const { matchup: games, week } of newSeason) {
-		if (!games) continue;
+	if (!game) return WEEKS_IN_SEASON;
 
-		const w = parseInt(week, 10);
-
-		log.info(`Week ${w}: ${games.length} games`);
-
-		for (let i = 0; i < games.length; i++) {
-			const gameObj = games[i];
-			const hTeamData = gameObj.team.find(({ isHome }) => isHome === '1');
-			const vTeamData = gameObj.team.find(({ isHome }) => isHome === '0');
-
-			if (!hTeamData || !vTeamData) {
-				throw new Error(`Missing data: Home team is ${hTeamData}, visitor is ${vTeamData}`);
-			}
-
-			// Create and save this game
-			const gameNumber = i + 1;
-			const gameID = w * 100 + gameNumber;
-			const homeTeamID = teams[hTeamData.id];
-			const visitorTeamID = teams[vTeamData.id];
-
-			await Game.create({
-				gameID,
-				gameWeek: w,
-				gameNumber,
-				homeTeamID,
-				gameHomeScore: 0,
-				visitorTeamID,
-				gameVisitorScore: 0,
-				gameStatus: GameStatus.Pregame,
-				gameKickoff: convertEpoch(parseInt(gameObj.kickoff, 10)),
-				gameTimeLeftInSeconds: parseInt(gameObj.gameSecondsRemaining || '0', 10),
-				gameAddedBy: ADMIN_USER,
-				gameUpdatedBy: ADMIN_USER,
-			}).save();
-
-			// Update home team data
-			await updateTeamData(homeTeamID, hTeamData, w);
-
-			// Update visiting team data
-			await updateTeamData(visitorTeamID, vTeamData, w);
-		}
-	}
+	return game.gameWeek;
 };
+
+export const getAllGamesForWeek = async (gameWeek: number): Promise<Array<Game>> =>
+	Game.find({ relations: ['homeTeam', 'visitorTeam', 'winnerTeam'], where: { gameWeek } });
