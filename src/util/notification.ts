@@ -31,6 +31,7 @@ export const sendReminderEmails = async (
 	const notifications = await Notification.createQueryBuilder('N')
 		.innerJoinAndSelect(User, 'U')
 		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationEmail is true')
 		.andWhere('N.NotificationEmailHoursBefore = :hoursLeft', { hoursLeft })
 		.getMany();
@@ -71,6 +72,7 @@ export const sendReminderPushNotifications = async (
 	const notifications = await Notification.createQueryBuilder('N')
 		.innerJoinAndSelect(User, 'U')
 		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationPushNotification is true')
 		.andWhere('N.NotificationPushNotificationHoursBefore = :hoursLeft', { hoursLeft })
 		.getMany();
@@ -104,6 +106,7 @@ export const sendReminderTexts = async (hoursLeft: number, week: number): Promis
 	const notifications = await Notification.createQueryBuilder('N')
 		.innerJoinAndSelect(User, 'U')
 		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationSMS is true')
 		.andWhere('N.NotificationSMSHoursBefore = :hoursLeft', { hoursLeft })
 		.getMany();
