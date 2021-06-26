@@ -35,6 +35,7 @@ import {
 import { verifySeasonYearForReset } from '../../src/util/dates';
 import { populateWinnerHistory } from '../../src/util/history';
 import { updateSystemYear } from '../../src/util/systemValue';
+import { MyTimer } from '../../src/util/types';
 import { clearOldUserData } from '../../src/util/user';
 
 const { database, host, password, port, dbuser } = process.env;
@@ -48,10 +49,6 @@ if (!password) throw new Error('Missing password from environment');
 if (!port) throw new Error('Missing port from environment');
 
 if (!dbuser) throw new Error('Missing user from environment');
-
-type Schedule = { adjustForDST: boolean };
-type ScheduleStatus = { last: string; next: string; lastUpdated: string };
-type MyTimer = { schedule: Schedule; scheduleStatus: ScheduleStatus; isPastDue: boolean };
 
 const timerTrigger: AzureFunction = async (
 	context: Context,
