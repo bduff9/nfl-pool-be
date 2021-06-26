@@ -35,6 +35,11 @@ export const {
 export const DAYS_IN_WEEK = 7;
 
 /**
+ * Prefix used for all communications
+ */
+export const EMAIL_SUBJECT_PREFIX = '[NFL Confidence Pool] ';
+
+/**
  * Number of hours in a day, used for conversions
  */
 // ts-prune-ignore-next

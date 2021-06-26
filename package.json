@@ -52,7 +52,7 @@
     "@saeris/apollo-server-vercel": "0.4.0",
     "@sentry/node": "6.7.2",
     "@sentry/tracing": "6.7.2",
-    "aws-sdk": "2.934.0",
+    "aws-sdk": "2.935.0",
     "axios": "0.21.1",
     "class-validator": "0.13.1",
     "dynamoose": "2.7.3",
@@ -67,6 +67,7 @@
     "node-sass": "6.0.1",
     "reflect-metadata": "0.1.13",
     "tslog": "3.2.0",
+    "twilio": "3.64.0",
     "type-graphql": "1.1.1",
     "typeorm": "0.2.34",
     "uuid": "8.3.2"

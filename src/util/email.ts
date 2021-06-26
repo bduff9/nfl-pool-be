@@ -25,7 +25,14 @@ import { getID } from '../dynamodb';
 import { EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
 
-import { AWS_AK_ID, AWS_R, AWS_SAK_ID, domain, EMAIL_FROM } from './constants';
+import {
+	AWS_AK_ID,
+	AWS_R,
+	AWS_SAK_ID,
+	domain,
+	EMAIL_FROM,
+	EMAIL_SUBJECT_PREFIX,
+} from './constants';
 import { log } from './logging';
 
 if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
@@ -43,6 +50,18 @@ const transport = {
 	}),
 };
 
+//TODO: remove export if moving this to helpers
+export const formatPreview = (previewText: string): string => {
+	const PREVIEW_LENGTH = 200;
+	const currentLength = previewText.length;
+	let toAdd = PREVIEW_LENGTH - currentLength;
+	let formatted = `${previewText}&nbsp;`;
+
+	while (toAdd--) formatted += '&zwnj;&nbsp;';
+
+	return formatted;
+};
+
 const renderMJML = async <Data = Record<string, unknown>>(
 	view: string,
 	locals: Data,
@@ -51,7 +70,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
-	const mjml = template(locals);
+	const mjml = template(locals, { helpers: {}, partials: {} });
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
 		: { errors: [], html: mjml };
@@ -73,7 +92,7 @@ const emailSender = new Email<{
 	},
 	preview: false,
 	send: true,
-	subjectPrefix: '[NFL Confidence Pool] ',
+	subjectPrefix: EMAIL_SUBJECT_PREFIX,
 	transport,
 	render: renderMJML,
 	views: {
@@ -82,17 +101,6 @@ const emailSender = new Email<{
 		},
 	},
 });
-
-export const formatPreview = (previewText: string): string => {
-	const PREVIEW_LENGTH = 200;
-	const currentLength = previewText.length;
-	let toAdd = PREVIEW_LENGTH - currentLength;
-	let formatted = `${previewText}&nbsp;`;
-
-	while (toAdd--) formatted += '&zwnj;&nbsp;';
-
-	return formatted;
-};
 
 type TSendEmailProps = {
 	locals: Record<string, unknown> & {
