@@ -15,6 +15,11 @@
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 
+import { getGamesForWeek } from '../../src/api';
+import { getCurrentWeek, getHoursToWeekStart, updateSpreads } from '../../src/util/game';
+import { sendReminderEmails, sendReminderTexts } from '../../src/util/notification';
+import { MyTimer } from '../../src/util/types';
+
 const { database, host, password, port, dbuser } = process.env;
 
 if (!database) throw new Error('Missing database from environment');
@@ -27,10 +32,6 @@ if (!port) throw new Error('Missing port from environment');
 
 if (!dbuser) throw new Error('Missing user from environment');
 
-type Schedule = { adjustForDST: boolean };
-type ScheduleStatus = { last: string; next: string; lastUpdated: string };
-type MyTimer = { schedule: Schedule; scheduleStatus: ScheduleStatus; isPastDue: boolean };
-
 const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
@@ -40,13 +41,20 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	const timeStamp = new Date().toISOString();
+	const currentWeek = await getCurrentWeek();
+	const games = await getGamesForWeek(currentWeek);
 
-	//TODO: get schedule for current week from API
-	//TODO: loop over each game
-	//TODO: get hours to first game
-	//TODO: check notifications to see if we need to send any reminders on picks, survivor, or quick picks
-	//TODO: validate kickoff and metadata is accurate, or update
-	//TODO: update spreads
+	for (const game of games) await updateSpreads(currentWeek, game);
+
+	const hours = await getHoursToWeekStart(currentWeek);
+
+	context.log(`${hours} hours until week ${currentWeek} starts!`);
+
+	if (hours > 0) {
+		await sendReminderEmails(hours, currentWeek);
+		await sendReminderTexts(hours, currentWeek);
+		// await sendReminderPushNotifications(hours, currentWeek);
+	}
 
 	context.log('Current week updater function ran!', timeStamp);
 };

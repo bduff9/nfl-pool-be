@@ -15,9 +15,12 @@
  */
 import { MoreThan } from 'typeorm';
 
-import { Game } from '../entity';
+import { TAPIResponseMatchup } from '../api/types';
+import { parseTeamsFromApi } from '../api/util';
+import { Game, Team } from '../entity';
 
 import { WEEKS_IN_SEASON } from './constants';
+import { convertDateToEpoch, convertEpoch } from './dates';
 
 export const findFutureGame = async (
 	homeTeamID: number,
@@ -59,3 +62,44 @@ export const getCurrentWeek = async (): Promise<number> => {
 
 export const getAllGamesForWeek = async (gameWeek: number): Promise<Array<Game>> =>
 	Game.find({ relations: ['homeTeam', 'visitorTeam', 'winnerTeam'], where: { gameWeek } });
+
+export const getDBGameFromAPI = async (
+	week: number,
+	homeTeam: string,
+	visitorTeam: string,
+): Promise<Game> =>
+	Game.createQueryBuilder('G')
+		.innerJoin(Team, 'H', 'G.HomeTeamID = H.TeamID')
+		.innerJoin(Team, 'V', 'G.VisitorTeamID = V.TeamID')
+		.where('H.TeamShortName = :homeTeam', { homeTeam })
+		.andWhere('V.TeamShortName = :visitorTeam', { visitorTeam })
+		.andWhere('G.GameWeek = :week', { week })
+		.getOneOrFail();
+
+export const getHoursToWeekStart = async (week: number): Promise<number> => {
+	const result = await Game.createQueryBuilder()
+		.select('TIMESTAMPDIFF(HOUR, CURRENT_TIMESTAMP, GameKickoff)', 'hours')
+		.where('GameNumber = 1')
+		.andWhere('GameWeek = :week', { week })
+		.getRawOne<{ hours: number }>();
+
+	return result.hours;
+};
+
+export const updateSpreads = async (
+	week: number,
+	apiGame: TAPIResponseMatchup,
+): Promise<void> => {
+	const { kickoff, team } = apiGame;
+	const [homeTeam, visitingTeam] = parseTeamsFromApi(team);
+	const game = await getDBGameFromAPI(week, homeTeam.id, visitingTeam.id);
+	const dbKickoff = convertDateToEpoch(game.gameKickoff);
+
+	if (dbKickoff !== +kickoff) {
+		game.gameKickoff = convertEpoch(+kickoff);
+	}
+
+	game.gameHomeSpread = +homeTeam.spread;
+	game.gameVisitorSpread = +visitingTeam.spread;
+	await game.save();
+};

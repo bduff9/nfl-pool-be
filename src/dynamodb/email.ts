@@ -25,7 +25,7 @@ class EmailClass extends Document {
 	emailID!: string;
 	emailType!: EmailType;
 	to!: Set<string>;
-	subject!: string;
+	subject!: null | string;
 	html!: null | string;
 	textOnly!: null | string;
 	sms!: null | string;

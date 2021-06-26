@@ -190,8 +190,6 @@ const APIResponseNFLWeek = excess(
 	]),
 );
 
-//TODO: see if used after week api calls are done
-// ts-prune-ignore-next
 export const APIResponse = excess(
 	t.type({
 		encoding: t.literal('utf-8'),
@@ -200,7 +198,7 @@ export const APIResponse = excess(
 	}),
 );
 
-//export type TAPIResponse = t.TypeOf<typeof APIResponse>;
+export type TAPIResponse = t.TypeOf<typeof APIResponse>;
 
 interface APIResponseNFLScheduleForFullBrand {
 	readonly LastUpdatedForFull: unique symbol;

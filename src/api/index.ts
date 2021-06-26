@@ -21,7 +21,14 @@ import { log } from '../util/logging';
 import { getSystemYear } from '../util/systemValue';
 
 import { apiClient } from './client';
-import { APIResponseFull, TAPIAllWeeksResponse, TAPIFullResponse } from './types';
+import {
+	APIResponse,
+	APIResponseFull,
+	TAPIAllWeeksResponse,
+	TAPIFullResponse,
+	TAPIResponse,
+	TAPIResponseMatchup,
+} from './types';
 
 const getAPIUrl = (year: number, week?: number): string => {
 	if (week) {
@@ -84,7 +91,7 @@ export const getEntireSeasonFromAPI = async (
 				apiCallYear: year,
 			});
 		} catch (error) {
-			log.error('Error creating API call record in DynamoDB for all seasons', {
+			log.error('Error creating API call record in DynamoDB for all season', {
 				error,
 				year,
 			});
@@ -116,8 +123,92 @@ export const getEntireSeasonFromAPI = async (
 				apiCallYear: year,
 			});
 		} catch (error) {
-			log.error('Error creating API call record in DynamoDB for all seasons', {
+			log.error('Error creating API call record in DynamoDB for all season', {
 				error,
+				year,
+			});
+		}
+
+		return [];
+	}
+};
+
+export const getGamesForWeek = async (
+	week: number,
+	year?: number,
+): Promise<Array<TAPIResponseMatchup>> => {
+	if (!year) year = await getSystemYear();
+
+	const url = getAPIUrl(year, week);
+
+	try {
+		const result = await apiClient.get<TAPIResponse>(url);
+		const parsed = APIResponse.decode(result.data);
+
+		if (parsed._tag === 'Left') {
+			const err = parsed.left[parsed.left.length - 1];
+			const last = err.context[err.context.length - 1];
+
+			log.error(`Error when parsing week ${week} JSON`);
+			log.error('\t', err.context);
+			log.error('\t', last.actual);
+
+			const errors = [err.context, last.actual];
+
+			throw new Error(
+				`${parsed.left.length} errors found, last error: ${JSON.stringify(errors)}`,
+			);
+		}
+
+		try {
+			const apiCallID = getID();
+
+			await APICallModel.create({
+				apiCallID,
+				apiCallResponse: JSON.stringify(parsed.right),
+				apiCallUrl: url,
+				apiCallYear: year,
+				apiCallWeek: week,
+			});
+		} catch (error) {
+			log.error('Error creating API call record in DynamoDB for week', {
+				error,
+				week,
+				year,
+			});
+		}
+
+		return parsed.right.nflSchedule.matchup;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			log.error('Error when trying to load weekly data from API', {
+				error,
+				url,
+				week,
+				year,
+			});
+		} else {
+			log.fatal('Unexpected error when trying to call API', {
+				error,
+				url,
+				year,
+			});
+		}
+
+		try {
+			const apiCallID = getID();
+
+			await APICallModel.create({
+				apiCallID,
+				apiCallError: error.message,
+				apiCallUrl: url,
+				apiCallYear: year,
+				apiCallWeek: week,
+			});
+		} catch (error) {
+			log.error('Error creating API call record in DynamoDB for week', {
+				error,
+				week,
 				year,
 			});
 		}

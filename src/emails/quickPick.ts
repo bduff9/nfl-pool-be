@@ -13,13 +13,43 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
+import { formatPreview, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-export const sendPushNotification = async (
-	to: string,
-	body: string,
-	type: EmailType,
+const sendQuickPickEmail = async (
+	user: User,
+	week: number,
+	hoursLeft: number,
 ): Promise<void> => {
-	log.info('TODO: Not implemented yet', { to, body, type });
+	const SUBJECT = `Time's almost up, ${user.userFirstName}!`;
+	const PREVIEW = formatPreview(
+		`This is an automated email to allow you one-click access to make your pick for the first game of the week`,
+	);
+	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
+		relations: ['homeTeam', 'visitorTeam'],
+		where: { gameNumber: 1, gameWeek: week },
+	});
+
+	try {
+		await sendEmail({
+			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.quickPick,
+		});
+	} catch (error) {
+		log.error('Failed to send quick pick email:', {
+			error,
+			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.quickPick,
+		});
+	}
 };
+
+export default sendQuickPickEmail;

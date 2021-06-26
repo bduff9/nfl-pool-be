@@ -13,13 +13,39 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { User } from '../entity';
 import EmailType from '../entity/EmailType';
+import { formatPreview, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-export const sendPushNotification = async (
-	to: string,
-	body: string,
-	type: EmailType,
+const sendSurvivorReminderEmail = async (
+	user: User,
+	week: number,
+	hoursLeft: number,
 ): Promise<void> => {
-	log.info('TODO: Not implemented yet', { to, body, type });
+	const SUBJECT = `Hurry up, ${user.userFirstName}!`;
+	const PREVIEW = formatPreview(
+		`Don't fall out of survivor this week, act now to submit your survivor pick!`,
+	);
+
+	try {
+		await sendEmail({
+			locals: { hoursLeft, user, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.survivorReminder,
+		});
+	} catch (error) {
+		log.error('Failed to send survivor reminder email:', {
+			error,
+			locals: { hoursLeft, user, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.survivorReminder,
+		});
+	}
 };
+
+export default sendSurvivorReminderEmail;

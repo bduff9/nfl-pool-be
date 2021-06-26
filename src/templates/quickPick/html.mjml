@@ -1,0 +1,52 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ SUBJECT }}</mj-title>
+    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .container {
+        max-width: 600px;
+      }
+
+      .link {
+        text-decoration: none;
+        font-size: 16px;
+        color: #346df1;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-section background-color="#F9F9F9" full-width="full-width">
+      <mj-column width="100%" css-class="container">
+        <mj-text align="center" padding="0 0 25px 0" font-size="22px">
+          <strong>{{ domain }}</strong>
+          &nbsp; | &nbsp;
+          <a href="{{ browserLink }}" class="link">View online version</a>
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text padding="30px 0 15px 0" font-size="18px" align="center">
+          <h1>Quick {{ user.userFirstName }}!</h1>
+
+          <p>You have not made your pick for game 1 of week {{ week }} yet and you now have less than {{ hoursLeft }} hours.</p>
+
+          <p>You can avoid losing points for this game by simply clicking one of the teams below to set your pick.</p>
+
+          <p><strong>Note:</strong> This email is only good up until kickoff of this game, so act now to avoid losing points for this week!</p>
+        </mj-text>
+        <mj-button padding="20px 0" border-radius="5px" background-color="{{ visitorTeam.teamPrimaryColor }}" href="{{ domain }}/quick-pick/{{ user.userID }}/{{ visitorTeam.teamID }}" font-size="18px" color="{{ visitorTeam.teamSecondaryColor }}" border="1px solid {{ visitorTeam.teamPrimaryColor }}" font-weight="bold">
+          {{ visitorTeam.teamCity }} {{ visitorTeam.teamName }}
+        </mj-button>
+        <mj-text font-size="18px" align="center">@</mj-text>
+        <mj-button padding="20px 0" border-radius="5px" background-color="{{ homeTeam.teamPrimaryColor }}" href="{{ domain }}/quick-pick/{{ user.userID }}/{{ homeTeam.teamID }}" font-size="18px" color="{{ homeTeam.teamSecondaryColor }}" border="1px solid {{ homeTeam.teamPrimaryColor }}" font-weight="bold">
+          {{ homeTeam.teamCity }} {{ homeTeam.teamName }}
+        </mj-button>
+        <mj-text padding="20px 0 25px 0" font-size="16px" line-height="22px" align="center">
+          <a href="{{ domain }}/users/edit">Edit Notification Preferences</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
