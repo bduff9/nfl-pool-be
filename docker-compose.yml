@@ -1,9 +1,9 @@
 version: "3"
 services:
-  mysql-movies:
+  mysql-nfl:
     image: mysql:5.7.34
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: media_tracker
+      MYSQL_DATABASE: NFL
     ports:
       - "3308:3306"
