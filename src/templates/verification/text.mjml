@@ -1,2 +1,5 @@
-Sign in to {{ domain }}
-{{ url }}
+Please visit {{ url }} to sign in as
+
+{{ user.userFirstName }} {{ user.userLastName }}
+{{ user.userEmail }}
+

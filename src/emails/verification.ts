@@ -21,10 +21,14 @@ const sendVerificationEmail = async (email: string, url: string): Promise<void> 
 	const domain = new URL(url).hostname;
 	const SUBJECT = `Sign in to ${domain}`;
 	const PREVIEW = formatPreview(`Open this to finish your login to ${domain}`);
+	const user = '';
+
+	//TODO: Add user based on email.
+	//TODO: If first name or last name are blank, hide both names.
 
 	try {
 		await sendEmail({
-			locals: { email, url },
+			locals: { email, url, user },
 			PREVIEW,
 			SUBJECT,
 			to: [email],
@@ -33,7 +37,7 @@ const sendVerificationEmail = async (email: string, url: string): Promise<void> 
 	} catch (error) {
 		log.error('Failed to send verification email:', {
 			error,
-			locals: { domain, email, url },
+			locals: { domain, email, url, user },
 			PREVIEW,
 			SUBJECT,
 			to: [email],
