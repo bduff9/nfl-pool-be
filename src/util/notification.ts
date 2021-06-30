@@ -148,7 +148,6 @@ export const sendWeekEndedNotifications = async (week: number): Promise<void> =>
 		.where('U.UserCommunicationsOptedOut is false')
 		.andWhere('U.UserDoneRegistering is true')
 		.andWhere(`N.NotificationType = 'WeekEnded'`)
-		.andWhere('N.NotificationSMS is true')
 		.andWhere(
 			new Brackets(qb => {
 				qb.where('N.NotificationEmail is true').orWhere('N.NotificationSMS is true');
@@ -172,7 +171,6 @@ export const sendWeekStartedNotifications = async (week: number): Promise<void> 
 		.where('U.UserCommunicationsOptedOut is false')
 		.andWhere('U.UserDoneRegistering is true')
 		.andWhere(`N.NotificationType = 'WeekStarted'`)
-		.andWhere('N.NotificationSMS is true')
 		.andWhere(
 			new Brackets(qb => {
 				qb.where('N.NotificationEmail is true').orWhere('N.NotificationSMS is true');
