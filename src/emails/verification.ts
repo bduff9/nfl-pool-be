@@ -36,7 +36,7 @@ const sendVerificationEmail = async (email: string, url: string): Promise<void> 
 	} catch (error) {
 		log.error('Failed to send verification email:', {
 			error,
-			locals: { domain, email, url, user },
+			locals: { domain, email, hasName, url, user },
 			PREVIEW,
 			SUBJECT,
 			to: [email],

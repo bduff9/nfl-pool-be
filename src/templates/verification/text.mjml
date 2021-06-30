@@ -1,5 +1,6 @@
 Please visit {{ url }} to sign in as
 
-{{ user.userFirstName }} {{ user.userLastName }}
+{{#if hasName}}
+  {{ user.userFirstName }} {{ user.userLastName }}
+{{/if}}
 {{ user.userEmail }}
-
