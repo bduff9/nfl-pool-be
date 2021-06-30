@@ -50,8 +50,7 @@ const transport = {
 	}),
 };
 
-//TODO: remove export if moving this to helpers
-export const formatPreview = (previewText: string): string => {
+const formatPreview = (previewText: string): string => {
 	const PREVIEW_LENGTH = 200;
 	const currentLength = previewText.length;
 	let toAdd = PREVIEW_LENGTH - currentLength;
@@ -70,7 +69,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
-	const mjml = template(locals, { helpers: {}, partials: {} });
+	const mjml = template(locals, { helpers: { formatPreview }, partials: {} });
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
 		: { errors: [], html: mjml };
@@ -83,8 +82,6 @@ const renderMJML = async <Data = Record<string, unknown>>(
 };
 
 const emailSender = new Email<{
-	SUBJECT: string;
-	PREVIEW: string;
 	[key: string]: unknown;
 }>({
 	message: {
@@ -106,19 +103,13 @@ type TSendEmailProps = {
 	locals: Record<string, unknown> & {
 		browserLink?: never;
 		domain?: never;
-		PREVIEW?: never;
-		SUBJECT?: never;
 	};
-	PREVIEW: string;
-	SUBJECT: string;
 	type: EmailType;
 } & ({ bcc: string[]; to?: never } | { bcc?: never; to: string[] });
 
 export const sendEmail = async ({
 	bcc,
 	locals,
-	PREVIEW,
-	SUBJECT,
 	to,
 	type,
 }: TSendEmailProps): Promise<void> => {
@@ -130,7 +121,6 @@ export const sendEmail = async ({
 			emailID,
 			emailType: type,
 			to: new Set(emails),
-			subject: SUBJECT,
 		});
 	} catch (error) {
 		log.error('Failed to create email record in DynamoDB:', {
@@ -138,7 +128,6 @@ export const sendEmail = async ({
 			emailType: type,
 			error,
 			to: new Set(emails),
-			subject: SUBJECT,
 		});
 	}
 
@@ -150,8 +139,6 @@ export const sendEmail = async ({
 			...locals,
 			browserLink: `${domain}/api/email/${emailID}`,
 			domain,
-			PREVIEW,
-			SUBJECT,
 			unsubscribeLink: `${domain}/api/email/unsubscribe${
 				emails.length === 1 ? `?email=${encodeURIComponent(emails[0])}` : ''
 			}`,
