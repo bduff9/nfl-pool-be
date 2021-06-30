@@ -13,23 +13,31 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { Brackets } from 'typeorm';
+
 import sendPickReminderEmail from '../emails/pickReminder';
 import sendQuickPickEmail from '../emails/quickPick';
 import sendSurvivorReminderEmail from '../emails/survivorReminder';
-import { Notification, User } from '../entity';
+import sendWeekEndedEmail from '../emails/weekEnded';
+import sendWeeklyEmail from '../emails/weekly';
+import sendWeekStartedEmail from '../emails/weekStarted';
+import { Notification } from '../entity';
 import sendPickReminderPushNotification from '../pushNotifications/pickReminder';
 import sendSurvivorReminderPushNotification from '../pushNotifications/survivorReminder';
 import sendPickReminderSMS from '../sms/pickReminder';
 import sendSurvivorReminderSMS from '../sms/survivorReminder';
+import sendWeekEndedSMS from '../sms/weekEnded';
+import sendWeekStartedSMS from '../sms/weekStarted';
 
 import { log } from './logging';
 
+// ts-prune-ignore-next
 export const sendReminderEmails = async (
 	hoursLeft: number,
 	week: number,
 ): Promise<void> => {
 	const notifications = await Notification.createQueryBuilder('N')
-		.innerJoinAndSelect(User, 'U')
+		.innerJoinAndSelect('N.user', 'U')
 		.where('U.UserCommunicationsOptedOut is false')
 		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationEmail is true')
@@ -70,7 +78,7 @@ export const sendReminderPushNotifications = async (
 	week: number,
 ): Promise<void> => {
 	const notifications = await Notification.createQueryBuilder('N')
-		.innerJoinAndSelect(User, 'U')
+		.innerJoinAndSelect('N.user', 'U')
 		.where('U.UserCommunicationsOptedOut is false')
 		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationPushNotification is true')
@@ -102,9 +110,10 @@ export const sendReminderPushNotifications = async (
 	}
 };
 
+// ts-prune-ignore-next
 export const sendReminderTexts = async (hoursLeft: number, week: number): Promise<void> => {
 	const notifications = await Notification.createQueryBuilder('N')
-		.innerJoinAndSelect(User, 'U')
+		.innerJoinAndSelect('N.user', 'U')
 		.where('U.UserCommunicationsOptedOut is false')
 		.andWhere('U.UserDoneRegistering is true')
 		.andWhere('N.NotificationSMS is true')
@@ -129,5 +138,70 @@ export const sendReminderTexts = async (hoursLeft: number, week: number): Promis
 				});
 				break;
 		}
+	}
+};
+
+// ts-prune-ignore-next
+export const sendWeekEndedNotifications = async (week: number): Promise<void> => {
+	const notifications = await Notification.createQueryBuilder('N')
+		.innerJoinAndSelect('N.user', 'U')
+		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
+		.andWhere(`N.NotificationType = 'WeekEnded'`)
+		.andWhere('N.NotificationSMS is true')
+		.andWhere(
+			new Brackets(qb => {
+				qb.where('N.NotificationEmail is true').orWhere('N.NotificationSMS is true');
+			}),
+		)
+		.getMany();
+
+	log.info('Found week ended notifications to send', { count: notifications.length, week });
+
+	for (const { notificationEmail, notificationSMS, user } of notifications) {
+		if (notificationEmail) await sendWeekEndedEmail(user, week);
+
+		if (notificationSMS) await sendWeekEndedSMS(user, week);
+	}
+};
+
+// ts-prune-ignore-next
+export const sendWeekStartedNotifications = async (week: number): Promise<void> => {
+	const notifications = await Notification.createQueryBuilder('N')
+		.innerJoinAndSelect('N.user', 'U')
+		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
+		.andWhere(`N.NotificationType = 'WeekStarted'`)
+		.andWhere('N.NotificationSMS is true')
+		.andWhere(
+			new Brackets(qb => {
+				qb.where('N.NotificationEmail is true').orWhere('N.NotificationSMS is true');
+			}),
+		)
+		.getMany();
+
+	log.info('Found week started notifications to send', {
+		count: notifications.length,
+		week,
+	});
+
+	for (const { notificationEmail, notificationSMS, user } of notifications) {
+		if (notificationEmail) await sendWeekStartedEmail(user, week);
+
+		if (notificationSMS) await sendWeekStartedSMS(user, week);
+	}
+};
+
+// ts-prune-ignore-next
+export const sendWeeklyEmails = async (week: number): Promise<void> => {
+	const emails = await Notification.createQueryBuilder('N')
+		.innerJoinAndSelect('N.user', 'U')
+		.where('U.UserCommunicationsOptedOut is false')
+		.andWhere('U.UserDoneRegistering is true')
+		.andWhere(`N.NotificationType = 'Essentials'`)
+		.getMany();
+
+	for (const { user } of emails) {
+		await sendWeeklyEmail(user, week);
 	}
 };

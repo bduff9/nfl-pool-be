@@ -133,6 +133,7 @@ export const getEntireSeasonFromAPI = async (
 	}
 };
 
+// ts-prune-ignore-next
 export const getGamesForWeek = async (
 	week: number,
 	year?: number,

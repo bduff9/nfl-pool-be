@@ -14,10 +14,12 @@
  * Home: https://asitewithnoname.com/
  */
 import {
+	Game,
 	League,
 	Notification,
 	Pick,
 	SurvivorPick,
+	SystemValue,
 	Tiebreaker,
 	User,
 	UserLeague,
@@ -57,6 +59,47 @@ export const getAllRegisteredUsers = async (): Promise<Array<User>> => {
 	}
 
 	return users;
+};
+
+export const getUserAlerts = async (user: User): Promise<Array<string>> => {
+	const alerts: Array<string> = [];
+	const poolCostStr =
+		(
+			await SystemValue.findOneOrFail({
+				where: { systemValueName: 'PoolCost' },
+			})
+		).systemValueValue || '0';
+	const survivorCostStr =
+		(
+			await SystemValue.findOneOrFail({
+				where: { systemValueName: 'SurvivorCost' },
+			})
+		).systemValueValue || '0';
+	let owe = +poolCostStr;
+
+	if (user.userPlaysSurvivor) {
+		owe += +survivorCostStr;
+	}
+
+	if (owe > user.userPaid) {
+		const paymentDueWeekStr =
+			(
+				await SystemValue.findOneOrFail({
+					where: { systemValueName: 'PaymentDueWeek' },
+				})
+			).systemValueValue || '0';
+		const dueDate = (
+			await Game.findOneOrFail({
+				order: { gameKickoff: 'DESC' },
+				where: { gameWeek: +paymentDueWeekStr },
+			})
+		).gameKickoff;
+		const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
+
+		alerts.push(`Please pay $${owe - user.userPaid} by ${formatter.format(dueDate)}`);
+	}
+
+	return alerts;
 };
 
 export const populateUserData = async (

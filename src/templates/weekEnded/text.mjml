@@ -1,0 +1,8 @@
+Hello {{ user.userFirstName }},
+
+Week {{ week }} has just ended with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+
+The final score is {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.
+
+Manage your notifications here:
+{{ domain }}/users/edit

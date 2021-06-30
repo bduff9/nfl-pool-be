@@ -15,6 +15,23 @@
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 
+import { getGamesForWeek } from '../../src/api';
+import { parseTeamsFromApi } from '../../src/api/util';
+import { convertEpoch } from '../../src/util/dates';
+import {
+	checkDBIfUpdatesNeeded,
+	getCurrentWeek,
+	getDBGameFromAPI,
+	updateDBGame,
+} from '../../src/util/game';
+import { updateOverallMV, updateSurvivorMV, updateWeeklyMV } from '../../src/util/mv';
+import {
+	sendWeekEndedNotifications,
+	sendWeeklyEmails,
+	sendWeekStartedNotifications,
+} from '../../src/util/notification';
+import { updateMissedPicks } from '../../src/util/pick';
+import { markEmptySurvivorPicksAsDead } from '../../src/util/survivor';
 import { MyTimer } from '../../src/util/types';
 
 const { database, host, password, port, dbuser } = process.env;
@@ -38,18 +55,58 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	const timeStamp = new Date().toISOString();
+	const currentWeek = await getCurrentWeek();
+	const needUpdates = await checkDBIfUpdatesNeeded(currentWeek);
 
-	//TODO: check if any games are in progress or just started (should we just get JSON from API?  Or check db? or both?)
-	//TODO: if not, exit function
-	//TODO: otherwise, begin looping over all games
-	//TODO: if first game of week has started, send out notifications
-	//TODO: update all game progresses and scores
-	//TODO: update missed picks
-	//TODO: update missed survivor picks
-	//TODO: if all games are complete, send out end of week notifications (week end and weekly email)
-	//TODO: if user got a survivor pick wrong, update their data to soft delete future games
-	//TODO: run weekly mv query
-	//TODO: run overall mv query
+	if (!needUpdates) {
+		context.log('No games need to be updated, exiting...');
+
+		return;
+	}
+
+	const games = await getGamesForWeek(currentWeek);
+	const now = new Date();
+	let gamesLeft = games.length;
+	let needMVsUpdated = false;
+
+	for (const game of games) {
+		const kickoff = convertEpoch(+game.kickoff);
+
+		if (now < kickoff || game.status === 'SCHED') continue;
+
+		const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
+		let dbGame = await getDBGameFromAPI(currentWeek, homeTeam.id, visitingTeam.id);
+		const oldStatus = dbGame.gameStatus;
+
+		if (oldStatus === 'Pregame') {
+			await updateMissedPicks(dbGame);
+
+			if (dbGame.gameNumber === 1) {
+				await sendWeekStartedNotifications(currentWeek);
+				await markEmptySurvivorPicksAsDead(currentWeek);
+				await updateSurvivorMV(currentWeek);
+			}
+		}
+
+		dbGame = await updateDBGame(game, dbGame);
+
+		if (dbGame.gameStatus === 'Final') {
+			gamesLeft--;
+
+			if (oldStatus !== dbGame.gameStatus) needMVsUpdated = true;
+		}
+	}
+
+	if (needMVsUpdated) {
+		await updateWeeklyMV(currentWeek);
+		await updateOverallMV();
+		await updateSurvivorMV(currentWeek);
+	}
+
+	if (gamesLeft === 0) {
+		await sendWeekEndedNotifications(currentWeek);
+		await sendWeeklyEmails(currentWeek);
+	}
 
 	context.log('Live game updater function ran!', timeStamp);
 };

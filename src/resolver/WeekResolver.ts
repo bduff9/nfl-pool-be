@@ -38,7 +38,7 @@ export class WeekResolver {
 				 */
 				const nextGame = await Game.findOneOrFail({
 					order: { gameKickoff: 'ASC' },
-					where: { gameStatus: Not('C') },
+					where: { gameStatus: Not('Final') },
 				});
 
 				/**
@@ -84,7 +84,7 @@ export class WeekResolver {
 		const weekStatusSubquery = Game.createQueryBuilder('g1')
 			.select('count(*)')
 			.where('g1.GameWeek = :week', { week })
-			.andWhere(`g1.GameStatus <> 'C'`);
+			.andWhere(`g1.GameStatus <> 'Final'`);
 		const gameCountSubquery = Game.createQueryBuilder('g2')
 			.select('COUNT(*)')
 			.where('g2.GameWeek = :week', { week });
@@ -117,10 +117,10 @@ export class WeekResolver {
 	@FieldResolver()
 	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
 		const { Completed, InProgress, NotStarted } = await Game.createQueryBuilder()
-			.select(`sum(case when GameStatus = 'P' then 1 else 0 end)`, 'NotStarted')
-			.addSelect(`sum(case when GameStatus = 'C' then 1 else 0 end)`, 'Completed')
+			.select(`sum(case when GameStatus = 'Pregame' then 1 else 0 end)`, 'NotStarted')
+			.addSelect(`sum(case when GameStatus = 'Final' then 1 else 0 end)`, 'Completed')
 			.addSelect(
-				`sum(case when GameStatus not in ('C', 'P') then 1 else 0 end)`,
+				`sum(case when GameStatus not in ('Pregame', 'Final') then 1 else 0 end)`,
 				'InProgress',
 			)
 			.getRawOne<{ Completed: number; InProgress: number; NotStarted: number }>();

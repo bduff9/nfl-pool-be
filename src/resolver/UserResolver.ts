@@ -31,20 +31,12 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import {
-	Game,
-	League,
-	Notification,
-	SystemValue,
-	User,
-	UserHistory,
-	UserLeague,
-} from '../entity';
+import { League, Notification, User, UserHistory, UserLeague } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
 import { TCustomContext, TUserType } from '../util/types';
-import { populateUserData } from '../util/user';
+import { getUserAlerts, populateUserData } from '../util/user';
 
 @InputType({ description: 'User registration data' })
 class FinishRegistrationInput implements Partial<User> {
@@ -119,45 +111,10 @@ export class UserResolver {
 	@Query(() => [String])
 	async getMyAlerts (@Ctx() context: TCustomContext): Promise<Array<string>> {
 		const { user } = context;
-		const alerts: Array<string> = [];
 
-		if (!user) return alerts;
+		if (!user) return [];
 
-		const poolCostStr =
-			(
-				await SystemValue.findOneOrFail({
-					where: { systemValueName: 'PoolCost' },
-				})
-			).systemValueValue || '0';
-		const survivorCostStr =
-			(
-				await SystemValue.findOneOrFail({
-					where: { systemValueName: 'SurvivorCost' },
-				})
-			).systemValueValue || '0';
-		let owe = +poolCostStr;
-
-		if (user.userPlaysSurvivor) {
-			owe += +survivorCostStr;
-		}
-
-		if (owe > user.userPaid) {
-			const paymentDueWeekStr =
-				(
-					await SystemValue.findOneOrFail({
-						where: { systemValueName: 'PaymentDueWeek' },
-					})
-				).systemValueValue || '0';
-			const dueDate = (
-				await Game.findOneOrFail({
-					order: { gameKickoff: 'DESC' },
-					where: { gameWeek: +paymentDueWeekStr },
-				})
-			).gameKickoff;
-			const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
-
-			alerts.push(`Please pay $${owe - user.userPaid} by ${formatter.format(dueDate)}`);
-		}
+		const alerts: Array<string> = await getUserAlerts(user);
 
 		return alerts;
 	}

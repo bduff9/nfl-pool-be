@@ -1,0 +1,6 @@
+Hello {{ user.userFirstName }},
+
+Week {{ week }} has just started with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+
+Manage your notifications here:
+{{ domain }}/users/edit
