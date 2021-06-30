@@ -13,6 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { formatPreview, sendEmail } from '../util/email';
 import { log } from '../util/logging';
@@ -21,10 +22,12 @@ const sendVerificationEmail = async (email: string, url: string): Promise<void> 
 	const domain = new URL(url).hostname;
 	const SUBJECT = `Sign in to ${domain}`;
 	const PREVIEW = formatPreview(`Open this to finish your login to ${domain}`);
+	const user = await User.findOneOrFail({ where: { userEmail: email } });
+	const hasName = !!user.userFirstName && !!user.userLastName;
 
 	try {
 		await sendEmail({
-			locals: { email, url },
+			locals: { email, hasName, url, user },
 			PREVIEW,
 			SUBJECT,
 			to: [email],
@@ -33,7 +36,7 @@ const sendVerificationEmail = async (email: string, url: string): Promise<void> 
 	} catch (error) {
 		log.error('Failed to send verification email:', {
 			error,
-			locals: { domain, email, url },
+			locals: { domain, email, hasName, url, user },
 			PREVIEW,
 			SUBJECT,
 			to: [email],
