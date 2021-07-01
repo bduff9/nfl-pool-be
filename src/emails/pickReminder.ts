@@ -15,7 +15,7 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendPickReminderEmail = async (
@@ -23,16 +23,9 @@ const sendPickReminderEmail = async (
 	week: number,
 	hoursLeft: number,
 ): Promise<void> => {
-	const SUBJECT = `Hurry up, ${user.userFirstName}!`;
-	const PREVIEW = formatPreview(
-		`Don't lose out on points this week, act now to submit your picks!`,
-	);
-
 	try {
 		await sendEmail({
 			locals: { hoursLeft, user, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.pickReminder,
 		});
@@ -40,8 +33,6 @@ const sendPickReminderEmail = async (
 		log.error('Failed to send pick reminder email:', {
 			error,
 			locals: { hoursLeft, user, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.pickReminder,
 		});

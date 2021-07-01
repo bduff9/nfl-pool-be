@@ -15,7 +15,7 @@
  */
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendQuickPickEmail = async (
@@ -23,10 +23,6 @@ const sendQuickPickEmail = async (
 	week: number,
 	hoursLeft: number,
 ): Promise<void> => {
-	const SUBJECT = `Time's almost up, ${user.userFirstName}!`;
-	const PREVIEW = formatPreview(
-		`This is an automated email to allow you one-click access to make your pick for the first game of the week`,
-	);
 	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
 		relations: ['homeTeam', 'visitorTeam'],
 		where: { gameNumber: 1, gameWeek: week },
@@ -35,8 +31,6 @@ const sendQuickPickEmail = async (
 	try {
 		await sendEmail({
 			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.quickPick,
 		});
@@ -44,8 +38,6 @@ const sendQuickPickEmail = async (
 		log.error('Failed to send quick pick email:', {
 			error,
 			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.quickPick,
 		});

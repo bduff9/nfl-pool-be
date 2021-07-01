@@ -18,16 +18,12 @@ import { LessThan } from 'typeorm';
 import { SurvivorMV, User, WeeklyMV } from '../entity';
 import EmailType from '../entity/EmailType';
 import { WEEKS_IN_SEASON } from '../util/constants';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { addOrdinal } from '../util/numbers';
 import { getUserAlerts } from '../util/user';
 
 const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
-	const SUBJECT = `Week ${week} results`;
-	const PREVIEW = formatPreview(
-		`Here is your official weekly email from the NFL Confidence Pool commissioners`,
-	);
 	const userMessages: Array<string> = [];
 	const poolUpdates: Array<string> = [];
 	const survivorUpdates: Array<string> = [];
@@ -96,8 +92,6 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 	try {
 		await sendEmail({
 			locals: { poolUpdates, survivorUpdates, user, userMessages, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.weekly,
 		});
@@ -105,8 +99,6 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 		log.error('Failed to send weekly email:', {
 			error,
 			locals: { poolUpdates, survivorUpdates, user, userMessages, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.weekly,
 		});

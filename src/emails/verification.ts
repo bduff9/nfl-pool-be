@@ -15,30 +15,24 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendVerificationEmail = async (email: string, url: string): Promise<void> => {
-	const domain = new URL(url).hostname;
-	const SUBJECT = `Sign in to ${domain}`;
-	const PREVIEW = formatPreview(`Open this to finish your login to ${domain}`);
+	const host = new URL(url).hostname;
 	const user = await User.findOneOrFail({ where: { userEmail: email } });
 	const hasName = !!user.userFirstName && !!user.userLastName;
 
 	try {
 		await sendEmail({
-			locals: { email, hasName, url, user },
-			PREVIEW,
-			SUBJECT,
+			locals: { email, hasName, host, url, user },
 			to: [email],
 			type: EmailType.verification,
 		});
 	} catch (error) {
 		log.error('Failed to send verification email:', {
 			error,
-			locals: { domain, email, hasName, url, user },
-			PREVIEW,
-			SUBJECT,
+			locals: { email, hasName, host, url, user },
 			to: [email],
 			type: EmailType.verification,
 		});

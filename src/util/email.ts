@@ -50,6 +50,9 @@ const transport = {
 	}),
 };
 
+const concat = (...values: Array<string>): string =>
+	values.splice(0, values.length - 1).join('');
+
 const formatPreview = (previewText: string): string => {
 	const PREVIEW_LENGTH = 200;
 	const currentLength = previewText.length;
@@ -69,7 +72,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
-	const mjml = template(locals, { helpers: { formatPreview }, partials: {} });
+	const mjml = template(locals, { helpers: { concat, formatPreview }, partials: {} });
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
 		: { errors: [], html: mjml };

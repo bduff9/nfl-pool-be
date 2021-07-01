@@ -1,7 +1,7 @@
 <mjml owa="desktop" version="4.6.3">
   <mj-head>
-    <mj-title>{{ SUBJECT }}</mj-title>
-    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-title>Sign in to {{ host }}</mj-title>
+    <mj-preview>{{{formatPreview (concat 'Open this to finish your login to ' host)}}}</mj-preview>
     <mj-attributes>
       <mj-all font-family="Roboto, Helvetica, Arial, sans-serif" color="#55575d" vertical-align="middle" text-align="center" background-color="#F4F4F4" />
     </mj-attributes>

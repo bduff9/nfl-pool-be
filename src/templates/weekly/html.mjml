@@ -1,7 +1,7 @@
 <mjml>
   <mj-head>
-    <mj-title>{{ SUBJECT }}</mj-title>
-    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-title>Week {{ week }} results</mj-title>
+    <mj-preview>{{{formatPreview 'Here is your official weekly email from the NFL Confidence Pool commissioners'}}}</mj-preview>
     <mj-attributes>
       <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
     </mj-attributes>

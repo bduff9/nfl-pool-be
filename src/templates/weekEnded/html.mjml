@@ -1,7 +1,7 @@
 <mjml>
   <mj-head>
-    <mj-title>{{ SUBJECT }}</mj-title>
-    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-title>Week {{ week }} has just finished</mj-title>
+    <mj-preview>{{{formatPreview 'This is an automated email you requested to let you know when the week ends'}}}</mj-preview>
     <mj-attributes>
       <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
     </mj-attributes>
