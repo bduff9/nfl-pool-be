@@ -1,7 +1,7 @@
 <mjml>
   <mj-head>
-    <mj-title>{{ SUBJECT }}</mj-title>
-    <mj-preview>{{{ PREVIEW }}}</mj-preview>
+    <mj-title>Hurry up, {{ user.userFirstName }}!</mj-title>
+    <mj-preview>{{{formatPreview 'Don't fall out of survivor this week, act now to submit your survivor pick!'}}}</mj-preview>
     <mj-attributes>
       <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
     </mj-attributes>

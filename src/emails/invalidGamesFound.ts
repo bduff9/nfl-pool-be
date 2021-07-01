@@ -18,7 +18,7 @@ import { parseTeamsFromApi } from '../api/util';
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { convertEpoch } from '../util/dates';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 type TAdminMessage = { game: string; reason: string };
@@ -49,12 +49,6 @@ const sendInvalidGamesFoundEmail = async (
 		messages.push(message);
 	});
 
-	const SUBJECT = `${messages.length} ${
-		messages.length === 1 ? 'issue' : 'issues'
-	} with week ${week} games found`;
-	const PREVIEW = formatPreview(
-		'URGENT! Please read to resolve critical issues with the current NFL Pool schedule',
-	);
 	const admins = await User.find({ where: { userIsAdmin: true } });
 
 	await Promise.all(
@@ -64,17 +58,13 @@ const sendInvalidGamesFoundEmail = async (
 			try {
 				await sendEmail({
 					locals: { messages, week },
-					PREVIEW,
-					SUBJECT,
 					to: [email],
 					type: EmailType.invalidGamesFound,
 				});
 			} catch (error) {
 				log.error('Failed to send new user email:', {
 					error,
-					locals: { admin, messages },
-					PREVIEW,
-					SUBJECT,
+					locals: { admin, messages, week },
 					to: [email],
 					type: EmailType.invalidGamesFound,
 				});

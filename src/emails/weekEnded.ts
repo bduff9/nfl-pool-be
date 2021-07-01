@@ -15,14 +15,10 @@
  */
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendWeekEndedEmail = async (user: User, week: number): Promise<void> => {
-	const SUBJECT = `Week ${week} has just finished`;
-	const PREVIEW = formatPreview(
-		`This is an automated email you requested to let you know when the week ends`,
-	);
 	const game = await Game.findOneOrFail({
 		order: { gameKickoff: 'DESC' },
 		relations: ['homeTeam', 'visitorTeam'],
@@ -33,8 +29,6 @@ const sendWeekEndedEmail = async (user: User, week: number): Promise<void> => {
 	try {
 		await sendEmail({
 			locals: { game, homeTeam, user, visitorTeam, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.weekEnded,
 		});
@@ -42,8 +36,6 @@ const sendWeekEndedEmail = async (user: User, week: number): Promise<void> => {
 		log.error('Failed to send week ended email:', {
 			error,
 			locals: { game, homeTeam, user, visitorTeam, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.weekEnded,
 		});

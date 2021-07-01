@@ -1,1 +1,1 @@
-{{ SUBJECT }}
+Time's almost up, {{ user.userFirstName }}!

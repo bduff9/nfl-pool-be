@@ -15,7 +15,7 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatPreview, sendEmail } from '../util/email';
+import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendSurvivorReminderEmail = async (
@@ -23,16 +23,9 @@ const sendSurvivorReminderEmail = async (
 	week: number,
 	hoursLeft: number,
 ): Promise<void> => {
-	const SUBJECT = `Hurry up, ${user.userFirstName}!`;
-	const PREVIEW = formatPreview(
-		`Don't fall out of survivor this week, act now to submit your survivor pick!`,
-	);
-
 	try {
 		await sendEmail({
 			locals: { hoursLeft, user, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.survivorReminder,
 		});
@@ -40,8 +33,6 @@ const sendSurvivorReminderEmail = async (
 		log.error('Failed to send survivor reminder email:', {
 			error,
 			locals: { hoursLeft, user, week },
-			PREVIEW,
-			SUBJECT,
 			to: [user.userEmail],
 			type: EmailType.survivorReminder,
 		});
