@@ -86,6 +86,7 @@ const fixTooLowPoints = async (picks: Array<Pick>): Promise<void> => {
 	for (let i = diff; i--; ) movePointUp(lowest, picks);
 };
 
+// ts-prune-ignore-next
 export const healPicks = async (week: number): Promise<void> => {
 	log.info(`Healing picks for week ${week}...`);
 
@@ -205,6 +206,7 @@ const findFutureAPIGame = (
 	return [WEEKS_IN_SEASON, null];
 };
 
+// ts-prune-ignore-next
 export const healWeek = async (
 	week: number,
 	allAPIWeeks: TAPIAllWeeksResponse,

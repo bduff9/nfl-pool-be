@@ -46,9 +46,9 @@ export const getUserFromContext = async (req: VercelRequest): Promise<null | Use
 
 	if (!token) return null;
 
-	const user = await User.createQueryBuilder('u')
-		.innerJoin('Sessions', 's', 'u.UserID = s.UserID')
-		.where('s.SessionAccessToken = :token', {
+	const user = await User.createQueryBuilder('U')
+		.innerJoin('Sessions', 'S', 'U.UserID = S.UserID')
+		.where('S.SessionAccessToken = :token', {
 			token,
 		})
 		.getOne();

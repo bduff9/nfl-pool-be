@@ -14,9 +14,11 @@
  * Home: https://asitewithnoname.com/
  */
 import { Authorized, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import { LessThanOrEqual } from 'typeorm';
 
-import { User, Payment, SystemValue } from '../entity';
-import { log } from '../util/logging';
+import { User, Payment, SystemValue, WeeklyMV, OverallMV, SurvivorMV } from '../entity';
+import { WEEKS_IN_SEASON } from '../util/constants';
+import { addOrdinal } from '../util/numbers';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Payment)
@@ -82,10 +84,36 @@ export class PaymentResolver {
 
 		if (weeklyPrizesStr && overallPrizesStr) {
 			const weeklyPrizes = JSON.parse(weeklyPrizesStr);
-			const overallPrizes = JSON.parse(overallPrizesStr);
+			const numWeeklyPrizes = weeklyPrizes.length - 1;
+			const myWeeklyPrizes = await WeeklyMV.find({
+				where: { rank: LessThanOrEqual(numWeeklyPrizes), userID: user.userID },
+			});
 
-			//TODO: get all pool prizes as positives and add to payments array
-			log.info('Get pool prizes here:', { overallPrizes, weeklyPrizes });
+			for (const prize of myWeeklyPrizes) {
+				payments.push({
+					paymentDescription: `${addOrdinal(prize.rank)} place in week ${prize.week}`,
+					paymentWeek: prize.week,
+					paymentAmount: weeklyPrizes[prize.rank],
+					paymentUser: user,
+					userID,
+				});
+			}
+
+			const overallPrizes = JSON.parse(overallPrizesStr);
+			const numOverallPrizes = overallPrizes.length - 1;
+			const myOverallPrizes = await OverallMV.find({
+				where: { rank: LessThanOrEqual(numOverallPrizes), userID: user.userID },
+			});
+
+			for (const prize of myOverallPrizes) {
+				payments.push({
+					paymentDescription: `${addOrdinal(prize.rank)} place overall`,
+					paymentWeek: null,
+					paymentAmount: overallPrizes[prize.rank],
+					paymentUser: user,
+					userID,
+				});
+			}
 		}
 
 		if (userPlaysSurvivor) {
@@ -95,9 +123,28 @@ export class PaymentResolver {
 
 			if (survivorPrizesStr) {
 				const survivorPrizes = JSON.parse(survivorPrizesStr);
+				const stillAlive = await SurvivorMV.find({
+					relations: ['user'],
+					where: { isAliveOverall: true },
+				});
 
-				//TODO: get all survivor prizes as positives and add to payments array
-				log.info('Get survivor prizes here:', { survivorPrizes });
+				if (stillAlive.length === 1 || stillAlive[0].weeksAlive === WEEKS_IN_SEASON) {
+					const mySurvivorRank = await SurvivorMV.findOne({
+						where: { userID: user.userID },
+					});
+
+					if (mySurvivorRank && mySurvivorRank.rank < survivorPrizes.length) {
+						payments.push({
+							paymentDescription: `${addOrdinal(
+								mySurvivorRank.rank,
+							)} place in survivor pool`,
+							paymentWeek: null,
+							paymentAmount: survivorPrizes[mySurvivorRank.rank],
+							paymentUser: user,
+							userID,
+						});
+					}
+				}
 			}
 		}
 

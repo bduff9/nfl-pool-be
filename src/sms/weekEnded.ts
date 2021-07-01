@@ -13,25 +13,36 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Connection } from 'typeorm';
 
-import { User } from '../entity';
+import { Game, User } from '../entity';
+import EmailType from '../entity/EmailType';
+import { log } from '../util/logging';
 
-export type TCustomContext = {
-	dbConnection: Connection;
-	headers: string[];
-	user: null | User;
+import { sendSMS } from '.';
+
+const sendWeekEndedSMS = async (user: User, week: number): Promise<void> => {
+	const game = await Game.findOneOrFail({
+		order: { gameKickoff: 'DESC' },
+		relations: ['homeTeam', 'visitorTeam'],
+		where: { gameWeek: week },
+	});
+	const message = `${user.userFirstName}, week ${week} has just ended with ${game.visitorTeam.teamShortName} @ ${game.homeTeam.teamShortName}, final score ${game.gameVisitorScore}-${game.gameHomeScore}`;
+
+	try {
+		if (!user.userPhone) {
+			throw new Error('Missing phone number for user!');
+		}
+
+		await sendSMS(user.userPhone, message, EmailType.weekEnded);
+	} catch (error) {
+		log.error('Failed to send week ended sms:', {
+			error,
+			game,
+			type: EmailType.weekEnded,
+			user,
+			week,
+		});
+	}
 };
 
-export type TUserType = 'admin' | 'anonymous' | 'registered' | 'survivorPlayer' | 'user';
-
-type Schedule = { adjustForDST: boolean };
-
-type ScheduleStatus = { last: string; next: string; lastUpdated: string };
-
-// ts-prune-ignore-next
-export type MyTimer = {
-	schedule: Schedule;
-	scheduleStatus: ScheduleStatus;
-	isPastDue: boolean;
-};
+export default sendWeekEndedSMS;

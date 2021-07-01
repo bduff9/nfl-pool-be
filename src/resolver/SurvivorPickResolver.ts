@@ -63,14 +63,14 @@ export class SurvivorPickResolver {
 
 		if (!user?.userPlaysSurvivor) return false;
 
-		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('sp')
+		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('SP')
 			.select('COUNT(*)', 'incorrect')
-			.leftJoin(Game, 'g', 'sp.GameID = g.GameID')
-			.where('sp.UserID = :userID', { userID: user?.userID })
-			.andWhere('g.GameStatus <> :status', { status: 'P' })
+			.leftJoin('SP.game', 'G')
+			.where('SP.UserID = :userID', { userID: user?.userID })
+			.andWhere('G.GameStatus <> :status', { status: 'Pregame' })
 			.andWhere(
 				new Brackets(qb => {
-					qb.where('g.WinnerTeamID <> sp.TeamID').orWhere('sp.TeamID is null');
+					qb.where('G.WinnerTeamID <> SP.TeamID').orWhere('SP.TeamID is null');
 				}),
 			)
 			.execute();

@@ -21,7 +21,7 @@ import { convertEpoch } from '../util/dates';
 import { formatPreview, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-export type TAdminMessage = { game: string; reason: string };
+type TAdminMessage = { game: string; reason: string };
 
 const sendInvalidGamesFoundEmail = async (
 	week: number,

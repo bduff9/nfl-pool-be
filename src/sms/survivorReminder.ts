@@ -34,7 +34,7 @@ const sendSurvivorReminderSMS = async (
 
 		await sendSMS(user.userPhone, message, EmailType.survivorReminder);
 	} catch (error) {
-		log.error('Failed to send survivor reminder email:', {
+		log.error('Failed to send survivor reminder sms:', {
 			error,
 			hoursLeft,
 			type: EmailType.survivorReminder,

@@ -127,8 +127,18 @@ export class Game extends BaseEntity {
 
 	@Field(() => GameStatus, { nullable: false })
 	@Column('enum', {
-		default: 'P',
-		enum: ['P', 'I', '1', '2', 'H', '3', '4', 'C'],
+		default: 'Pregame',
+		enum: [
+			'Pregame',
+			'Invalid',
+			'1st Quarter',
+			'2nd Quarter',
+			'Half Time',
+			'3rd Quarter',
+			'4th Quarter',
+			'Final',
+			'Overtime',
+		],
 		name: 'GameStatus',
 		nullable: false,
 	})
@@ -152,6 +162,16 @@ export class Game extends BaseEntity {
 	@Min(0)
 	@Max(3600)
 	public gameTimeLeftInSeconds!: number;
+
+	@Field(() => String, { nullable: false })
+	@Column({
+		default: '',
+		length: 10,
+		name: 'GameTimeLeftInQuarter',
+		nullable: false,
+		type: 'varchar',
+	})
+	public gameTimeLeftInQuarter!: string;
 
 	@Column({ name: 'GameHasPossession', nullable: true, type: 'int' })
 	public gameHasPossession!: null | number;

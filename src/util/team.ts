@@ -25,6 +25,9 @@ export const getTeamsFromDB = async (): Promise<Record<string, number>> => {
 	return teamMap;
 };
 
+export const getTeamFromDB = async (teamShortName: string): Promise<Team> =>
+	Team.findOneOrFail({ where: { teamShortName } });
+
 export const updateTeamData = async (
 	teamID: number,
 	data: TAPITeamResponse,

@@ -13,35 +13,40 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-
-import { User } from '../entity';
+import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
+import { formatPreview, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-import { sendSMS } from '.';
-
-const sendPickReminderSMS = async (
-	user: User,
-	week: number,
-	hoursLeft: number,
-): Promise<void> => {
-	const message = `${user.userFirstName}, this is your reminder to submit your picks for week ${week} as you now have less than ${hoursLeft} hours!`;
+const sendWeekStartedEmail = async (user: User, week: number): Promise<void> => {
+	const SUBJECT = `Week ${week} has just begun`;
+	const PREVIEW = formatPreview(
+		`This is an automated email you requested to let you know when the week starts`,
+	);
+	const game = await Game.findOneOrFail({
+		relations: ['homeTeam', 'visitorTeam'],
+		where: { gameNumber: 1, gameWeek: week },
+	});
+	const { homeTeam, visitorTeam } = game;
 
 	try {
-		if (!user.userPhone) {
-			throw new Error('Missing phone number for user!');
-		}
-
-		await sendSMS(user.userPhone, message, EmailType.pickReminder);
+		await sendEmail({
+			locals: { game, homeTeam, user, visitorTeam, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.weekStarted,
+		});
 	} catch (error) {
-		log.error('Failed to send pick reminder sms:', {
+		log.error('Failed to send week started email:', {
 			error,
-			hoursLeft,
-			type: EmailType.pickReminder,
-			user,
-			week,
+			locals: { game, homeTeam, user, visitorTeam, week },
+			PREVIEW,
+			SUBJECT,
+			to: [user.userEmail],
+			type: EmailType.weekStarted,
 		});
 	}
 };
 
-export default sendPickReminderSMS;
+export default sendWeekStartedEmail;

@@ -13,24 +13,35 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
 
-enum EmailType {
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	quickPick = 'quickPick',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+import { Game, User } from '../entity';
+import EmailType from '../entity/EmailType';
+import { log } from '../util/logging';
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
+import { sendSMS } from '.';
 
-export default EmailType;
+const sendWeekStartedSMS = async (user: User, week: number): Promise<void> => {
+	const game = await Game.findOneOrFail({
+		relations: ['homeTeam', 'visitorTeam'],
+		where: { gameWeek: week, gameNumber: 1 },
+	});
+	const message = `${user.userFirstName}, week ${week} has just started with ${game.visitorTeam.teamShortName} @ ${game.homeTeam.teamShortName}`;
+
+	try {
+		if (!user.userPhone) {
+			throw new Error('Missing phone number for user!');
+		}
+
+		await sendSMS(user.userPhone, message, EmailType.weekStarted);
+	} catch (error) {
+		log.error('Failed to send week started sms:', {
+			error,
+			game,
+			type: EmailType.weekStarted,
+			user,
+			week,
+		});
+	}
+};
+
+export default sendWeekStartedSMS;

@@ -16,14 +16,15 @@
 import { registerEnumType } from 'type-graphql';
 
 enum GameStatus {
-	Pregame = 'P',
-	Incomplete = 'I',
-	Q1 = '1',
-	Q2 = '2',
-	Halftime = 'H',
-	Q3 = '3',
-	Q4 = '4',
-	Complete = 'C',
+	Pregame = 'Pregame',
+	Invalid = 'Invalid',
+	FirstQuarter = '1st Quarter',
+	SecondQuarter = '2nd Quarter',
+	HalfTime = 'Half Time',
+	ThirdQuarter = '3rd Quarter',
+	FourthQuarter = '4th Quarter',
+	Overtime = 'Overtime',
+	Final = 'Final',
 }
 
 registerEnumType(GameStatus, {

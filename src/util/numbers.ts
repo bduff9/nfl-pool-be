@@ -13,24 +13,15 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+export const addOrdinal = (n: number): string => {
+	const remainder10 = n % 10;
+	const remainder100 = n % 100;
 
-enum EmailType {
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	quickPick = 'quickPick',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+	if (remainder10 === 1 && remainder100 !== 11) return `${n}st`;
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
+	if (remainder10 === 2 && remainder100 !== 12) return `${n}nd`;
 
-export default EmailType;
+	if (remainder10 === 3 && remainder100 !== 13) return `${n}rd`;
+
+	return `${n}th`;
+};

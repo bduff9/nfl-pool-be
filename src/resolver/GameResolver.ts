@@ -34,7 +34,7 @@ export class GameResolver {
 	async getCurrentWeek (): Promise<number> {
 		const { currentWeek } = await Game.createQueryBuilder('Game')
 			.select(`COALESCE(MIN(Game.GameWeek), ${WEEKS_IN_SEASON})`, 'currentWeek')
-			.where('Game.GameStatus <> :status', { status: 'C' })
+			.where('Game.GameStatus <> :status', { status: 'Final' })
 			.getRawOne<{ currentWeek: number }>();
 
 		if (currentWeek === 1) return currentWeek;
@@ -45,7 +45,7 @@ export class GameResolver {
 				'CURRENT_TIMESTAMP > DATE_ADD(Game.GameKickoff, INTERVAL 24 HOUR)',
 				'useCurrentWeek',
 			)
-			.where('Game.GameStatus = :status', { status: 'C' })
+			.where('Game.GameStatus = :status', { status: 'Final' })
 			.orderBy('Game.GameKickoff', 'DESC')
 			.getRawOne<{ lastWeek: number; useCurrentWeek: '0' | '1' }>();
 

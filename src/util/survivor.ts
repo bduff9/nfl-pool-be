@@ -13,35 +13,36 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { SurvivorPick } from '../entity';
 
-import { User } from '../entity';
-import EmailType from '../entity/EmailType';
-import { log } from '../util/logging';
+import { ADMIN_USER } from './constants';
 
-import { sendSMS } from '.';
-
-const sendPickReminderSMS = async (
-	user: User,
-	week: number,
-	hoursLeft: number,
-): Promise<void> => {
-	const message = `${user.userFirstName}, this is your reminder to submit your picks for week ${week} as you now have less than ${hoursLeft} hours!`;
-
-	try {
-		if (!user.userPhone) {
-			throw new Error('Missing phone number for user!');
-		}
-
-		await sendSMS(user.userPhone, message, EmailType.pickReminder);
-	} catch (error) {
-		log.error('Failed to send pick reminder sms:', {
-			error,
-			hoursLeft,
-			type: EmailType.pickReminder,
-			user,
-			week,
-		});
-	}
+const markUserDead = async (userID: number, week: number): Promise<void> => {
+	await SurvivorPick.createQueryBuilder()
+		.update()
+		.set({
+			survivorPickDeleted: () => 'CURRENT_TIMESTAMP',
+			survivorPickDeletedBy: ADMIN_USER,
+		})
+		.where('UserID = :userID', { userID })
+		.andWhere('SurvivorPickWeek > :week', { week })
+		.execute();
 };
 
-export default sendPickReminderSMS;
+// ts-prune-ignore-next
+export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> => {
+	const dead = await SurvivorPick.find({ where: { survivorPickWeek: week, teamID: null } });
+
+	for (const user of dead) await markUserDead(user.userID, week);
+};
+
+export const markWrongSurvivorPicksAsDead = async (
+	week: number,
+	losingID: number,
+): Promise<void> => {
+	const dead = await SurvivorPick.find({
+		where: { survivorPickWeek: week, teamID: losingID },
+	});
+
+	for (const user of dead) await markUserDead(user.userID, week);
+};
