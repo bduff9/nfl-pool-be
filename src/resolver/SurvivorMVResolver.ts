@@ -23,10 +23,12 @@ import {
 	Resolver,
 	Root,
 } from 'type-graphql';
-import { Not } from 'typeorm';
+import { IsNull, Not } from 'typeorm';
 
 import { SurvivorMV, Team, User } from '../entity';
+import SeasonStatus from '../entity/SeasonStatus';
 import SurvivorStatus from '../entity/SurvivorStatus';
+import { WEEKS_IN_SEASON } from '../util/constants';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorMV)
@@ -44,15 +46,29 @@ export class SurvivorMVResolver {
 	}
 
 	@Authorized<TUserType>('registered')
+	@Query(() => Boolean)
+	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+
+		if (!user?.userPlaysSurvivor) return false;
+
+		const myRank = await SurvivorMV.findOne({ where: { userID: user.userID } });
+
+		if (!myRank) return false;
+
+		return myRank.isAliveOverall;
+	}
+
+	@Authorized<TUserType>('registered')
 	@Query(() => Int)
 	async getSurvivorWeekCount (
 		@Arg('Type', () => SurvivorStatus, { nullable: true }) type: null | SurvivorStatus,
 	): Promise<number> {
-		if (type !== null) {
+		if (type) {
 			return SurvivorMV.count({ where: { currentStatus: type } });
 		}
 
-		return SurvivorMV.count({ where: { currentStatus: Not(null) } });
+		return SurvivorMV.count({ where: { currentStatus: Not(IsNull()) } });
 	}
 
 	@Authorized<TUserType>('registered')
@@ -60,11 +76,27 @@ export class SurvivorMVResolver {
 	async getSurvivorOverallCount (
 		@Arg('Type', () => Boolean, { nullable: true }) type: boolean | null,
 	): Promise<number> {
-		if (type !== null) {
+		if (typeof type === 'boolean') {
 			return SurvivorMV.count({ where: { isAliveOverall: type } });
 		}
 
 		return SurvivorMV.count();
+	}
+
+	@Authorized<TUserType>('registered')
+	@Query(() => SeasonStatus)
+	async getSurvivorStatus (): Promise<SeasonStatus> {
+		const count = await SurvivorMV.count();
+
+		if (count === 0) return SeasonStatus.NotStarted;
+
+		const leaders = await SurvivorMV.find({ where: { rank: 1 } });
+
+		if (leaders.length === 1 || leaders[0].weeksAlive === WEEKS_IN_SEASON) {
+			return SeasonStatus.Complete;
+		}
+
+		return SeasonStatus.InProgress;
 	}
 
 	@FieldResolver()

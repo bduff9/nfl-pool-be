@@ -23,10 +23,8 @@ import {
 	Resolver,
 	Root,
 } from 'type-graphql';
-import { Brackets } from 'typeorm';
 
 import { Game, League, SurvivorPick, Team, User } from '../entity';
-import { log } from '../util/logging';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorPick)
@@ -53,31 +51,28 @@ export class SurvivorPickResolver {
 	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<SurvivorPick[]> {
 		const { user } = context;
 
-		return SurvivorPick.find({ where: { userID: user?.userID } });
+		if (!user) throw new Error('Missing user from context');
+
+		return SurvivorPick.find({
+			relations: ['team'],
+			where: { userID: user.userID },
+		});
 	}
 
 	@Authorized<TUserType>('registered')
-	@Query(() => Boolean)
-	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+	@Query(() => SurvivorPick, { nullable: true })
+	async getMySurvivorPickForWeek (
+		@Arg('Week', () => Int) week: number,
+		@Ctx() context: TCustomContext,
+	): Promise<SurvivorPick | undefined> {
 		const { user } = context;
 
-		if (!user?.userPlaysSurvivor) return false;
+		if (!user) throw new Error('Missing user from context');
 
-		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('SP')
-			.select('COUNT(*)', 'incorrect')
-			.leftJoin('SP.game', 'G')
-			.where('SP.UserID = :userID', { userID: user?.userID })
-			.andWhere('G.GameStatus <> :status', { status: 'Pregame' })
-			.andWhere(
-				new Brackets(qb => {
-					qb.where('G.WinnerTeamID <> SP.TeamID').orWhere('SP.TeamID is null');
-				}),
-			)
-			.execute();
-
-		log.debug({ incorrect });
-
-		return incorrect === 0;
+		return SurvivorPick.findOne({
+			relations: ['team'],
+			where: { survivorPickWeek: week, userID: user.userID },
+		});
 	}
 
 	@FieldResolver()
