@@ -10,7 +10,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: aswnn-nfl
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./azure/"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./azure"
   NODE_VERSION: "14.x"
 
 jobs:
@@ -55,4 +55,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           slot-name: ${{ env.DEPLOYMENT_SLOT }}
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/
