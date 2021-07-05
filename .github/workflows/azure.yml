@@ -22,7 +22,9 @@ jobs:
         run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       - name: "Login via Azure CLI"
-        run: az login -u bduff9@gmail.com -p ${{ AZURE_APP_PASSWORD }}
+        env:
+          AZURE_APP_PASSWORD: ${{ secrets.AZURE_APP_PASSWORD }}
+        run: az login -u bduff9@gmail.com -p $AZURE_APP_PASSWORD
 
       - name: Setup Node ${{ env.NODE_VERSION }} Environment
         uses: actions/setup-node@v1
