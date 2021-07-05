@@ -34,7 +34,6 @@ jobs:
         run: |
           npm ci
           npm run build:azure
-          mv src ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/dist
           mv node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
 
       - name: Set environment variables
