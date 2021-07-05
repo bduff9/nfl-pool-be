@@ -10,7 +10,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: aswnn-nfl
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: "azure"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./azure/"
   NODE_VERSION: "14.x"
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
         run: |
           npm ci
           npm run build:azure
-          cp -R src ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/dist
+          mv src ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/dist
           mv node_modules ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/node_modules
 
       - name: Set environment variables
@@ -54,5 +54,5 @@ jobs:
         id: fa
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          slot-name: "dev" # ${{ env.DEPLOYMENT_SLOT }}
+          slot-name: ${{ env.DEPLOYMENT_SLOT }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
