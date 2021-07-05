@@ -28,6 +28,7 @@ export const getUserPicksForWeek = async (
 		.andWhere('G.GameWeek = :week', { week })
 		.getMany();
 
+// ts-prune-ignore-next
 export const updateMissedPicks = async (game: Game): Promise<void> => {
 	const missed = await Pick.find({ where: { teamID: null, gameID: game.gameID } });
 
