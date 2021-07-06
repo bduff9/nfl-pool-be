@@ -230,6 +230,25 @@ export class UserResolver {
 		return User.findOneOrFail(context.user.userID);
 	}
 
+	@Authorized<TUserType>('anonymous')
+	@Mutation(() => Boolean)
+	async unsubscribeEmail (
+		@Arg('email') email: string,
+		@Ctx() context: TCustomContext,
+	): Promise<boolean> {
+		if (context.user && context.user.userEmail !== email) {
+			throw new Error('Invalid email passed in!');
+		}
+
+		await User.createQueryBuilder()
+			.update()
+			.set({ userCommunicationsOptedOut: true })
+			.where('UserEmail = :email', { email })
+			.execute();
+
+		return true;
+	}
+
 	@Authorized<TUserType>('registered')
 	@Query(() => [User])
 	async getUsers (): Promise<User[]> {
