@@ -25,7 +25,6 @@ export class GameResolver {
 	@Query(() => Game)
 	async getGame (@Arg('GameID', () => Int) gameID: number): Promise<Game> {
 		return Game.findOneOrFail({
-			order: { gameKickoff: 'ASC' },
 			where: { gameID },
 		});
 	}
@@ -34,6 +33,7 @@ export class GameResolver {
 	@Query(() => [Game])
 	async getGamesForWeek (@Arg('Week', () => Int) gameWeek: number): Promise<Array<Game>> {
 		return Game.find({
+			order: { gameKickoff: 'ASC' },
 			where: { gameWeek },
 		});
 	}
