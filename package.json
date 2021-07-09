@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@azure/functions": "1.2.3",
-    "@types/email-templates": "8.0.3",
+    "@types/email-templates": "8.0.4",
     "@types/eslint": "7.2.13",
     "@types/jest": "26.0.23",
     "@types/mjml": "4.7.0",
