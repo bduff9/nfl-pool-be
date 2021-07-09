@@ -26,7 +26,7 @@ import {
 
 import SurvivorStatus from './SurvivorStatus';
 
-import { Team, User } from '.';
+import { SurvivorPick, Team, User } from '.';
 
 @Entity('SurvivorMV', { schema: 'NFL' })
 @ObjectType()
@@ -87,6 +87,9 @@ export class SurvivorMV extends BaseEntity {
 	})
 	@JoinColumn({ name: 'LastPick' })
 	public lastPickTeam!: Team;
+
+	@Field(() => [SurvivorPick])
+	public allPicks!: SurvivorPick[];
 
 	@Field(() => Date, { nullable: false })
 	@UpdateDateColumn({

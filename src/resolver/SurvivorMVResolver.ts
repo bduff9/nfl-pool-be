@@ -25,14 +25,21 @@ import {
 } from 'type-graphql';
 import { IsNull, Not } from 'typeorm';
 
-import { SurvivorMV, Team, User } from '../entity';
+import { SurvivorMV, SurvivorPick, Team, User } from '../entity';
 import SeasonStatus from '../entity/SeasonStatus';
 import SurvivorStatus from '../entity/SurvivorStatus';
 import { WEEKS_IN_SEASON } from '../util/constants';
+import { getCurrentWeekInProgress } from '../util/game';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorMV)
 export class SurvivorMVResolver {
+	@Authorized<TUserType>('registered')
+	@Query(() => [SurvivorMV])
+	async getSurvivorRankings (): Promise<Array<SurvivorMV>> {
+		return SurvivorMV.find({ order: { rank: 'ASC' } });
+	}
+
 	@Authorized<TUserType>('registered')
 	@Query(() => SurvivorMV, { nullable: true })
 	async getMySurvivorDashboard (
@@ -107,5 +114,19 @@ export class SurvivorMVResolver {
 	@FieldResolver()
 	async lastPickTeam (@Root() survivorMV: SurvivorMV): Promise<Team | undefined> {
 		return Team.findOne({ where: { teamID: survivorMV.lastPick } });
+	}
+
+	@FieldResolver()
+	async allPicks (@Root() survivorMV: SurvivorMV): Promise<Array<SurvivorPick>> {
+		const week = await getCurrentWeekInProgress();
+
+		return SurvivorPick.createQueryBuilder('SP')
+			.innerJoinAndSelect('SP.user', 'U')
+			.innerJoinAndSelect('SP.game', 'G')
+			.leftJoinAndSelect('SP.team', 'T')
+			.where('SP.SurvivorPickWeek <= :week', { week })
+			.andWhere('SP.UserID = :userID', { userID: survivorMV.userID })
+			.orderBy('SP.SurvivorPickWeek', 'ASC')
+			.getMany();
 	}
 }

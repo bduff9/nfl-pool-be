@@ -31,23 +31,6 @@ import { TCustomContext, TUserType } from '../util/types';
 export class SurvivorPickResolver {
 	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
-	async getAllSurvivorPicksForWeek (
-		@Arg('Week', () => Int) week: number,
-	): Promise<SurvivorPick[]> {
-		const [{ hasStarted }] = await Game.createQueryBuilder('g')
-			.select('CURRENT_TIMESTAMP > g.GameKickoff', 'hasStarted')
-			.where('g.GameWeek = :week', { week })
-			.execute();
-
-		if (!hasStarted) {
-			throw new Error(`Week ${week} has not started yet!`);
-		}
-
-		return SurvivorPick.find({ where: { survivorPickWeek: week } });
-	}
-
-	@Authorized<TUserType>('survivorPlayer')
-	@Query(() => [SurvivorPick])
 	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<SurvivorPick[]> {
 		const { user } = context;
 

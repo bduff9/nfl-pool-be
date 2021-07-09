@@ -23,6 +23,7 @@ import {
 	MINUTES_IN_HOUR,
 	SECONDS_IN_MINUTE,
 } from '../util/constants';
+import { getCurrentWeekInProgress } from '../util/game';
 import { log } from '../util/logging';
 import { TUserType } from '../util/types';
 
@@ -104,6 +105,12 @@ export class WeekResolver {
 		log.debug(weekObj);
 
 		return weekObj;
+	}
+
+	@Authorized<TUserType>('registered')
+	@Query(() => Int)
+	async getWeekInProgress (): Promise<number> {
+		return getCurrentWeekInProgress();
 	}
 
 	@FieldResolver()
