@@ -19,12 +19,14 @@ import {
 	Ctx,
 	FieldResolver,
 	Int,
+	Mutation,
 	Query,
 	Resolver,
 	Root,
 } from 'type-graphql';
 
 import { Game, League, SurvivorPick, Team, User } from '../entity';
+import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorPick)
@@ -56,6 +58,30 @@ export class SurvivorPickResolver {
 			relations: ['team'],
 			where: { survivorPickWeek: week, userID: user.userID },
 		});
+	}
+
+	@Authorized<TUserType>('registered')
+	@Mutation(() => Boolean)
+	async registerForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		await registerForSurvivor(user.userID);
+
+		return true;
+	}
+
+	@Authorized<TUserType>('survivorPlayer')
+	@Mutation(() => Boolean)
+	async unregisterForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		await unregisterForSurvivor(user.userID);
+
+		return true;
 	}
 
 	@FieldResolver()
