@@ -18,7 +18,6 @@ import {
 	League,
 	Notification,
 	Pick,
-	SurvivorPick,
 	SystemValue,
 	Tiebreaker,
 	User,
@@ -26,6 +25,7 @@ import {
 } from '../entity';
 
 import { log } from './logging';
+import { registerForSurvivor } from './survivor';
 
 // ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
@@ -127,16 +127,7 @@ export const populateUserData = async (
 	);
 	log.info(`Inserted tiebreakers for user ${userID}`, result);
 
-	// Populate survivor, mark deleted if not playing
-	const insertQuery = `INSERT INTO SurvivorPicks (UserID, LeagueID, SurvivorPickWeek, GameID, SurvivorPickAddedBy, SurvivorPickUpdatedBy${
-		isInSurvivor ? '' : ', SurvivorPickDeleted, SurvivorPickDeletedBy'
-	}) SELECT ?, ?, GameWeek, GameID, ?, ?${
-		isInSurvivor ? '' : ', CURRENT_TIMESTAMP, ?'
-	} from Games Where GameNumber = 1`;
-	const insertVars = [userID, league.leagueID, user.userEmail, user.userEmail];
-
-	if (!isInSurvivor) insertVars.push(user.userEmail);
-
-	result = await SurvivorPick.query(insertQuery, insertVars);
-	log.info(`Inserted survivor picks for user ${userID}`, result);
+	if (isInSurvivor) {
+		await registerForSurvivor(userID);
+	}
 };

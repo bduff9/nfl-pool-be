@@ -13,9 +13,10 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { SurvivorPick } from '../entity';
+import { SurvivorPick, SystemValue, User } from '../entity';
 
 import { ADMIN_USER } from './constants';
+import { log } from './logging';
 
 const markUserDead = async (userID: number, week: number): Promise<void> => {
 	await SurvivorPick.createQueryBuilder()
@@ -31,6 +32,26 @@ const markUserDead = async (userID: number, week: number): Promise<void> => {
 
 // ts-prune-ignore-next
 export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> => {
+	if (week === 1) {
+		const systemValues = await SystemValue.findOneOrFail({
+			where: { systemValueName: 'PoolCost' },
+		});
+		const poolCost = +(systemValues.systemValueValue ?? '0');
+		const users = await SurvivorPick.createQueryBuilder('SP')
+			.innerJoin('SP.user', 'U')
+			.where('U.UserPaid <= :poolCost', { poolCost })
+			.andWhere('SP.SurvivorPickWeek = 1')
+			.andWhere('SP.TeamID is null')
+			.getMany();
+
+		log.info(`Found ${users.length} users to unregister from survivor pool`);
+
+		for (const user of users) {
+			await unregisterForSurvivor(user.userID);
+			log.info('Unregistered user from survivor pool', user);
+		}
+	}
+
 	const dead = await SurvivorPick.find({ where: { survivorPickWeek: week, teamID: null } });
 
 	for (const user of dead) await markUserDead(user.userID, week);
@@ -45,4 +66,24 @@ export const markWrongSurvivorPicksAsDead = async (
 	});
 
 	for (const user of dead) await markUserDead(user.userID, week);
+};
+
+export const registerForSurvivor = async (userID: number): Promise<void> => {
+	const user = await User.findOneOrFail({ relations: ['userLeagues'], where: { userID } });
+	const insertQuery = `INSERT INTO SurvivorPicks (UserID, LeagueID, SurvivorPickWeek, GameID, SurvivorPickAddedBy, SurvivorPickUpdatedBy) SELECT ?, ?, GameWeek, GameID, ?, ? from Games Where GameNumber = 1`;
+
+	for (const league of user.userLeagues) {
+		const insertVars = [userID, league.leagueID, user.userEmail, user.userEmail];
+		const result = await SurvivorPick.query(insertQuery, insertVars);
+
+		log.info(`Inserted survivor picks for user ${userID}`, result);
+	}
+
+	user.userPlaysSurvivor = true;
+	await user.save();
+};
+
+export const unregisterForSurvivor = async (userID: number): Promise<void> => {
+	await SurvivorPick.delete({ userID });
+	await User.update({ userID }, { userPlaysSurvivor: false });
 };
