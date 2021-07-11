@@ -20,7 +20,7 @@ import { convertDateToEpoch, convertEpoch } from '../util/dates';
 import { findFutureGame, getAllGamesForWeek } from '../util/game';
 import { log } from '../util/logging';
 import { getUserPicksForWeek } from '../util/pick';
-import { getTeamsFromDB } from '../util/team';
+import { getTeamsFromDB, updateTeamByeWeeks } from '../util/team';
 import { getAllRegisteredUsers } from '../util/user';
 
 import { TAPIAllWeeksResponse, TAPIResponseMatchup } from './types';
@@ -280,6 +280,8 @@ export const healWeek = async (
 	if (invalidAPIGames.length > 0 || invalidDBGames.length > 0) {
 		await sendInvalidGamesEmail(week, invalidAPIGames, invalidDBGames);
 	}
+
+	await updateTeamByeWeeks(week);
 
 	log.info(`Finished healing games for week ${week}`);
 };

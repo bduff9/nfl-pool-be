@@ -28,6 +28,12 @@ export const getTeamsFromDB = async (): Promise<Record<string, number>> => {
 export const getTeamFromDB = async (teamShortName: string): Promise<Team> =>
 	Team.findOneOrFail({ where: { teamShortName } });
 
+export const updateTeamByeWeeks = async (week: number): Promise<void> => {
+	await Team.query(
+		`update Teams set TeamByeWeek = ${week} where TeamID not in (select HomeTeamID from Games where GameWeek = ${week} union select VisitorTeamID from Games where GameWeek = ${week}) and TeamCity <> 'Tie'`,
+	);
+};
+
 export const updateTeamData = async (
 	teamID: number,
 	data: TAPITeamResponse,
