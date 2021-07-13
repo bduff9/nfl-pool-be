@@ -37,27 +37,25 @@
       </mj-column>
     </mj-section>
 
-    <mj-section background-repeat="no-repeat" background-size="100% 100%" background-url="{{ domain }}/bkgd-pitch.png" padding="25px 200px">
+    <mj-section background-size="100% 100%" background-url="{{ domain }}/bkgd-pitch.png" padding="25px 200px" border-radius="10px 10px 0px 0px">
       <mj-column background-color="transparent">
         <mj-image align="center" alt="Football Image" border="none" height="auto" src="{{ domain }}/football.svg" title="Football Image" width="150px"></mj-image>
       </mj-column>
     </mj-section>
 
-    <mj-section padding="0px 0px 0px 0px" text-align="center">
-      <mj-column background-color="#ffffff">
-        <mj-text color="#000000" padding="15px 0px 20px 0px">
+    <mj-section padding="0px" text-align="center">
+      <mj-column background-color="#ffffff" width="100%">
+        <mj-text padding="15px 0px 0px 0px">
           <h1 align="center">
-            <span style="font-size:30px;letter-spacing:.5px;">
+            <span style="letter-spacing:.5px;">
               <strong>NFL Confidence Pool</strong>
             </span>
           </h1>
         </mj-text>
       </mj-column>
-    </mj-section>
 
-    <mj-section background-size="auto" padding="0px" text-align="center">
-      <mj-column background-color="#ffffff">
-        <mj-text align="center" font-size="20px" padding="0px 25px 20px 25px" color="#55575d">
+      <mj-column width="100%" background-color="#ffffff" border-radius="0px 0px 10px 10px">
+        <mj-text align="center" font-size="20px" padding="10px 25px 20px 25px" >
           Click below to sign in as
         </mj-text>
         <mj-text align="center" padding="10px 10px 20px 10px" font-size="20px">
