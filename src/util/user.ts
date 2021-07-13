@@ -17,6 +17,7 @@ import {
 	Game,
 	League,
 	Notification,
+	OverallMV,
 	Pick,
 	SystemValue,
 	Tiebreaker,
@@ -24,6 +25,7 @@ import {
 	UserLeague,
 } from '../entity';
 
+import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { registerForSurvivor } from './survivor';
 
@@ -110,14 +112,23 @@ export const populateUserData = async (
 	const league = await League.findOneOrFail({
 		where: { leagueName: 'public' },
 	});
+	const week = await getCurrentWeek();
 	let result;
 
 	// Populate picks
-	//TODO: Handle case where someone signs up after week 1 and needs to be assigned lowest score
-	result = await Pick.query(
-		'INSERT INTO Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) SELECT ?, ?, GameID, ?, ? from Games',
-		[userID, league.leagueID, user.userEmail, user.userEmail],
-	);
+	if (week > 1) {
+		const lowest = await OverallMV.findOneOrFail({ order: { rank: 'DESC' } });
+
+		result = await Pick.query(
+			`insert into Picks (UserID, LeagueID, GameID, TeamID, PickPoints, PickAddedBy, PickUpdatedBy) select ${user.userID}, LeagueID, GameID, TeamID, PickPoints, ${user.userEmail}, ${user.userEmail} from Picks where UserID = ${lowest.userID}`,
+		);
+	} else {
+		result = await Pick.query(
+			'INSERT INTO Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) SELECT ?, ?, GameID, ?, ? from Games',
+			[userID, league.leagueID, user.userEmail, user.userEmail],
+		);
+	}
+
 	log.info(`Inserted picks for user ${userID}`, result);
 
 	// Populate tiebreakers
