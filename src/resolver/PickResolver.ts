@@ -13,55 +13,38 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
-import { getRepository } from 'typeorm';
+import { Arg, Authorized, Ctx, Int, Query, Resolver } from 'type-graphql';
 
-import { Game, League, Pick, Team, User } from '../entity';
-import { TUserType } from '../util/types';
+import { Pick } from '../entity';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Pick)
 export class PickResolver {
-	@Authorized<TUserType>('user')
+	@Authorized<TUserType>('registered')
 	@Query(() => [Pick])
 	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Pick[]> {
-		return getRepository(Pick)
-			.createQueryBuilder('Pick')
-			.leftJoinAndSelect('Pick.game', 'Game')
-			.where('Game.gameWeek = :week', { week })
+		return Pick.createQueryBuilder('P')
+			.innerJoinAndSelect('P.game', 'G')
+			.innerJoinAndSelect('P.team', 'T')
+			.where('G.gameWeek = :week', { week })
 			.getMany();
 	}
 
-	@Authorized<TUserType>('user')
+	@Authorized<TUserType>('registered')
 	@Query(() => [Pick])
 	async getMyPicksForWeek (
 		@Arg('Week', () => Int) week: number,
-		@Arg('UserID', () => Int) userID: number,
-	): Promise<Pick[]> {
-		return getRepository(Pick)
-			.createQueryBuilder('Pick')
-			.leftJoinAndSelect('Pick.game', 'Game')
-			.where('Game.gameWeek = :week', { week })
-			.andWhere('Pick.userID = :userID', { userID })
+		@Ctx() context: TCustomContext,
+	): Promise<Array<Pick>> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		return Pick.createQueryBuilder('P')
+			.innerJoinAndSelect('P.game', 'G')
+			.innerJoinAndSelect('P.team', 'T')
+			.where('G.gameWeek = :week', { week })
+			.andWhere('P.userID = :userID', { userID: user.userID })
 			.getMany();
-	}
-
-	@FieldResolver()
-	async user (@Root() pick: Pick): Promise<User> {
-		return User.findOneOrFail({ where: { userID: pick.userID } });
-	}
-
-	@FieldResolver()
-	async league (@Root() pick: Pick): Promise<League> {
-		return League.findOneOrFail({ where: { leagueID: pick.leagueID } });
-	}
-
-	@FieldResolver()
-	async game (@Root() pick: Pick): Promise<Game> {
-		return Game.findOneOrFail({ where: { gameID: pick.gameID } });
-	}
-
-	@FieldResolver()
-	async team (@Root() pick: Pick): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: pick.teamID } });
 	}
 }
