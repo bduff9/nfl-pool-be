@@ -64,29 +64,37 @@ const formatPreview = (previewText: string): string => {
 	return formatted;
 };
 
-const registerPartials = (): void => {
+const getPartials = (): Record<
+	string,
+	HandlebarsTemplateDelegate<Record<string, unknown>>
+> => {
 	const partialsDir = path.join(__dirname, '..', 'templates', 'partials');
 	const files = readdirSync(partialsDir);
+	const partials: Record<string, HandlebarsTemplateDelegate<Record<string, unknown>>> = {};
 
 	for (const file of files) {
 		const fileStr = readFileSync(path.join(partialsDir, file)).toString();
 		const name = file.split('.')[0];
+		const partial = Handlebars.compile<Record<string, unknown>>(fileStr);
 
-		Handlebars.registerPartial(name, fileStr);
+		partials[name] = partial;
 	}
+
+	return partials;
 };
 
 const renderMJML = async <Data = Record<string, unknown>>(
 	view: string,
 	locals: Data,
 ): Promise<string> => {
-	registerPartials();
+	// registerPartials();
 	const templatePath = path.join(__dirname, '..', 'templates', `${view}.mjml`);
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
 	const mjml = template(locals, {
 		helpers: { concat, formatPreview },
+		partials: getPartials(),
 	});
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
