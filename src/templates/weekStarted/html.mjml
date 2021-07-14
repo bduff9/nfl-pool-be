@@ -2,84 +2,27 @@
   <mj-head>
     <mj-title>Week {{ week }} has just begun</mj-title>
     <mj-preview>{{{formatPreview 'This is an automated email you requested to let you know when the week starts'}}}</mj-preview>
-    <mj-attributes>
-      <mj-all font-family="Roboto, Helvetica, Arial, sans-serif" color="#55575d" vertical-align="middle" text-align="center" background-color="#F4F4F4" />
-    </mj-attributes>
-    <mj-style inline="inline">
-      .container {
-      max-width: 600px;
-      }
-      .link {
-      font-family: Roboto Helvetica, Arial, sans-serif;
-      text-decoration: none;
-      font-size: 16px;
-      color: #346df1;
-      }
-      .footerLink {
-      font-size: 14px;
-      color: #000000;
-      text-decoration: none;
-      color: #346df1;
-      }
-    </mj-style>
+    {{> styles }}
   </mj-head>
   <mj-body>
+    {{> header }}
 
-  <mj-section padding="0px 0px 15px 0px">
-      <mj-column vertical-align="middle">
-        <mj-text align="left" font-size="15px" padding="0px">
-          <p style="text-align: center; margin: 10px 0px;">
-            <span>Email not displaying correctly? </span>
-            <a style="font-size: 15px;" href="{{ browserLink }}" class="link">View it in your browser</a>
-          </p>
-        </mj-text>
-      </mj-column>
-    </mj-section>
-
-    <mj-section background-repeat="no-repeat" background-size="100% 100%" background-url="{{ domain }}/bkgd-pitch.png" padding="25px 200px" border-radius="10px 10px 0px 0px" >
-      <mj-column background-color="transparent">
-        <mj-image align="center" alt="Football Image" border="none" height="auto" src="{{ domain }}/football.svg" title="Football Image" width="150px"></mj-image>
-      </mj-column>
-      </mj-section>
-
-       <mj-section padding="0px" text-align="center">
-      <mj-column background-color="#ffffff" width="100%">
-        <mj-text padding="15px 0px 0px 0px">
-          <h1 align="center">
-            <span style="letter-spacing:.5px;">
-              <strong>NFL Confidence Pool</strong>
-            </span>
-          </h1>
-        </mj-text>
-      </mj-column>
-
+    <mj-section padding="0px" text-align="center">
       <mj-column width="100%" background-color="#fff" border-radius="10px">
         <mj-text padding="10px 0px 10px 0px" font-size="18px" align="center">
           <p>Hello {{ user.userFirstName }},</p>
           <p>Week {{ week }} has just started with</p>
           <p>{{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.</p>
-         </mj-text>
-         <mj-button align="center" background-color="#15803d" href="{{ domain }}" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        </mj-text>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Go to the Pool</span>
         </mj-button>
         <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
           <span>If you did not request this email you can safely ignore it.</span>
         </mj-text>
       </mj-column>
-
     </mj-section>
 
-    <mj-section background-size="auto" padding="50px 0px 20px 0px" text-align="center">
-      <mj-column>
-        <mj-text align="center" line-height="10px" color="#000000" padding="0px 20px 0px 20px">
-          <p><a href="https://www.asitewithnoname.com" class="footerLink">asitewithnoname.com</a></p>
-          <p><span class="footer" style="font-size:14px;">Chicago, IL USA</span></p>
-          <p><a href="{{ unsubscribeLink }}" class="footerLink">Unsubscribe</a>
-            <span style="font-size:16px;"> | </span>
-            <a href="{{ domain }}/users/edit" class="footerLink">Update Preferences</a>
-          </p>
-        </mj-text>
-      </mj-column>
-    </mj-section>
+    {{> footer }}
   </mj-body>
 </mjml>

@@ -1,0 +1,22 @@
+<mj-attributes>
+      <mj-all font-family="Roboto, Helvetica, Arial, sans-serif" color="#55575d" vertical-align="middle" text-align="center" background-color="#F4F4F4" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .container {
+        max-width: 600px;
+      }
+
+      .link {
+        font-family: Roboto Helvetica, Arial, sans-serif;
+        text-decoration: none;
+        font-size: 16px;
+        color: #346df1;
+      }
+
+      .footerLink {
+        font-size: 14px;
+        color: #000000;
+        text-decoration: none;
+        color: #346df1;
+      }
+    </mj-style>

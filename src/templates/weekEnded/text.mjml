@@ -2,7 +2,7 @@ Hello {{ user.userFirstName }},
 
 Week {{ week }} has just ended with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
 
-The final score wass {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.
+The final score was {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.
 
 Check your rankings here: {{ domain }}
 
