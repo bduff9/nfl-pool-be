@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { promises as fs } from 'fs';
+import { promises as fs, readdirSync, readFileSync } from 'fs';
 import path from 'path';
 
 import { SES } from 'aws-sdk';
@@ -64,15 +64,30 @@ const formatPreview = (previewText: string): string => {
 	return formatted;
 };
 
+const registerPartials = (): void => {
+	const partialsDir = path.join(__dirname, '..', 'templates', 'partials');
+	const files = readdirSync(partialsDir);
+
+	for (const file of files) {
+		const fileStr = readFileSync(path.join(partialsDir, file)).toString();
+		const name = file.split('.')[0];
+
+		Handlebars.registerPartial(name, fileStr);
+	}
+};
+
 const renderMJML = async <Data = Record<string, unknown>>(
 	view: string,
 	locals: Data,
 ): Promise<string> => {
+	registerPartials();
 	const templatePath = path.join(__dirname, '..', 'templates', `${view}.mjml`);
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
-	const mjml = template(locals, { helpers: { concat, formatPreview }, partials: {} });
+	const mjml = template(locals, {
+		helpers: { concat, formatPreview },
+	});
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
 		: { errors: [], html: mjml };
