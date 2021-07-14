@@ -13,13 +13,15 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, Query, Resolver } from 'type-graphql';
+import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
+import { Brackets } from 'typeorm';
 
-import { Team } from '../entity';
+import { Game, Team } from '../entity';
 import { TUserType } from '../util/types';
 
 @Resolver(Team)
 export class TeamResolver {
+	//FIXME: Not currently used, will we use for the make pick team detail component?
 	@Authorized<TUserType>('user')
 	@Query(() => Team)
 	async getTeam (@Arg('TeamShort', () => String) teamShort: string): Promise<Team> {
@@ -28,9 +30,50 @@ export class TeamResolver {
 		});
 	}
 
+	@Authorized<TUserType>('registered')
+	@Query(() => [Team])
+	async getTeamsOnBye (@Arg('Week', () => Int) week: number): Promise<Array<Team>> {
+		return Team.find({
+			where: { teamByeWeek: week },
+		});
+	}
+
 	@Authorized<TUserType>('user')
 	@Query(() => [Team])
 	async getTeams (): Promise<Team[]> {
 		return Team.find();
+	}
+
+	@FieldResolver()
+	async teamRecord (@Root() team: Team): Promise<string> {
+		const { teamID } = team;
+		const [result]: Array<{
+			losses: number;
+			ties: number;
+			wins: number;
+		}> = await Game.query(
+			`select sum(if(WinnerTeamID = ${teamID}, 1, 0)) as wins, sum(if(WinnerTeamID <> ${teamID} and WinnerTeamID in (HomeTeamID, VisitorTeamID), 1, 0)) as losses, sum(if(WinnerTeamID <> ${teamID} and WinnerTeamID not in (HomeTeamID, VisitorTeamID), 1, 0)) as ties from Games where GameStatus = 'Final' and (HomeTeamID = ${teamID} or VisitorTeamID = ${teamID})`,
+		);
+
+		console.log('~~~~~~~~~~~~~~~~~~~~>', { result });
+
+		return `${result.wins}-${result.losses}-${result.ties}`;
+	}
+
+	@FieldResolver()
+	async teamHistory (@Root() team: Team): Promise<Array<Game>> {
+		const { teamID } = team;
+
+		return Game.createQueryBuilder('G')
+			.where('G.GameStatus = :status', { status: 'Final' })
+			.andWhere(
+				new Brackets(qb => {
+					qb.where('G.HomeTeamID = :teamID', {
+						teamID,
+					}).orWhere('G.VisitorTeamID = :teamID', { teamID });
+				}),
+			)
+			.orderBy('gameWeek', 'ASC')
+			.getMany();
 	}
 }

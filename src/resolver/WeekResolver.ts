@@ -108,8 +108,8 @@ export class WeekResolver {
 	}
 
 	@Authorized<TUserType>('registered')
-	@Query(() => Int)
-	async getWeekInProgress (): Promise<number> {
+	@Query(() => Int, { nullable: true })
+	async getWeekInProgress (): Promise<null | number> {
 		return getCurrentWeekInProgress();
 	}
 

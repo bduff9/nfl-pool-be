@@ -59,6 +59,10 @@ export class SurvivorMVResolver {
 
 		if (!user?.userPlaysSurvivor) return false;
 
+		const count = await SurvivorMV.count();
+
+		if (count === 0) return true;
+
 		const myRank = await SurvivorMV.findOne({ where: { userID: user.userID } });
 
 		if (!myRank) return false;
@@ -119,6 +123,8 @@ export class SurvivorMVResolver {
 	@FieldResolver()
 	async allPicks (@Root() survivorMV: SurvivorMV): Promise<Array<SurvivorPick>> {
 		const week = await getCurrentWeekInProgress();
+
+		if (!week) return [];
 
 		return SurvivorPick.createQueryBuilder('SP')
 			.innerJoinAndSelect('SP.user', 'U')

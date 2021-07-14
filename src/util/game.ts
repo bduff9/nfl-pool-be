@@ -50,13 +50,15 @@ export const findFutureGame = async (
  * @returns number
  */
 // ts-prune-ignore-next
-export const getCurrentWeekInProgress = async (): Promise<number> => {
+export const getCurrentWeekInProgress = async (): Promise<null | number> => {
 	const game = await Game.createQueryBuilder('G')
 		.select()
 		.where('GameNumber = :gameNumber', { gameNumber: 1 })
 		.andWhere('GameKickoff < CURRENT_TIMESTAMP')
 		.orderBy('GameKickoff', 'DESC')
-		.getOneOrFail();
+		.getOne();
+
+	if (!game) return null;
 
 	return game.gameWeek;
 };
