@@ -66,7 +66,7 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 		const name = `${user.userFirstName} ${user.userLastName}`;
 		const ordinal = addOrdinal(rank);
 
-		poolUpdates.push(`${name} took ${ordinal} place this week`);
+		poolUpdates.push(`${ordinal}:  ${name}`);
 	}
 
 	survivorUpdates.push(`${newlyDead.length} people went out of survivor this week`);
