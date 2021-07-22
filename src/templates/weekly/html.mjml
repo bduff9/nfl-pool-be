@@ -3,6 +3,27 @@
     <mj-title>Week {{ week }} results</mj-title>
     <mj-preview>{{{formatPreview 'Here is your official weekly email from the NFL Confidence Pool commissioners'}}}</mj-preview>
     {{> styles }}
+    <mj-style inline="inline">
+      .weekly ul {
+        list-style-type: none;
+        padding-left: 0px;
+        margin-top: 2px;
+      }
+
+      .weekly li {
+        font-size: 15px;
+      }
+
+      .weekly h3 {
+        margin-bottom: 8px;
+      }
+
+      .messages li {
+        line-height: 1.3;
+        padding-bottom: 5px;
+        padding-top: 5px;
+      }
+    </mj-style>
   </mj-head>
   <mj-body>
     {{> header }}
