@@ -13,18 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import {
-	Arg,
-	Authorized,
-	Ctx,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 
-import { League, Tiebreaker, User } from '../entity';
+import { Game, Pick, Tiebreaker } from '../entity';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
@@ -39,9 +30,7 @@ export class TiebreakerResolver {
 
 		const { user } = context;
 
-		if (!user) {
-			throw new Error('Missing user from context!');
-		}
+		if (!user) throw new Error('Missing user from context!');
 
 		return Tiebreaker.findOneOrFail({
 			where: { tiebreakerWeek: week, userID: user.userID },
@@ -52,20 +41,101 @@ export class TiebreakerResolver {
 	@Query(() => [Tiebreaker])
 	async getTiebreakersForWeek (
 		@Arg('Week', () => Int) week: number,
-	): Promise<Tiebreaker[]> {
-		//FIXME: prevent users who haven't submitted this week from running this
+		@Ctx() context: TCustomContext,
+	): Promise<Array<Tiebreaker>> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const myTiebreaker = await Tiebreaker.findOneOrFail({
+			where: { tiebreakerWeek: week, userID: user.userID },
+		});
+
+		if (!myTiebreaker.tiebreakerHasSubmitted) return [];
+
 		return Tiebreaker.find({ where: { tiebreakerWeek: week } });
 	}
 
-	@FieldResolver()
-	async user (@Root() tiebreaker: Tiebreaker): Promise<User> {
-		return User.findOneOrFail({ where: { userID: tiebreaker.userID } });
+	@Authorized<TUserType>('registered')
+	@Mutation(() => Tiebreaker)
+	async updateMyTiebreakerScore (
+		@Arg('Week', () => Int) week: number,
+		@Arg('Score', () => Int) score: number,
+		@Ctx() context: TCustomContext,
+	): Promise<Tiebreaker> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context!');
+
+		const lastGame = await Game.findOneOrFail({
+			order: { gameKickoff: 'DESC' },
+			where: { gameWeek: week },
+		});
+
+		if (new Date(lastGame.gameKickoff) < new Date()) {
+			throw new Error('Last game has already started!');
+		}
+
+		const myTiebreaker = await Tiebreaker.findOneOrFail({
+			where: { tiebreakerWeek: week, userID: user.userID },
+		});
+
+		if (myTiebreaker.tiebreakerHasSubmitted) {
+			throw new Error('Picks have already been submitted!');
+		}
+
+		myTiebreaker.tiebreakerLastScore = score;
+		await myTiebreaker.save();
+
+		return myTiebreaker;
 	}
 
-	@FieldResolver()
-	async league (@Root() tiebreaker: Tiebreaker): Promise<League> {
-		return League.findOneOrFail({
-			where: { leagueID: tiebreaker.leagueID },
+	@Authorized<TUserType>('registered')
+	@Mutation(() => Tiebreaker)
+	async submitPicksForWeek (
+		@Arg('Week', () => Int) week: number,
+		@Ctx() context: TCustomContext,
+	): Promise<Tiebreaker> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context!');
+
+		const picks = await Pick.createQueryBuilder('P')
+			.innerJoinAndSelect('P.game', 'G')
+			.where('P.UserID = :userID', { userID: user.userID })
+			.andWhere('G.GameWeek = :week', { week })
+			.orderBy('P.PickPoints', 'ASC')
+			.getMany();
+
+		for (let i = 0; i < picks.length; i++) {
+			const pick = picks[i];
+			const point = i + 1;
+			const hasGameStarted = new Date(pick.game.gameKickoff) < new Date();
+
+			if (pick.pickPoints !== point) throw new Error('Missing point value found!');
+
+			if (pick.teamID === null && !hasGameStarted) {
+				throw new Error('Missing team pick found!');
+			}
+		}
+
+		const lastGame = await Game.findOneOrFail({
+			order: { gameKickoff: 'DESC' },
+			where: { gameWeek: week },
 		});
+		const lastGameHasStarted = new Date(lastGame.gameKickoff) < new Date();
+
+		const myTiebreaker = await Tiebreaker.findOneOrFail({
+			where: { tiebreakerWeek: week, userID: user.userID },
+		});
+
+		if (myTiebreaker.tiebreakerLastScore < 1 && !lastGameHasStarted) {
+			throw new Error('Tiebreaker last score must be greater than zero');
+		}
+
+		myTiebreaker.tiebreakerHasSubmitted = true;
+		await myTiebreaker.save();
+
+		return myTiebreaker;
 	}
 }

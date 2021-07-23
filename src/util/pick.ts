@@ -14,6 +14,7 @@
  * Home: https://asitewithnoname.com/
  */
 import { Game, Pick } from '../entity';
+import AutoPickStrategy from '../entity/AutoPickStrategy';
 
 export const getUserPicksForWeek = async (
 	leagueID: number,
@@ -27,6 +28,14 @@ export const getUserPicksForWeek = async (
 		.andWhere('P.UserID = :userID', { userID })
 		.andWhere('G.GameWeek = :week', { week })
 		.getMany();
+
+export const shouldAutoPickHome = (type: AutoPickStrategy): boolean => {
+	if (type === AutoPickStrategy.Home) return true;
+
+	if (type === AutoPickStrategy.Away) return false;
+
+	return Math.random() < 0.5;
+};
 
 // ts-prune-ignore-next
 export const updateMissedPicks = async (game: Game): Promise<void> => {
@@ -46,6 +55,7 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 		for (let point = 1; point <= usedResult.length; point++) {
 			if (used.includes(point)) continue;
 
+			//TODO: get if they have auto picks turned on and left to set team here if so
 			pick.pickPoints = point;
 			await pick.save();
 			break;
