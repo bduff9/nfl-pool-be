@@ -61,7 +61,7 @@
     "graphql": "15.5.1",
     "handlebars": "4.7.7",
     "io-ts": "2.2.16",
-    "mjml": "<4.10.0",
+    "mjml": "4.10.2",
     "mysql2": "2.2.5",
     "mysqldump": "3.2.0",
     "node-sass": "6.0.1",
