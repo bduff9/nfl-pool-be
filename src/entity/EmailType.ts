@@ -20,6 +20,7 @@ enum EmailType {
 	newUser = 'newUser',
 	pickReminder = 'pickReminder',
 	quickPick = 'quickPick',
+	quickPickConfirmation = 'quickPickConfirmation',
 	survivorReminder = 'survivorReminder',
 	untrusted = 'untrusted',
 	verification = 'verification',

@@ -1,0 +1,10 @@
+Quick {{ user.userFirstName }}!
+
+You have not made your pick for game 1 of week {{ week }} yet and you now have less than {{ hoursLeft }} hours.
+
+You can avoid losing points for this game by simply clicking one of the teams below to set your pick.
+
+Note: This email is only good up until kickoff of this game, so act now to avoid losing points for this week!
+
+Click here to pick the visiting team, the {{ visitorTeam.teamCity }} {{ visitorTeam.teamName }}: {{ domain }}/quick-pick/{{ user.userID }}/{{ visitorTeam.teamID }}
+click here to pick the home team, the {{ homeTeam.teamCity }} {{ homeTeam.teamName }}: {{ domain }}/quick-pick/{{ user.userID }}/{{ homeTeam.teamID }}
