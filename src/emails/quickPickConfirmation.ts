@@ -13,30 +13,37 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, User } from '../entity';
+import { Pick, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendQuickPickConfirmationEmail = async (user: User, week: number): Promise<void> => {
-	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
-		relations: ['homeTeam', 'visitorTeam'],
-		where: { gameNumber: 1, gameWeek: week },
-	});
-
-	//TODO: Need field for selected quick pick team ID so we can pull things like quickPick.teamCity, quickPick.teamName, quickPick.teamPrimaryColor.
-	//TODO: If possible, get other team (not selected to win)
+	const quickPick = await Pick.createQueryBuilder('P')
+		.innerJoinAndSelect('P.game', 'G')
+		.innerJoinAndSelect('P.team', 'T')
+		.innerJoinAndSelect('G.homeTeam', 'HT')
+		.innerJoinAndSelect('G.visitorTeam', 'VT')
+		.where('P.UserID = :userID', { userID: user.userID })
+		.andWhere('G.GameNumber = 1')
+		.andWhere('G.GameWeek = :week', { week })
+		.getOneOrFail();
+	const quickPickSelected = quickPick.team;
+	const quickPickNotSelected =
+		quickPick.teamID === quickPick.game.homeTeamID
+			? quickPick.game.visitorTeam
+			: quickPick.game.homeTeam;
 
 	try {
 		await sendEmail({
-			locals: { homeTeam, user, visitorTeam, week },
+			locals: { quickPickNotSelected, quickPickSelected, user, week },
 			to: [user.userEmail],
 			type: EmailType.quickPickConfirmation,
 		});
 	} catch (error) {
 		log.error('Failed to send quick pick email:', {
 			error,
-			locals: { homeTeam, user, visitorTeam, week },
+			locals: { quickPickNotSelected, quickPickSelected, user, week },
 			to: [user.userEmail],
 			type: EmailType.quickPickConfirmation,
 		});
