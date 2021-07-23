@@ -1,63 +1,66 @@
-<mjml>
+<mjml owa="desktop" version="4.6.3">
   <mj-head>
     <mj-title>Week {{ week }} results</mj-title>
     <mj-preview>{{{formatPreview 'Here is your official weekly email from the NFL Confidence Pool commissioners'}}}</mj-preview>
-    <mj-attributes>
-      <mj-all font-family="Helvetica, Arial, sans-serif" color="#444444" />
-    </mj-attributes>
+    {{> styles }}
     <mj-style inline="inline">
-      .container {
-        max-width: 600px;
+      .weekly ul {
+        list-style-type: none;
+        padding-left: 0px;
+        margin-top: 2px;
       }
 
-      .link {
-        text-decoration: none;
-        font-size: 16px;
-        color: #346df1;
+      .weekly li {
+        font-size: 15px;
+      }
+
+      .weekly h3 {
+        margin-bottom: 8px;
+      }
+
+      .messages li {
+        line-height: 1.3;
+        padding-bottom: 5px;
+        padding-top: 5px;
       }
     </mj-style>
   </mj-head>
   <mj-body>
-    <mj-section background-color="#F9F9F9" full-width="full-width">
-      <mj-column width="100%" css-class="container">
-        <mj-text align="center" padding="0 0 25px 0" font-size="22px">
-          <strong>{{ domain }}</strong>
-          &nbsp; | &nbsp;
-          <a href="{{ browserLink }}" class="link">View online version</a>
-        </mj-text>
-      </mj-column>
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="30px 0 15px 0" font-size="18px" align="center">
-          <h1>Hello {{ user.userFirstName }},</h1>
+    {{> header }}
 
-          <h2>Your messages</h2>
-          <ul>
+    <mj-section padding="0px" text-align="center">
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text css-class="weekly" padding="30px 5px 15px 5px" font-size="18px" align="center" line-height="1.4">
+          <h3 style="margin-top: 10px;">{{ user.userFirstName }}'s Messages</h3>
+          <ul class="messages">
             {{#each userMessages}}
               <li>{{ this }}</li>
             {{/each}}
           </ul>
 
-          <h2>Confidence Pool update</h2>
+          <h3>Confidence Pool Update</h3>
           <ul>
             {{#each poolUpdates}}
               <li>{{ this }}</li>
             {{/each}}
           </ul>
 
-          <h2>Survivor Pool update</h2>
+          <h3>Survivor Pool Update</h3>
           <ul>
             {{#each survivorUpdates}}
               <li>{{ this }}</li>
             {{/each}}
           </ul>
         </mj-text>
-        <mj-text padding="30px 0 15px 0" font-size="18px" align="center">
-          View full standings here:
-        </mj-text>
-        <mj-button padding="20px 0" border-radius="5px" background-color="#346df1" href="{{ domain }}/" font-size="18px" color="#fff" border="1px solid #346df1" font-weight="bold">
-          Go to pool
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">View Full Standings</span>
         </mj-button>
+        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
+          <span>If you did not request this email you can safely ignore it.</span>
+        </mj-text>
       </mj-column>
     </mj-section>
+
+    {{> footer }}
   </mj-body>
 </mjml>
