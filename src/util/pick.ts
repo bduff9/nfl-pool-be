@@ -16,6 +16,8 @@
 import { Game, Pick } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 
+import { log } from './logging';
+
 export const getUserPicksForWeek = async (
 	leagueID: number,
 	userID: number,
@@ -39,7 +41,10 @@ export const shouldAutoPickHome = (type: AutoPickStrategy): boolean => {
 
 // ts-prune-ignore-next
 export const updateMissedPicks = async (game: Game): Promise<void> => {
-	const missed = await Pick.find({ where: { teamID: null, gameID: game.gameID } });
+	const missed = await Pick.find({
+		relations: ['game', 'user'],
+		where: { teamID: null, gameID: game.gameID },
+	});
 
 	for (const pick of missed) {
 		if (pick.pickPoints) continue;
@@ -47,6 +52,7 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 		const usedResult = await Pick.createQueryBuilder('P')
 			.select('P.PickPoints', 'points')
 			.innerJoin('P.game', 'G')
+			.innerJoinAndSelect('P.user', 'U')
 			.where('G.GameWeek = :week', { week: game.gameWeek })
 			.andWhere('P.UserID = :userID', { userID: pick.userID })
 			.getRawMany<{ points: number }>();
@@ -55,7 +61,21 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 		for (let point = 1; point <= usedResult.length; point++) {
 			if (used.includes(point)) continue;
 
-			//TODO: get if they have auto picks turned on and left to set team here if so
+			if (pick.user.userAutoPickStrategy && pick.user.userAutoPicksLeft > 0) {
+				pick.user.userAutoPicksLeft -= 1;
+				await pick.user.save();
+
+				if (shouldAutoPickHome(pick.user.userAutoPickStrategy)) {
+					pick.teamID = pick.game.homeTeamID;
+				} else {
+					pick.teamID = pick.game.visitorTeamID;
+				}
+
+				log.info('Auto picked for user', { pick });
+			} else {
+				log.info('Auto assigned points for missed pick', { pick });
+			}
+
 			pick.pickPoints = point;
 			await pick.save();
 			break;
