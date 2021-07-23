@@ -32,6 +32,14 @@ export const connectionPromise = createConnection({
 	entities: Object.values(entities),
 	migrations: [],
 	subscribers: [],
+}).then(async connection => {
+	const timeZone = 'US/Central';
+
+	await connection.manager.query(
+		`SET @@global.time_zone = '${timeZone}', @@session.time_zone = '${timeZone}'`,
+	);
+
+	return connection;
 });
 
 // ts-prune-ignore-next
