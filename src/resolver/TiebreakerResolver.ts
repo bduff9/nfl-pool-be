@@ -15,6 +15,7 @@
  */
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 
+import sendPicksSubmittedEmail from '../emails/picksSubmitted';
 import { Game, Pick, Tiebreaker } from '../entity';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -102,6 +103,7 @@ export class TiebreakerResolver {
 
 		const picks = await Pick.createQueryBuilder('P')
 			.innerJoinAndSelect('P.game', 'G')
+			.innerJoinAndSelect('P.team', 'T')
 			.where('P.UserID = :userID', { userID: user.userID })
 			.andWhere('G.GameWeek = :week', { week })
 			.orderBy('P.PickPoints', 'ASC')
@@ -135,6 +137,7 @@ export class TiebreakerResolver {
 
 		myTiebreaker.tiebreakerHasSubmitted = true;
 		await myTiebreaker.save();
+		await sendPicksSubmittedEmail(user, week, picks, myTiebreaker);
 
 		return myTiebreaker;
 	}

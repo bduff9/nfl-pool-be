@@ -13,25 +13,31 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import { Pick, Tiebreaker, User } from '../entity';
+import EmailType from '../entity/EmailType';
+import { sendEmail } from '../util/email';
+import { log } from '../util/logging';
 
-enum EmailType {
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	picksSubmitted = 'picksSubmitted',
-	quickPick = 'quickPick',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+const sendPicksSubmittedEmail = async (
+	user: User,
+	week: number,
+	picks: Array<Pick>,
+	tiebreaker: Tiebreaker,
+): Promise<void> => {
+	try {
+		await sendEmail({
+			locals: { picks, tiebreaker, user, week },
+			to: [user.userEmail],
+			type: EmailType.picksSubmitted,
+		});
+	} catch (error) {
+		log.error('Failed to send picks submitted email:', {
+			error,
+			locals: { picks, tiebreaker, user, week },
+			to: [user.userEmail],
+			type: EmailType.picksSubmitted,
+		});
+	}
+};
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
-
-export default EmailType;
+export default sendPicksSubmittedEmail;
