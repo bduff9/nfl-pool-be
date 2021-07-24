@@ -14,10 +14,12 @@
  * Home: https://asitewithnoname.com/
  */
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
+import { Brackets } from 'typeorm';
 
 import { Game, Pick, Tiebreaker } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
-import { shouldAutoPickHome } from '../util/pick';
+import { log } from '../util/logging';
+import { getLowestUnusedPoint, shouldAutoPickHome } from '../util/pick';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Pick)
@@ -226,5 +228,76 @@ export class PickResolver {
 			.where('G.GameWeek = :week', { week })
 			.andWhere('P.UserID = :userID', { userID: user.userID })
 			.getMany();
+	}
+
+	@Authorized<TUserType>('anonymous')
+	@Mutation(() => Boolean)
+	async quickPick (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('TeamID', () => Int) teamID: number,
+		@Ctx() context: TCustomContext,
+	): Promise<true> {
+		const { user } = context;
+		const givenUserID = user?.userID;
+
+		if (givenUserID && givenUserID !== userID) {
+			log.error('Passed user ID does not match context', { teamID, user, userID });
+
+			return true;
+		}
+
+		const game = await Game.createQueryBuilder('G')
+			.innerJoinAndSelect('G.homeTeam', 'HT')
+			.innerJoinAndSelect('G.visitorTeam', 'VT')
+			.where('G.GameNumber = 1')
+			.andWhere('yearweek(G.GameKickoff) = yearweek(CURRENT_TIMESTAMP)')
+			.andWhere('G.GameKickoff > CURRENT_TIMESTAMP')
+			.andWhere(
+				new Brackets(qb => {
+					qb.where('G.HomeTeamID = :teamID', {
+						teamID,
+					}).orWhere('G.VisitorTeamID = :teamID', { teamID });
+				}),
+			)
+			.getOne();
+
+		if (!game) {
+			log.error('No matching game found', { teamID, user, userID });
+
+			return true;
+		}
+
+		const pick = await Pick.createQueryBuilder('P')
+			.innerJoinAndSelect('P.user', 'U')
+			.where('P.GameID = :gameID', { gameID: game.gameID })
+			.andWhere('P.UserID = :userID', { userID })
+			.getOneOrFail();
+
+		if (pick.teamID || pick.pickPoints) {
+			log.error('Pick has already been made', { game, pick, teamID, user, userID });
+
+			return true;
+		}
+
+		const lowestPoint = await getLowestUnusedPoint(game.gameWeek, userID);
+
+		if (lowestPoint === null) {
+			log.error(
+				'Quick pick failed because user has not made this pick but also has no points left to use',
+				{ game, pick, teamID, userID },
+			);
+			throw new Error(
+				'Quick pick failed because user has not made this pick but also has no points left to use',
+			);
+		}
+
+		pick.teamID = teamID;
+		pick.pickPoints = lowestPoint;
+		await pick.save();
+		//FIXME: remove the below once BA's PR gets merged to develop
+		//@ts-ignore
+		await sendQuickPickConfirmationEmail(pick.user, teamID, lowestPoint, game);
+
+		return true;
 	}
 }
