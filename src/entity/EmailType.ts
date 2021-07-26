@@ -21,6 +21,7 @@ enum EmailType {
 	pickReminder = 'pickReminder',
 	picksSubmitted = 'picksSubmitted',
 	quickPick = 'quickPick',
+	quickPickConfirmation = 'quickPickConfirmation',
 	survivorReminder = 'survivorReminder',
 	untrusted = 'untrusted',
 	verification = 'verification',
