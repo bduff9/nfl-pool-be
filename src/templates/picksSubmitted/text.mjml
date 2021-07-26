@@ -1,0 +1,14 @@
+Hi {{ user.userFirstName }},
+
+This is a confirmation that your week {{ week }} picks have been submitted.
+
+Your picks are:
+
+{{#each picks}}
+  {{#if this.teamID}}{{ this.team.teamShortName }}{{else}}Missed{{/if}} - {{ this.pickPoints }}
+{{/each}}
+
+Tiebreaker Score: {{ tiebreaker.tiebreakerLastScore }}
+
+You can also use the link below to view everyone's submitted picks:
+{{ domain }}/picks/viewall

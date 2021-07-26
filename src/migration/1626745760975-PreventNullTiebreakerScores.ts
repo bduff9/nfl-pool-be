@@ -13,26 +13,23 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-enum EmailType {
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	picksSubmitted = 'picksSubmitted',
-	quickPick = 'quickPick',
-	quickPickConfirmation = 'quickPickConfirmation',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
+// ts-prune-ignore-next
+export class PreventNullTiebreakerScores1626745760975 implements MigrationInterface {
+	public async up (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(
+			`update Tiebreakers set TiebreakerLastScore = 0 where TiebreakerLastScore is null`,
+		);
+		await queryRunner.query(
+			`alter table Tiebreakers modify TiebreakerLastScore int default 0 not null`,
+		);
+	}
+
+	public async down (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(
+			`update Tiebreakers set TiebreakerLastScore = null where TiebreakerLastScore = 0`,
+		);
+		await queryRunner.query(`alter table Tiebreakers modify TiebreakerLastScore int null`);
+	}
 }
-
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
-
-export default EmailType;

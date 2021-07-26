@@ -75,9 +75,9 @@ export class Tiebreaker extends BaseEntity {
 	@Max(17)
 	public tiebreakerWeek!: number;
 
-	@Field(() => Int, { nullable: true })
-	@Column('int', { default: null, name: 'TiebreakerLastScore', nullable: true })
-	public tiebreakerLastScore!: null | number;
+	@Field(() => Int, { nullable: false })
+	@Column('int', { default: 0, name: 'TiebreakerLastScore', nullable: false })
+	public tiebreakerLastScore!: number;
 
 	@Field(() => Boolean, { nullable: false })
 	@Column('boolean', {
