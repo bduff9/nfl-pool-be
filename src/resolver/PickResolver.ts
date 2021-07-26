@@ -16,6 +16,7 @@
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 import { Brackets } from 'typeorm';
 
+import sendQuickPickConfirmationEmail from '../emails/quickPickConfirmation';
 import { Game, Pick, Tiebreaker } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import { log } from '../util/logging';
@@ -26,10 +27,12 @@ import { TCustomContext, TUserType } from '../util/types';
 export class PickResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Pick])
-	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Pick[]> {
+	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Array<Pick>> {
 		return Pick.createQueryBuilder('P')
 			.innerJoinAndSelect('P.game', 'G')
+			.innerJoinAndSelect('G.winnerTeam', 'WT')
 			.innerJoinAndSelect('P.team', 'T')
+			.innerJoinAndSelect('P.user', 'U')
 			.where('G.gameWeek = :week', { week })
 			.getMany();
 	}
@@ -294,8 +297,6 @@ export class PickResolver {
 		pick.teamID = teamID;
 		pick.pickPoints = lowestPoint;
 		await pick.save();
-		//FIXME: remove the below once BA's PR gets merged to develop
-		//@ts-ignore
 		await sendQuickPickConfirmationEmail(pick.user, teamID, lowestPoint, game);
 
 		return true;
