@@ -1,7 +1,10 @@
 Your week {{ week }} game 1 pick has been saved.
 
-You picked the {{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }} to beat the {{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}
+You picked the
+{{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }}
+to beat the
+{{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}.
 
-You can copy and paste the link below to finish your picks.
+You can copy and paste the link below to finish your picks:
 
 {{ domain }}/picks/set
