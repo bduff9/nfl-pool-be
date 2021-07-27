@@ -23,7 +23,7 @@
     <mj-section padding="0px" text-align="center">
       <mj-column width="100%" background-color="#fff" border-radius="10px">
         <mj-text padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
-          <p>Hello,</p>
+          <p>Hello {{#if hasName}}{{ user.userFirstName }}{{/if}},</p>
 
           <p>You are getting this email because you either indicated an interest in participating in the {{ poolYear }} confidence pool or we thought you would be interested. All players are welcome, so even if you are not interested, please feel free to forward this along appropriately.</p>
 
@@ -31,10 +31,9 @@
             pick the winner of each game for the current week. When making your selections, you will assign a point value,
             or "confidence" value, based on how sure you are of each pick. 1 means it could go either way and 16 means it's
             a sure thing. If you are right, you win that amount of points and the player with the highest point total wins. Payouts are done to
-            the winner(s) each week and top 3 places at the end for the overall score. More general details about confidence pools
-            can be found here:</p>
+            the winner(s) each week and top 3 places at the end for the overall score. More details and rules about the confidence pool can be found here:</p>
 
-          <p><a href="http://ezinearticles.com/?How-to-Play-Fantasy-Football-Confidence-Pools&id=2596977">How to Play NFL Confidence Pools</a></p>
+          <p><a href="{{ domain }}/support">Support Page</a></p>
 
           <p class="subtitle">Registering</p>
 
@@ -54,7 +53,7 @@
 
           <p class="subtitle">Entry Fees and Payouts</p>
           <p>The cost for this confidence pool is {{ poolCost }} per person for the whole season. The survivor pool mini game is
-            {{ survivorCost }} for the whole season which you can sign up for in the pool after registering. Please pay by your total entry fee by the end of the third week of the season (before the end of {{ payByDate }}). Payouts will be announced after that and will be based
+            {{ survivorCost }} for the whole season which you can sign up for during or after registration. Please pay by your total entry fee by the end of the third week of the season (before the end of {{ payByDate }}). Payouts will be announced after that and will be based
             on how many people sign up. The more people who participate the better, as the payouts will be higher, so invite
             anyone who you think may be interested. New players will be accepted up until the start of the third week and
             will be assigned the number of points from the lowest score for the previous weeks.

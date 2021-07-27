@@ -6,13 +6,11 @@ For those of you who have never done a confidence pool before, they are very eas
 pick the winner of each game for the current week. When making your selections, you will assign a point value,
 or "confidence" value, based on how sure you are of each pick. 1 means it could go either way and 16 means it's
 a sure thing. If you are right, you win that amount of points and the player with the highest point total wins. Payouts are done to
-the winner(s) each week and top 3 places at the end for the overall score. More general details about confidence pools
-can be found here:
+the winner(s) each week and top 3 places at the end for the overall score. More details about the confidence pool can be found here:
 
-http://ezinearticles.com/?How-to-Play-Fantasy-Football-Confidence-Pools&id=2596977
+{{ domain }}/support
 
 Registering:
-
 If you have played previously, you can click the button at the bottom of this email and sign in to complete registration for this upcoming season.
 
 If you are a new player, welcome! You will also need to click the button below, however, you will need to register. You have
@@ -29,7 +27,7 @@ There is also an optional mini-game survivor pool. If you've never taken part in
 
 Entry Fees and Payouts
 The cost for this confidence pool is {{ poolCost }} per person for the whole season. The survivor pool mini game is
-{{ survivorCost }} for the whole season which you can sign up for in the pool after registering. Please pay by your total entry fee by the end of the third week of the season (before the end of {{ payByDate }}). Payouts will be announced after that and will be based
+{{ survivorCost }} for the whole season which you can sign up for in the pool after registering. Please pay your total entry fee by the end of the third week of the season (before the end of {{ payByDate }}). Payouts will be announced after that and will be based
 on how many people sign up. The more people who participate the better, as the payouts will be higher, so invite
 anyone who you think may be interested. New players will be accepted up until the start of the third week and
 will be assigned the number of points from the lowest score for the previous weeks.
