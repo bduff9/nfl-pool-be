@@ -13,37 +13,32 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Pick, User } from '../entity';
+import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendQuickPickConfirmationEmail = async (user: User, week: number): Promise<void> => {
-	const quickPick = await Pick.createQueryBuilder('P')
-		.innerJoinAndSelect('P.game', 'G')
-		.innerJoinAndSelect('P.team', 'T')
-		.innerJoinAndSelect('G.homeTeam', 'HT')
-		.innerJoinAndSelect('G.visitorTeam', 'VT')
-		.where('P.UserID = :userID', { userID: user.userID })
-		.andWhere('G.GameNumber = 1')
-		.andWhere('G.GameWeek = :week', { week })
-		.getOneOrFail();
-	const quickPickSelected = quickPick.team;
-	const quickPickNotSelected =
-		quickPick.teamID === quickPick.game.homeTeamID
-			? quickPick.game.visitorTeam
-			: quickPick.game.homeTeam;
+const sendQuickPickConfirmationEmail = async (
+	user: User,
+	teamID: number,
+	point: number,
+	game: Game,
+): Promise<void> => {
+	const [quickPickSelected, quickPickNotSelected] =
+		teamID === game.homeTeamID
+			? [game.homeTeam, game.visitorTeam]
+			: [game.visitorTeam, game.homeTeam];
 
 	try {
 		await sendEmail({
-			locals: { quickPickNotSelected, quickPickSelected, user, week },
+			locals: { point, quickPickNotSelected, quickPickSelected, user, week: game.gameWeek },
 			to: [user.userEmail],
 			type: EmailType.quickPickConfirmation,
 		});
 	} catch (error) {
 		log.error('Failed to send quick pick email:', {
 			error,
-			locals: { quickPickNotSelected, quickPickSelected, user, week },
+			locals: { point, quickPickNotSelected, quickPickSelected, user, week: game.gameWeek },
 			to: [user.userEmail],
 			type: EmailType.quickPickConfirmation,
 		});
