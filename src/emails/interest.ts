@@ -31,18 +31,17 @@ const sendInterestEmail = async (user: User): Promise<void> => {
 	const payByDate = formatter.format(payByDateRaw);
 	const poolCost = await getPoolCost();
 	const survivorCost = await getSurvivorCost();
-	const hasName = !!user.userFirstName;
 
 	try {
 		await sendEmail({
-			locals: { hasName, payByDate, poolCost, poolYear, survivorCost, user },
+			locals: { payByDate, poolCost, poolYear, survivorCost, user },
 			to: [user.userEmail],
 			type: EmailType.interest,
 		});
 	} catch (error) {
 		log.error('Failed to send interest email:', {
 			error,
-			locals: { hasName, payByDate, poolCost, poolYear, survivorCost, user },
+			locals: { payByDate, poolCost, poolYear, survivorCost, user },
 			to: [user.userEmail],
 			type: EmailType.interest,
 		});
