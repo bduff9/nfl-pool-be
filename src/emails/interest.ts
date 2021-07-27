@@ -17,26 +17,33 @@ import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
-//TODO: Need payByDate, poolCost, poolYear, survivorCost substitutions
+import {
+	getPaymentDueDate,
+	getPoolCost,
+	getSurvivorCost,
+	getSystemYear,
+} from '../util/systemValue';
 
-const sendInterestEmail = async (email: string, user: User): Promise<void> => {
-	const payByDate = '';
-	const poolCost = '';
-	const poolYear = '';
-	const survivorCost = '';
+const sendInterestEmail = async (user: User): Promise<void> => {
+	const poolYear = await getSystemYear();
+	const payByDateRaw = await getPaymentDueDate();
+	const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
+	const payByDate = formatter.format(payByDateRaw);
+	const poolCost = await getPoolCost();
+	const survivorCost = await getSurvivorCost();
 	const hasName = !!user.userFirstName;
 
 	try {
 		await sendEmail({
-			locals: { email, hasName, payByDate, poolCost, poolYear, survivorCost, user },
-			to: [email],
+			locals: { hasName, payByDate, poolCost, poolYear, survivorCost, user },
+			to: [user.userEmail],
 			type: EmailType.interest,
 		});
 	} catch (error) {
 		log.error('Failed to send interest email:', {
 			error,
-			locals: { email, hasName, payByDate, poolCost, poolYear, survivorCost, user },
-			to: [email],
+			locals: { hasName, payByDate, poolCost, poolYear, survivorCost, user },
+			to: [user.userEmail],
 			type: EmailType.interest,
 		});
 	}

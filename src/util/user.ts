@@ -14,12 +14,10 @@
  * Home: https://asitewithnoname.com/
  */
 import {
-	Game,
 	League,
 	Notification,
 	OverallMV,
 	Pick,
-	SystemValue,
 	Tiebreaker,
 	User,
 	UserLeague,
@@ -28,6 +26,7 @@ import {
 import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { registerForSurvivor } from './survivor';
+import { getPaymentDueDate, getPoolCost, getSurvivorCost } from './systemValue';
 
 // ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
@@ -65,40 +64,21 @@ export const getAllRegisteredUsers = async (): Promise<Array<User>> => {
 
 export const getUserAlerts = async (user: User): Promise<Array<string>> => {
 	const alerts: Array<string> = [];
-	const poolCostStr =
-		(
-			await SystemValue.findOneOrFail({
-				where: { systemValueName: 'PoolCost' },
-			})
-		).systemValueValue || '0';
-	const survivorCostStr =
-		(
-			await SystemValue.findOneOrFail({
-				where: { systemValueName: 'SurvivorCost' },
-			})
-		).systemValueValue || '0';
-	let owe = +poolCostStr;
+	const poolCost = await getPoolCost();
+	const survivorCost = await getSurvivorCost();
+	let owe = poolCost;
 
 	if (user.userPlaysSurvivor) {
-		owe += +survivorCostStr;
+		owe += survivorCost;
 	}
 
 	if (owe > user.userPaid) {
-		const paymentDueWeekStr =
-			(
-				await SystemValue.findOneOrFail({
-					where: { systemValueName: 'PaymentDueWeek' },
-				})
-			).systemValueValue || '0';
-		const dueDate = (
-			await Game.findOneOrFail({
-				order: { gameKickoff: 'DESC' },
-				where: { gameWeek: +paymentDueWeekStr },
-			})
-		).gameKickoff;
+		const paymentDueDate = await getPaymentDueDate();
 		const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
 
-		alerts.push(`Please pay $${owe - user.userPaid} by ${formatter.format(dueDate)}`);
+		alerts.push(
+			`Please pay $${owe - user.userPaid} by ${formatter.format(paymentDueDate)}`,
+		);
 	}
 
 	return alerts;
