@@ -1,4 +1,4 @@
-Hello{{ user.userFirstName }},
+Hello {{ user.userFirstName }},
 
 You are getting this email because you either indicated an interest in participating in the {{ poolYear }} confidence pool or we thought you would be interested. All players are welcome, so even if you are not interested, please feel free to forward this along appropriately.
 
