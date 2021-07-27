@@ -13,27 +13,31 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import EmailType from '../entity/EmailType';
+import { sendEmail } from '../util/email';
+import { log } from '../util/logging';
+//TODO: Need payByDate, poolCost, poolYear, survivorCost substitutions
 
-enum EmailType {
-	interest = 'interest',
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	picksSubmitted = 'picksSubmitted',
-	quickPick = 'quickPick',
-	quickPickConfirmation = 'quickPickConfirmation',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+const sendInterestEmail = async (email: string): Promise<void> => {
+	const payByDate = '';
+	const poolCost = '';
+	const poolYear = '';
+	const survivorCost = '';
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
+	try {
+		await sendEmail({
+			locals: { email, payByDate, poolCost, poolYear, survivorCost },
+			to: [email],
+			type: EmailType.interest,
+		});
+	} catch (error) {
+		log.error('Failed to send interest email:', {
+			error,
+			locals: { email, payByDate, poolCost, poolYear, survivorCost },
+			to: [email],
+			type: EmailType.interest,
+		});
+	}
+};
 
-export default EmailType;
+export default sendInterestEmail;
