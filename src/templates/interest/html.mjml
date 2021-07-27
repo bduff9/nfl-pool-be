@@ -23,7 +23,7 @@
     <mj-section padding="0px" text-align="center">
       <mj-column width="100%" background-color="#fff" border-radius="10px">
         <mj-text padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
-          <p>Hello{{ user.userFirstName }},</p>
+          <p>Hello {{ user.userFirstName }},</p>
 
           <p>You are getting this email because you either indicated an interest in participating in the {{ poolYear }} confidence pool or we thought you would be interested. All players are welcome, so even if you are not interested, please feel free to forward this along appropriately.</p>
 
