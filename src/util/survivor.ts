@@ -13,10 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { SurvivorPick, SystemValue, User } from '../entity';
+import { SurvivorPick, User } from '../entity';
 
 import { ADMIN_USER } from './constants';
 import { log } from './logging';
+import { getPoolCost } from './systemValue';
 
 const markUserDead = async (userID: number, week: number): Promise<void> => {
 	await SurvivorPick.createQueryBuilder()
@@ -33,10 +34,7 @@ const markUserDead = async (userID: number, week: number): Promise<void> => {
 // ts-prune-ignore-next
 export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> => {
 	if (week === 1) {
-		const systemValues = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'PoolCost' },
-		});
-		const poolCost = +(systemValues.systemValueValue ?? '0');
+		const poolCost = await getPoolCost();
 		const users = await SurvivorPick.createQueryBuilder('SP')
 			.innerJoin('SP.user', 'U')
 			.where('U.UserPaid <= :poolCost', { poolCost })

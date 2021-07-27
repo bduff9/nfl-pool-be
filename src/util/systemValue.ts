@@ -13,7 +13,38 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { SystemValue } from '../entity';
+import { Game, SystemValue } from '../entity';
+
+export const getPaymentDueDate = async (): Promise<Date> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'PaymentDueWeek' },
+	});
+	const dueWeek = +(systemValue.systemValueValue ?? '0');
+	const lastGame = await Game.findOneOrFail({
+		order: { gameKickoff: 'DESC' },
+		where: { gameWeek: dueWeek },
+	});
+
+	return new Date(lastGame.gameKickoff);
+};
+
+export const getPoolCost = async (): Promise<number> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'PoolCost' },
+	});
+	const cost = +(systemValue.systemValueValue ?? '0');
+
+	return cost;
+};
+
+export const getSurvivorCost = async (): Promise<number> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'SurvivorCost' },
+	});
+	const cost = +(systemValue.systemValueValue ?? '0');
+
+	return cost;
+};
 
 export const getSystemYear = async (): Promise<number> => {
 	const systemValue = await SystemValue.findOneOrFail({

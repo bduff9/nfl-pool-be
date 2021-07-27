@@ -19,6 +19,7 @@ import { LessThanOrEqual } from 'typeorm';
 import { User, Payment, SystemValue, WeeklyMV, OverallMV, SurvivorMV } from '../entity';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { addOrdinal } from '../util/numbers';
+import { getPoolCost, getSurvivorCost } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Payment)
@@ -36,30 +37,24 @@ export class PaymentResolver {
 		const { userDoneRegistering, userID, userPaid, userPlaysSurvivor } = user;
 
 		if (userDoneRegistering) {
-			const poolCost = await SystemValue.findOneOrFail({
-				where: { systemValueName: 'PoolCost' },
-			});
-			const cost = parseInt(poolCost.systemValueValue || '0', 10);
+			const poolCost = await getPoolCost();
 
 			payments.push({
 				paymentDescription: 'Confidence Pool',
 				paymentWeek: null,
-				paymentAmount: cost * -1,
+				paymentAmount: poolCost * -1,
 				paymentUser: user,
 				userID,
 			});
 		}
 
 		if (userPlaysSurvivor) {
-			const poolCost = await SystemValue.findOneOrFail({
-				where: { systemValueName: 'SurvivorCost' },
-			});
-			const cost = parseInt(poolCost.systemValueValue || '0', 10);
+			const poolCost = await getSurvivorCost();
 
 			payments.push({
 				paymentDescription: 'Survivor Pool',
 				paymentWeek: null,
-				paymentAmount: cost * -1,
+				paymentAmount: poolCost * -1,
 				paymentUser: user,
 				userID,
 			});
