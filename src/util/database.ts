@@ -33,7 +33,8 @@ export const connectionPromise = createConnection({
 	migrations: [],
 	subscribers: [],
 }).then(async connection => {
-	const timeZone = 'US/Central';
+	//FIXME: Change this back to central time if we get our own server, or we have to update this for DST
+	const timeZone = '-05:00'; //'US/Central';
 
 	await connection.manager.query(`SET @@session.time_zone = '${timeZone}'`);
 
