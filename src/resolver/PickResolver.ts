@@ -29,10 +29,14 @@ export class PickResolver {
 	@Query(() => [Pick])
 	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Array<Pick>> {
 		return Pick.createQueryBuilder('P')
-			.innerJoinAndSelect('P.game', 'G')
-			.innerJoinAndSelect('G.winnerTeam', 'WT')
-			.innerJoinAndSelect('P.team', 'T')
 			.innerJoinAndSelect('P.user', 'U')
+			.innerJoinAndSelect('P.game', 'G')
+			.leftJoinAndSelect('P.team', 'T')
+			.innerJoinAndSelect('G.homeTeam', 'HT')
+			.innerJoinAndSelect('G.visitorTeam', 'VT')
+			.leftJoinAndSelect('G.winnerTeam', 'WT')
+			.orderBy('P.UserID', 'ASC')
+			.addOrderBy('P.GameID', 'ASC')
 			.where('G.gameWeek = :week', { week })
 			.getMany();
 	}
