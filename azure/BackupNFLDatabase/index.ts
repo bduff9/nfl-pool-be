@@ -77,6 +77,7 @@ const timerTrigger: AzureFunction = async (
 		dump: {
 			data: {
 				format: false,
+				lockTables: true,
 				maxRowsPerInsertStatement: 9999,
 				verbose: true,
 			},
