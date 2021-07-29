@@ -35,6 +35,7 @@ export default allowCors(
 		try {
 			if (req.method === 'POST') {
 				log.info('Incoming request:', req.method, req.body);
+				//TODO: parse incoming event and write it to log table
 			}
 
 			res.statusCode = 200;
