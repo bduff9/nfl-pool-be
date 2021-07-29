@@ -2,6 +2,8 @@ Your week {{ week }} game 1 pick has been saved.
 
 You picked the {{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }} to beat the {{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}
 
+{{ point }} points has been automatically assigned to this game based on your preferences.
+
 You can copy and paste the link below to finish your picks.
 
 {{ domain }}/picks/set
