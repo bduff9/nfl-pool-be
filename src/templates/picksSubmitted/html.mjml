@@ -36,7 +36,7 @@
           <p>Your picks are:</p>
           <ul>
             {{#each picks}}
-              <li>{{#if this.teamID}}{{ this.team.teamShortName }}{{else}}Missed{{/if}} - {{ this.pickPoints }}</li>
+              <li>{{ this.pickPoints }} - {{#if this.teamID}}{{ this.team.teamCity }} {{ this.team.teamName }}{{else}}Missed Pick{{/if}}</li>
             {{/each}}
           </ul>
           <p>Tiebreaker Score: {{ tiebreaker.tiebreakerLastScore }}</p>
