@@ -33,20 +33,21 @@ export default allowCors(
 		await connectionPromise;
 
 		try {
-			// if (req.method === 'POST') {
-			log.info('Incoming request', req.method, req.body);
-			// }
+			if (req.method === 'POST') {
+				log.info('Incoming request:', req.method, req.body);
+			}
 
 			res.statusCode = 200;
 		} catch (error) {
-			log.error('Error during verification email request:', error);
+			log.error('Error during email event log SNS request:', error);
 			Sentry.captureException(error);
 			res.status(500).send({
 				status: 'error',
-				message: 'Error during verification email request',
+				message: 'Error during email event log SNS request',
 			});
 		} finally {
 			transaction.finish();
+			res.end();
 		}
 	},
 );
