@@ -11,7 +11,7 @@
       <mj-column width="100%" background-color="#fff" border-radius="10px">
         <mj-text padding="30px 25px 15px 25px" font-size="18px" align="center" line-height="1.4">
           <h2>Phew {{ user.userFirstName }},</h2>
-          <p>That was a close one! Your week {{ week }} game 1 pick has been saved.</p>
+          <p>That was a close one! Your week {{ week }} game 1 pick has been saved for {{ point }} points.</p>
           <p style="font-size: smaller;">You picked the:</p>
           <p style="font-size: 30px; color: {{ quickPickSelected.teamPrimaryColor }}; font-weight: bold; margin-bottom: 5px;">{{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }}</p>
           <p style="font-size: smaller;">to beat the</p>
