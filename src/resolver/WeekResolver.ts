@@ -29,6 +29,17 @@ import { TUserType } from '../util/types';
 
 @Resolver(Week)
 export class WeekResolver {
+	//FIXME: Remove this once we have confirmed timestamps are 100% identical between BE and FE
+	@Authorized<TUserType>('anonymous')
+	@Query(() => Date)
+	async getTime (): Promise<Date> {
+		const [{ time }]: Array<{ time: Date }> = await Game.query(
+			`select CURRENT_TIMESTAMP as time`,
+		);
+
+		return time;
+	}
+
 	@Authorized<TUserType>('registered')
 	@Query(() => Week)
 	async getWeek (@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
