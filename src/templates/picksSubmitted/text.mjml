@@ -5,7 +5,7 @@ This is a confirmation that your week {{ week }} picks have been submitted.
 Your picks are:
 
 {{#each picks}}
-  {{ this.pickPoints }} - {{#if this.teamID}}{{ this.team.teamCity }} {{ this.team.teamShortName }}{{else}}Missed Pick{{/if}}
+  {{ this.pickPoints }} - {{#if this.teamID}}{{ this.team.teamCity }} {{ this.team.teamName }}{{else}}Missed Pick{{/if}}
 {{/each}}
 
 Tiebreaker Score: {{ tiebreaker.tiebreakerLastScore }}
