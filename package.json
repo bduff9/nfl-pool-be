@@ -48,7 +48,7 @@
   },
   "config": {},
   "dependencies": {
-    "@azure/storage-blob": "12.6.0",
+    "@azure/storage-blob": "12.7.0",
     "@saeris/apollo-server-vercel": "0.4.0",
     "@sentry/node": "6.10.0",
     "@sentry/tracing": "6.10.0",
