@@ -59,16 +59,18 @@ export class WeeklyMVResolver {
 		if (!user) throw new Error('Missing user from context');
 
 		return (
-			await WeeklyMV.createQueryBuilder('W1')
-				.select('count(*)', 'tied')
-				.innerJoin(
-					WeeklyMV,
-					'W2',
-					'W1.UserID <> W2.UserID and W1.Rank = W2.Rank and W1.Week = W2.Week',
-				)
-				.where('W1.UserID = :userID and W1.Week = :week', { userID: user.userID, week })
-				.getRawOne<{ tied: number }>()
-		).tied;
+			(
+				await WeeklyMV.createQueryBuilder('W1')
+					.select('count(*)', 'tied')
+					.innerJoin(
+						WeeklyMV,
+						'W2',
+						'W1.UserID <> W2.UserID and W1.Rank = W2.Rank and W1.Week = W2.Week',
+					)
+					.where('W1.UserID = :userID and W1.Week = :week', { userID: user.userID, week })
+					.getRawOne<{ tied: number }>()
+			)?.tied ?? 0
+		);
 	}
 
 	@Authorized<TUserType>('registered')

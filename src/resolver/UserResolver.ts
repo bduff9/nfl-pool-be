@@ -131,7 +131,11 @@ export class UserResolver {
 		if (!user) throw new Error('Missing user from context!');
 
 		const order = { userLastName: 'ASC' } as const;
-		const relations = ['notifications', 'userReferredByUser'];
+		const relations = [
+			'notifications',
+			'notifications.notificationDefinition',
+			'userReferredByUser',
+		];
 
 		if (userType === AdminUserType.All) {
 			return User.find({ order, relations });
@@ -152,6 +156,7 @@ export class UserResolver {
 		if (userType === AdminUserType.Owes) {
 			return User.createQueryBuilder('U')
 				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('N.notificationDefinition', 'ND')
 				.leftJoinAndSelect('U.userReferredByUser', 'UR')
 				.where('U.UserDoneRegistering = true')
 				.andWhere(
@@ -168,6 +173,7 @@ export class UserResolver {
 		if (userType === AdminUserType.Rookies) {
 			return User.createQueryBuilder('U')
 				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('N.notificationDefinition', 'ND')
 				.leftJoinAndSelect('U.userReferredByUser', 'UR')
 				.where('U.UserDoneRegistering = true')
 				.andWhere(
@@ -180,6 +186,7 @@ export class UserResolver {
 		if (userType === AdminUserType.Veterans) {
 			return User.createQueryBuilder('U')
 				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('N.notificationDefinition', 'ND')
 				.leftJoinAndSelect('U.userReferredByUser', 'UR')
 				.where('U.UserDoneRegistering = true')
 				.andWhere(
@@ -430,7 +437,7 @@ export class UserResolver {
 			.where('U.UserID = :userID', { userID: user.userID })
 			.getRawOne<{ userOwes: number }>();
 
-		return result.userOwes ?? 0;
+		return result?.userOwes ?? 0;
 	}
 
 	@FieldResolver()
@@ -440,7 +447,7 @@ export class UserResolver {
 			.where('UH.UserID = :userID', { userID: user.userID })
 			.getRawOne<{ yearsPlayed: string }>();
 
-		return result.yearsPlayed ?? '';
+		return result?.yearsPlayed ?? '';
 	}
 
 	@FieldResolver()

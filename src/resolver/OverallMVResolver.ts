@@ -46,12 +46,14 @@ export class OverallMVResolver {
 		if (!user) throw new Error('Missing user from context');
 
 		return (
-			await OverallMV.createQueryBuilder('O1')
-				.select('count(*)', 'tied')
-				.innerJoin(OverallMV, 'O2', 'O1.UserID <> O2.UserID and O1.Rank = O2.Rank')
-				.where('O1.UserID = :userID', { userID: user.userID })
-				.getRawOne<{ tied: number }>()
-		).tied;
+			(
+				await OverallMV.createQueryBuilder('O1')
+					.select('count(*)', 'tied')
+					.innerJoin(OverallMV, 'O2', 'O1.UserID <> O2.UserID and O1.Rank = O2.Rank')
+					.where('O1.UserID = :userID', { userID: user.userID })
+					.getRawOne<{ tied: number }>()
+			)?.tied ?? 0
+		);
 	}
 
 	@Authorized<TUserType>('registered')

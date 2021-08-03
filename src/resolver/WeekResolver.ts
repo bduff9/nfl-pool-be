@@ -115,6 +115,8 @@ export class WeekResolver {
 
 		log.debug(weekObj);
 
+		if (!weekObj) throw new Error('Missing week object');
+
 		return weekObj;
 	}
 
@@ -134,7 +136,7 @@ export class WeekResolver {
 
 	@FieldResolver()
 	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
-		const { Completed, InProgress, NotStarted } = await Game.createQueryBuilder()
+		const result = await Game.createQueryBuilder()
 			.select(`sum(case when GameStatus = 'Pregame' then 1 else 0 end)`, 'NotStarted')
 			.addSelect(`sum(case when GameStatus = 'Final' then 1 else 0 end)`, 'Completed')
 			.addSelect(
@@ -142,6 +144,10 @@ export class WeekResolver {
 				'InProgress',
 			)
 			.getRawOne<{ Completed: number; InProgress: number; NotStarted: number }>();
+
+		if (!result) throw new Error('Missing season status');
+
+		const { Completed, InProgress, NotStarted } = result;
 
 		if (+Completed + +InProgress === 0) return SeasonStatus.NotStarted;
 

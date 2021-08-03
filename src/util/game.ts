@@ -105,7 +105,7 @@ export const getHoursToWeekStart = async (week: number): Promise<number> => {
 		.andWhere('GameWeek = :week', { week })
 		.getRawOne<{ hours: number }>();
 
-	return result.hours;
+	return result?.hours ?? 0;
 };
 
 // ts-prune-ignore-next
