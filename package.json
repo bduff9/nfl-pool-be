@@ -67,7 +67,7 @@
     "node-sass": "6.0.1",
     "reflect-metadata": "0.1.13",
     "tslog": "3.2.0",
-    "twilio": "3.66.0",
+    "twilio": "3.66.1",
     "type-graphql": "1.1.1",
     "typeorm": "0.2.34",
     "uuid": "8.3.2"
