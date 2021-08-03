@@ -106,17 +106,14 @@
   "private": true,
   "lint-staged": {
     "*.{js,ts}": [
-      "eslint --cache --fix",
-      "git add"
+      "eslint --cache --fix"
     ],
     "*.{md,json}": [
-      "prettierx --write",
-      "git add"
+      "prettierx --write"
     ],
     "package.json": [
       "scriptlint --fix",
-      "npmPkgJsonLint .",
-      "git add"
+      "npmPkgJsonLint ."
     ]
   },
   "jest": {

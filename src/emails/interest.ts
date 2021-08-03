@@ -48,4 +48,5 @@ const sendInterestEmail = async (user: User): Promise<void> => {
 	}
 };
 
+// ts-prune-ignore-next
 export default sendInterestEmail;

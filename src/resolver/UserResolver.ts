@@ -21,6 +21,7 @@ import {
 	Field,
 	FieldResolver,
 	InputType,
+	Int,
 	Mutation,
 	Query,
 	Resolver,
@@ -31,10 +32,12 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import { League, Notification, User, UserHistory, UserLeague } from '../entity';
+import { Account, League, User, UserHistory, UserLeague } from '../entity';
+import AdminUserType from '../entity/AdminUserType';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
+import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { TCustomContext, TUserType } from '../util/types';
 import { getUserAlerts, populateUserData } from '../util/user';
 
@@ -117,6 +120,78 @@ export class UserResolver {
 		const alerts: Array<string> = await getUserAlerts(user);
 
 		return alerts;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => [User])
+	async getUsersForAdmins (
+		@Arg('UserType', () => AdminUserType) userType: AdminUserType,
+		@Ctx() context: TCustomContext,
+	): Promise<Array<User>> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context!');
+
+		const order = { userLastName: 'ASC' } as const;
+		const relations = ['notifications', 'userReferredByUser'];
+
+		if (userType === AdminUserType.All) {
+			return User.find({ order, relations });
+		}
+
+		if (userType === AdminUserType.Inactive) {
+			return User.find({
+				order,
+				relations,
+				where: { userTrusted: true, userDoneRegistering: false },
+			});
+		}
+
+		if (userType === AdminUserType.Incomplete) {
+			return User.find({ order, relations, where: { userTrusted: false } });
+		}
+
+		if (userType === AdminUserType.Owes) {
+			return User.createQueryBuilder('U')
+				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('U.userReferredByUser', 'UR')
+				.where('U.UserDoneRegistering = true')
+				.andWhere(
+					`U.UserPaid < cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'PoolCost') as decimal(5,2)) + case when U.UserPlaysSurvivor then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'SurvivorCost') as decimal(5,2)) else 0 end`,
+				)
+				.orderBy('U.UserLastName', 'ASC')
+				.getMany();
+		}
+
+		if (userType === AdminUserType.Registered) {
+			return User.find({ order, relations, where: { userDoneRegistering: true } });
+		}
+
+		if (userType === AdminUserType.Rookies) {
+			return User.createQueryBuilder('U')
+				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('U.userReferredByUser', 'UR')
+				.where('U.UserDoneRegistering = true')
+				.andWhere(
+					'(select sum(1) from UserHistory UH where UH.UserID = U.UserID group by UH.UserID) = 1',
+				)
+				.orderBy('U.UserLastName', 'ASC')
+				.getMany();
+		}
+
+		if (userType === AdminUserType.Veterans) {
+			return User.createQueryBuilder('U')
+				.leftJoinAndSelect('U.notifications', 'N')
+				.leftJoinAndSelect('U.userReferredByUser', 'UR')
+				.where('U.UserDoneRegistering = true')
+				.andWhere(
+					'(select sum(1) from UserHistory UH where UH.UserID = U.UserID group by UH.UserID) > 1',
+				)
+				.orderBy('U.UserLastName', 'ASC')
+				.getMany();
+		}
+
+		throw new Error(`Invalid admin user type submitted: ${userType}`);
 	}
 
 	@Authorized<TUserType>('user')
@@ -249,25 +324,129 @@ export class UserResolver {
 		return true;
 	}
 
-	@Authorized<TUserType>('registered')
-	@Query(() => [User])
-	async getUsers (): Promise<User[]> {
-		return User.find();
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Int)
+	async updateUserPaid (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('AmountPaid') amountPaid: number,
+		@Ctx() context: TCustomContext,
+	): Promise<number> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const userToUpdate = await User.findOneOrFail({ where: { userID } });
+
+		userToUpdate.userPaid = amountPaid;
+		userToUpdate.userUpdatedBy = user.userEmail;
+		await userToUpdate.save();
+
+		return userToUpdate.userPaid;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Boolean)
+	async toggleSurvivor (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('IsPlaying') isPlaying: boolean,
+		@Ctx() context: TCustomContext,
+	): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		if (isPlaying) {
+			await registerForSurvivor(userID, user.userEmail);
+		} else {
+			await unregisterForSurvivor(userID, user.userEmail);
+		}
+
+		return isPlaying;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Boolean)
+	async trustUser (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('ReferredByUserID', () => Int) referredBy: number,
+		@Ctx() context: TCustomContext,
+	): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const userToUpdate = await User.findOneOrFail({ where: { userID } });
+
+		if (userToUpdate.userTrusted || userToUpdate.userReferredBy) {
+			throw new Error('User is already trusted');
+		}
+
+		if (userToUpdate.userID === referredBy) {
+			throw new Error('User cannot be trusted by themselves');
+		}
+
+		userToUpdate.userTrusted = true;
+		userToUpdate.userReferredBy = referredBy;
+		userToUpdate.userUpdatedBy = user.userEmail;
+		await userToUpdate.save();
+
+		return true;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Boolean)
+	async removeUser (
+		@Arg('UserID', () => Int) userID: number,
+		@Ctx() context: TCustomContext,
+	): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const userToRemove = await User.findOneOrFail({ where: { userID } });
+
+		if (userToRemove.userTrusted) {
+			throw new Error('Cannot delete a trusted user');
+		}
+
+		userToRemove.userDeletedBy = user.userEmail;
+		await userToRemove.save();
+		await User.softRemove(userToRemove);
+
+		return true;
 	}
 
 	@FieldResolver()
-	async userReferredByUser (@Root() user: User): Promise<undefined | User> {
-		return User.findOne({ where: { userID: user.userReferredBy } });
-	}
+	async userOwes (@Root() user: User): Promise<number> {
+		const result = await User.createQueryBuilder('U')
+			.select(
+				`case when U.UserDoneRegistering then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'PoolCost') as decimal(5,2)) else 0 end + case when U.UserPlaysSurvivor then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'SurvivorCost') as decimal(5,2)) else 0 end`,
+				'userOwes',
+			)
+			.where('U.UserID = :userID', { userID: user.userID })
+			.getRawOne<{ userOwes: number }>();
 
-	@FieldResolver()
-	async notifications (@Root() user: User): Promise<Notification[]> {
-		return Notification.find({ where: { userID: user.userID } });
+		return result.userOwes ?? 0;
 	}
 
 	@FieldResolver()
 	async userLeagues (@Root() user: User): Promise<UserLeague[]> {
 		//FIXME: need to join through join table, so this prob does not work
 		return UserLeague.find({ where: { userID: user.userID } });
+	}
+
+	@FieldResolver()
+	async yearsPlayed (@Root() user: User): Promise<string> {
+		const result = await UserHistory.createQueryBuilder('UH')
+			.select('group_concat(UserHistoryYear)', 'yearsPlayed')
+			.where('UH.UserID = :userID', { userID: user.userID })
+			.getRawOne<{ yearsPlayed: string }>();
+
+		return result.yearsPlayed ?? '';
+	}
+
+	@FieldResolver()
+	async accounts (@Root() user: User): Promise<Array<Account>> {
+		return Account.find({ where: { userID: user.userID } });
 	}
 }

@@ -29,9 +29,9 @@ import {
 } from 'typeorm';
 
 import AutoPickStrategy from './AutoPickStrategy';
-import { Notification } from './Notification';
 import PaymentType from './PaymentType';
-import { UserLeague } from './UserLeague';
+
+import { Account, Notification, UserLeague } from '.';
 
 @Index('uk_UserEmail', ['userEmail'], { unique: true })
 @Entity('Users', { schema: 'NFL' })
@@ -143,6 +143,9 @@ export class User extends BaseEntity {
 	})
 	public userPaid!: number;
 
+	@Field(() => Number, { nullable: false })
+	public userOwes!: number;
+
 	@Field(() => Int, { nullable: false })
 	@Column('int', { default: 3, name: 'UserAutoPicksLeft', nullable: false })
 	public userAutoPicksLeft!: number;
@@ -163,7 +166,7 @@ export class User extends BaseEntity {
 	})
 	public userCommunicationsOptedOut!: boolean;
 
-	@Field(() => Notification)
+	@Field(() => [Notification])
 	@OneToMany(() => Notification, notification => notification.user, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
@@ -176,6 +179,12 @@ export class User extends BaseEntity {
 		onUpdate: 'CASCADE',
 	})
 	public userLeagues!: UserLeague[];
+
+	@Field(() => String, { nullable: false })
+	public yearsPlayed!: string;
+
+	@Field(() => [Account], { nullable: false })
+	public accounts!: Array<Account>;
 
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({
