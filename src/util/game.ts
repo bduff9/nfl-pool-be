@@ -20,7 +20,7 @@ import { parseTeamsFromApi } from '../api/util';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 
-import { WEEKS_IN_SEASON } from './constants';
+import { ADMIN_USER, WEEKS_IN_SEASON } from './constants';
 import { convertDateToEpoch, convertEpoch } from './dates';
 import { markWrongSurvivorPicksAsDead } from './survivor';
 import { getTeamFromDB } from './team';
@@ -163,6 +163,7 @@ export const updateDBGame = async (
 		}
 	}
 
+	dbGame.gameUpdatedBy = ADMIN_USER;
 	await dbGame.save();
 
 	return dbGame;
@@ -184,5 +185,6 @@ export const updateSpreads = async (
 
 	game.gameHomeSpread = +homeTeam.spread;
 	game.gameVisitorSpread = +visitingTeam.spread;
+	game.gameUpdatedBy = ADMIN_USER;
 	await game.save();
 };

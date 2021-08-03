@@ -86,6 +86,7 @@ export class TiebreakerResolver {
 		}
 
 		myTiebreaker.tiebreakerLastScore = score;
+		myTiebreaker.tiebreakerUpdatedBy = user.userEmail;
 		await myTiebreaker.save();
 
 		return myTiebreaker;
@@ -136,6 +137,7 @@ export class TiebreakerResolver {
 		}
 
 		myTiebreaker.tiebreakerHasSubmitted = true;
+		myTiebreaker.tiebreakerUpdatedBy = user.userEmail;
 		await myTiebreaker.save();
 		await sendPicksSubmittedEmail(user, week, picks, myTiebreaker);
 

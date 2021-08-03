@@ -117,9 +117,7 @@ export class UserResolver {
 
 		if (!user) return [];
 
-		const alerts: Array<string> = await getUserAlerts(user);
-
-		return alerts;
+		return getUserAlerts(user);
 	}
 
 	@Authorized<TUserType>('admin')
@@ -200,7 +198,9 @@ export class UserResolver {
 		@Arg('data') data: FinishRegistrationInput,
 		@Ctx() context: TCustomContext,
 	): Promise<User> {
-		if (!context.user) throw new Error('Missing user data!');
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
 
 		if (data.userPaymentType !== 'Venmo' && !isEmail(data.userPaymentAccount)) {
 			throw new Error(
@@ -208,33 +208,33 @@ export class UserResolver {
 			);
 		}
 
-		const user: QueryDeepPartialEntity<User> = {
+		const userToUpdate: QueryDeepPartialEntity<User> = {
 			...data,
-			userUpdatedBy: context.user.userEmail,
+			userUpdatedBy: user.userEmail,
 		};
 		const promises: Array<Promise<unknown>> = [];
 
-		if (!context.user.userTrusted) {
+		if (!user.userTrusted) {
 			const referredByUser = await User.findOne({
 				where: {
 					userName: data.userReferredByRaw,
-					userID: Not(context.user.userID),
+					userID: Not(user.userID),
 				},
 			});
 
 			if (referredByUser) {
-				user.userReferredBy = referredByUser.userID;
-				user.userTrusted = true;
-				user.userDoneRegistering = true;
+				userToUpdate.userReferredBy = referredByUser.userID;
+				userToUpdate.userTrusted = true;
+				userToUpdate.userDoneRegistering = true;
 			} else {
 				promises.push(sendUntrustedEmail({ ...context.user, ...data } as User));
 			}
 		} else {
-			user.userDoneRegistering = true;
+			userToUpdate.userDoneRegistering = true;
 		}
 
-		if (user.userDoneRegistering) {
-			promises.push(populateUserData(context.user.userID, data.userPlaysSurvivor));
+		if (userToUpdate.userDoneRegistering) {
+			promises.push(populateUserData(user.userID, data.userPlaysSurvivor));
 			promises.push(sendNewUserEmail({ ...context.user, ...data } as User));
 			const league = await League.findOneOrFail();
 
@@ -242,10 +242,10 @@ export class UserResolver {
 				UserLeague.createQueryBuilder()
 					.insert()
 					.values({
-						userID: context.user.userID,
+						userID: user.userID,
 						leagueID: league.leagueID,
-						userLeagueAddedBy: `${context.user.userID}`,
-						userLeagueUpdatedBy: `${context.user.userID}`,
+						userLeagueAddedBy: `${user.userID}`,
+						userLeagueUpdatedBy: `${user.userID}`,
 					})
 					.execute(),
 			);
@@ -253,7 +253,7 @@ export class UserResolver {
 				UserHistory.createQueryBuilder()
 					.insert()
 					.values({
-						userID: context.user.userID,
+						userID: user.userID,
 						leagueID: league.leagueID,
 						userHistoryYear: new Date().getFullYear(),
 					})
@@ -261,20 +261,20 @@ export class UserResolver {
 			);
 		}
 
-		user.userAutoPicksLeft = DEFAULT_AUTO_PICKS;
-		user.userPaid = 0;
+		userToUpdate.userAutoPicksLeft = DEFAULT_AUTO_PICKS;
+		userToUpdate.userPaid = 0;
 
 		promises.push(
 			User.createQueryBuilder()
 				.update()
-				.set(user)
-				.where('UserID = :userID', { userID: context.user.userID })
+				.set(userToUpdate)
+				.where('UserID = :userID', { userID: user.userID })
 				.execute(),
 		);
 
 		await Promise.all(promises);
 
-		return User.findOneOrFail(context.user.userID);
+		return User.findOneOrFail(user.userID);
 	}
 
 	@Authorized<TUserType>('registered')
@@ -283,7 +283,9 @@ export class UserResolver {
 		@Arg('data') data: EditMyProfileInput,
 		@Ctx() context: TCustomContext,
 	): Promise<User> {
-		if (!context.user) throw new Error('Missing user data!');
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
 
 		if (data.userPaymentType !== 'Venmo' && !isEmail(data.userPaymentAccount)) {
 			throw new Error(
@@ -291,18 +293,18 @@ export class UserResolver {
 			);
 		}
 
-		const user: QueryDeepPartialEntity<User> = {
+		const userToUpdate: QueryDeepPartialEntity<User> = {
 			...data,
-			userUpdatedBy: context.user.userEmail,
+			userUpdatedBy: user.userEmail,
 		};
 
 		await User.createQueryBuilder()
 			.update()
-			.set(user)
-			.where('UserID = :userID', { userID: context.user.userID })
+			.set(userToUpdate)
+			.where('UserID = :userID', { userID: user.userID })
 			.execute();
 
-		return User.findOneOrFail(context.user.userID);
+		return User.findOneOrFail(user.userID);
 	}
 
 	@Authorized<TUserType>('anonymous')
@@ -311,7 +313,9 @@ export class UserResolver {
 		@Arg('email') email: string,
 		@Ctx() context: TCustomContext,
 	): Promise<boolean> {
-		if (context.user && context.user.userEmail !== email) {
+		const { user } = context;
+
+		if (user && user.userEmail !== email) {
 			throw new Error('Invalid email passed in!');
 		}
 
@@ -427,12 +431,6 @@ export class UserResolver {
 			.getRawOne<{ userOwes: number }>();
 
 		return result.userOwes ?? 0;
-	}
-
-	@FieldResolver()
-	async userLeagues (@Root() user: User): Promise<UserLeague[]> {
-		//FIXME: need to join through join table, so this prob does not work
-		return UserLeague.find({ where: { userID: user.userID } });
 	}
 
 	@FieldResolver()

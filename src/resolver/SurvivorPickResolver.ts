@@ -19,16 +19,14 @@ import {
 	Authorized,
 	Ctx,
 	Field,
-	FieldResolver,
 	InputType,
 	Int,
 	Mutation,
 	Query,
 	Resolver,
-	Root,
 } from 'type-graphql';
 
-import { Game, League, SurvivorMV, SurvivorPick, Team, User } from '../entity';
+import { Game, SurvivorMV, SurvivorPick } from '../entity';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { log } from '../util/logging';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
@@ -58,7 +56,7 @@ export class SurvivorPickResolver {
 		if (!user) throw new Error('Missing user from context');
 
 		return SurvivorPick.find({
-			relations: ['team'],
+			relations: ['game', 'team'],
 			where: { userID: user.userID },
 		});
 	}
@@ -143,30 +141,9 @@ export class SurvivorPickResolver {
 
 		pick.gameID = data.gameID;
 		pick.teamID = data.teamID;
+		pick.survivorPickUpdatedBy = user.userEmail;
 		await pick.save();
 
 		return pick;
-	}
-
-	@FieldResolver()
-	async user (@Root() survivorPick: SurvivorPick): Promise<User> {
-		return User.findOneOrFail({ where: { userID: survivorPick.userID } });
-	}
-
-	@FieldResolver()
-	async league (@Root() survivorPick: SurvivorPick): Promise<League> {
-		return League.findOneOrFail({
-			where: { leagueID: survivorPick.leagueID },
-		});
-	}
-
-	@FieldResolver()
-	async game (@Root() survivorPick: SurvivorPick): Promise<undefined | Game> {
-		return Game.findOne({ where: { gameID: survivorPick.gameID } });
-	}
-
-	@FieldResolver()
-	async team (@Root() survivorPick: SurvivorPick): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: survivorPick.teamID } });
 	}
 }

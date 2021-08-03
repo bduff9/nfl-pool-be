@@ -16,6 +16,7 @@
 import { Game, Pick } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 
+import { ADMIN_USER } from './constants';
 import { log } from './logging';
 
 export const getLowestUnusedPoint = async (
@@ -80,6 +81,7 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 
 		if (pick.user.userAutoPickStrategy && pick.user.userAutoPicksLeft > 0) {
 			pick.user.userAutoPicksLeft -= 1;
+			pick.pickUpdatedBy = ADMIN_USER;
 			await pick.user.save();
 
 			if (shouldAutoPickHome(pick.user.userAutoPickStrategy)) {
@@ -94,6 +96,7 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 		}
 
 		pick.pickPoints = lowestPoint;
+		pick.pickUpdatedBy = ADMIN_USER;
 		await pick.save();
 	}
 };

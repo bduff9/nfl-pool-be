@@ -23,6 +23,7 @@ import {
 	UserLeague,
 } from '../entity';
 
+import { ADMIN_USER } from './constants';
 import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { registerForSurvivor } from './survivor';
@@ -45,6 +46,7 @@ export const clearOldUserData = async (): Promise<void> => {
 			userDoneRegistering: false,
 			userPlaysSurvivor: false,
 			userPaid: 0,
+			userUpdatedBy: ADMIN_USER,
 		},
 	);
 };
@@ -104,7 +106,7 @@ export const populateUserData = async (
 		);
 	} else {
 		result = await Pick.query(
-			'INSERT INTO Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) SELECT ?, ?, GameID, ?, ? from Games',
+			'insert into Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) select ?, ?, GameID, ?, ? from Games',
 			[userID, league.leagueID, user.userEmail, user.userEmail],
 		);
 	}
@@ -113,7 +115,7 @@ export const populateUserData = async (
 
 	// Populate tiebreakers
 	result = await Tiebreaker.query(
-		'INSERT INTO Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) SELECT ?, ?, GameWeek, false, ?, ? FROM Games GROUP BY GameWeek',
+		'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, GameWeek, false, ?, ? from Games group by GameWeek',
 		[userID, league.leagueID, user.userEmail, user.userEmail],
 	);
 	log.info(`Inserted tiebreakers for user ${userID}`, result);

@@ -16,6 +16,8 @@
 import { TAPITeamResponse } from '../api/types';
 import { Team } from '../entity';
 
+import { ADMIN_USER } from './constants';
+
 export const getTeamsFromDB = async (): Promise<Record<string, number>> => {
 	const teams = await Team.find();
 	const teamMap: Record<string, number> = {};
@@ -30,7 +32,7 @@ export const getTeamFromDB = async (teamShortName: string): Promise<Team> =>
 
 export const updateTeamByeWeeks = async (week: number): Promise<void> => {
 	await Team.query(
-		`update Teams set TeamByeWeek = ${week} where TeamID not in (select HomeTeamID from Games where GameWeek = ${week} union select VisitorTeamID from Games where GameWeek = ${week}) and TeamCity <> 'Tie'`,
+		`update Teams set TeamByeWeek = ${week}, TeamUpdatedBy = '${ADMIN_USER}' where TeamID not in (select HomeTeamID from Games where GameWeek = ${week} union select VisitorTeamID from Games where GameWeek = ${week}) and TeamCity <> 'Tie'`,
 	);
 };
 
@@ -61,5 +63,6 @@ export const updateTeamData = async (
 		team.teamByeWeek = week + 1;
 	}
 
+	team.teamUpdatedBy = ADMIN_USER;
 	await team.save();
 };

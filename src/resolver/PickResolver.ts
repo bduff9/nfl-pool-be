@@ -103,7 +103,7 @@ export class PickResolver {
 		if (!user) throw new Error('Missing user from context');
 
 		await Pick.query(
-			`update Picks P join Games G on G.GameID = P.GameID set P.TeamID = null, P.PickPoints = null where P.UserID = ${user.userID} and G.GameWeek = ${week} and G.GameKickoff > CURRENT_TIMESTAMP`,
+			`update Picks P join Games G on G.GameID = P.GameID set P.TeamID = null, P.PickPoints = null, P.PickUpdatedBy = '${user.userEmail}' where P.UserID = ${user.userID} and G.GameWeek = ${week} and G.GameKickoff > CURRENT_TIMESTAMP`,
 		);
 
 		return Pick.createQueryBuilder('P')
@@ -141,6 +141,7 @@ export class PickResolver {
 
 			oldPick.teamID = null;
 			oldPick.pickPoints = null;
+			oldPick.pickUpdatedBy = user.userEmail;
 		}
 
 		if (!gameID) {
@@ -171,6 +172,7 @@ export class PickResolver {
 
 		newPick.teamID = teamID;
 		newPick.pickPoints = points;
+		newPick.pickUpdatedBy = user.userEmail;
 
 		oldPick && (await oldPick.save());
 		await newPick.save();
@@ -220,6 +222,7 @@ export class PickResolver {
 			const pointIndex = Math.floor(Math.random() * availablePoints.length);
 
 			pick.pickPoints = availablePoints.splice(pointIndex, 1)[0];
+			pick.pickUpdatedBy = user.userEmail;
 
 			if (shouldAutoPickHome(type)) {
 				pick.teamID = pick.game.homeTeamID;
@@ -300,6 +303,7 @@ export class PickResolver {
 
 		pick.teamID = teamID;
 		pick.pickPoints = lowestPoint;
+		pick.pickUpdatedBy = pick.user.userEmail;
 		await pick.save();
 		await sendQuickPickConfirmationEmail(pick.user, teamID, lowestPoint, game);
 

@@ -15,7 +15,7 @@
  */
 import sendInvalidGamesEmail from '../emails/invalidGamesFound';
 import { Game, Pick } from '../entity';
-import { WEEKS_IN_SEASON } from '../util/constants';
+import { ADMIN_USER, WEEKS_IN_SEASON } from '../util/constants';
 import { convertDateToEpoch, convertEpoch } from '../util/dates';
 import { findFutureGame, getAllGamesForWeek } from '../util/game';
 import { log } from '../util/logging';
@@ -35,6 +35,7 @@ const movePointDown = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 	if (foundPick) movePointDown(foundPick, picks);
 
 	pick.pickPoints = moveTo;
+	pick.pickUpdatedBy = ADMIN_USER;
 	await pick.save();
 };
 
@@ -65,6 +66,7 @@ const movePointUp = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 	if (foundPick) movePointUp(foundPick, picks);
 
 	pick.pickPoints = moveTo;
+	pick.pickUpdatedBy = ADMIN_USER;
 	await pick.save();
 };
 
@@ -150,12 +152,14 @@ const redoGameNumbers = async (gameWeek: number): Promise<void> => {
 
 		if (foundGame) {
 			foundGame.gameNumber = nextOpen++;
+			foundGame.gameUpdatedBy = ADMIN_USER;
 			await foundGame.save();
 		} else {
 			nextOpen--;
 		}
 
 		game.gameNumber = expectedGame;
+		game.gameUpdatedBy = ADMIN_USER;
 		await game.save();
 	}
 };
@@ -167,6 +171,7 @@ const updateKickoff = async (game: Game, week: number, newKickoff: Date): Promis
 	game.gameNumber = gameNumber;
 	game.gameWeek = week;
 	game.gameKickoff = newKickoff;
+	game.gameUpdatedBy = ADMIN_USER;
 
 	await game.save();
 };

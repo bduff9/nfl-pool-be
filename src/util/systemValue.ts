@@ -15,6 +15,8 @@
  */
 import { Game, SystemValue } from '../entity';
 
+import { ADMIN_USER } from './constants';
+
 export const getPaymentDueDate = async (): Promise<Date> => {
 	const systemValue = await SystemValue.findOneOrFail({
 		where: { systemValueName: 'PaymentDueWeek' },
@@ -60,6 +62,6 @@ export const getSystemYear = async (): Promise<number> => {
 export const updateSystemYear = async (year: number): Promise<void> => {
 	await SystemValue.update(
 		{ systemValueName: 'YearUpdated' },
-		{ systemValueValue: `${year}` },
+		{ systemValueValue: `${year}`, systemValueUpdatedBy: ADMIN_USER },
 	);
 };

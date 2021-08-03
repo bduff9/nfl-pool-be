@@ -19,16 +19,14 @@ import {
 	Authorized,
 	Ctx,
 	Field,
-	FieldResolver,
 	InputType,
 	Int,
 	Mutation,
 	Query,
 	Resolver,
-	Root,
 } from 'type-graphql';
 
-import { Notification, NotificationType, User } from '../entity';
+import { Notification } from '../entity';
 import { log } from '../util/logging';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -78,12 +76,13 @@ export class NotificationResolver {
 			[user.userID, user.userEmail, user.userEmail, user.userID],
 		);
 		await Notification.query(
-			`update Notifications set NotificationEmail = true where NotificationType = 'Essentials' and UserID = ?`,
-			[user.userID],
+			`update Notifications set NotificationEmail = true, NotificationUpdatedBy = ? where NotificationType = 'Essentials' and UserID = ?`,
+			[user.userEmail, user.userID],
 		);
 
 		return Notification.find({
 			order: { notificationType: 'ASC' },
+			relations: ['notificationDefinition', 'user'],
 			where: { userID: user.userID },
 		});
 	}
@@ -109,7 +108,7 @@ export class NotificationResolver {
 
 			await Notification.createQueryBuilder()
 				.update()
-				.set(notification)
+				.set({ ...notification, notificationUpdatedBy: user.userEmail })
 				.where('NotificationType = :notificationType', { notificationType })
 				.andWhere('UserID = :userID', { userID: user.userID })
 				.execute();
@@ -117,19 +116,8 @@ export class NotificationResolver {
 
 		return Notification.find({
 			order: { notificationType: 'ASC' },
+			relations: ['notificationDefinition', 'user'],
 			where: { userID: user.userID },
 		});
-	}
-
-	@FieldResolver()
-	async user (@Root() notification: Notification): Promise<User> {
-		return User.findOneOrFail({ where: { userID: notification.userID } });
-	}
-
-	@FieldResolver()
-	async notificationDefinition (
-		@Root() notification: Notification,
-	): Promise<NotificationType> {
-		return NotificationType.findOneOrFail(notification.notificationType);
 	}
 }
