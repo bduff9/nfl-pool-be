@@ -23,7 +23,7 @@ export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
 		);
 		await queryRunner.query(`drop index fk_ToUserID on Logs`);
 		await queryRunner.query(
-			`alter table Logs drop column LogIsRead, drop column LogIsDeleted, drop constraint fk_ToUserID, drop column ToUserID`,
+			`alter table Logs drop column LogIsRead, drop column LogIsDeleted, drop column ToUserID`,
 		);
 		await queryRunner.query(
 			`alter table Logs modify LogAction enum('404', 'AUTH_ERROR', 'CREATE_ACCOUNT', 'EMAIL_ACTIVITY', 'LINK_ACCOUNT', 'LOGIN', 'LOGOUT', 'MESSAGE', 'PAID', 'REGISTER', 'SLACK', 'SUBMIT_PICKS', 'SUPPORT_SEARCH', 'SURVIVOR_PICK', 'UNSUBSCRIBE', 'VIEW_HTML_EMAIL') not null`,
