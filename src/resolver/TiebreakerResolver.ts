@@ -16,7 +16,8 @@
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 
 import sendPicksSubmittedEmail from '../emails/picksSubmitted';
-import { Game, Pick, Tiebreaker } from '../entity';
+import { Game, Log, Pick, Tiebreaker } from '../entity';
+import LogAction from '../entity/LogAction';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
@@ -140,6 +141,15 @@ export class TiebreakerResolver {
 		myTiebreaker.tiebreakerUpdatedBy = user.userEmail;
 		await myTiebreaker.save();
 		await sendPicksSubmittedEmail(user, week, picks, myTiebreaker);
+
+		const log = new Log();
+
+		log.logAction = LogAction.SubmitPicks;
+		log.logMessage = `${user.userName} submitted their picks for week ${week}`;
+		log.logAddedBy = user.userEmail;
+		log.logUpdatedBy = user.userEmail;
+		log.userID = user.userID;
+		await log.save();
 
 		return myTiebreaker;
 	}

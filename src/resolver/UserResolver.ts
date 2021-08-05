@@ -32,9 +32,10 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import { Account, League, User, UserHistory, UserLeague } from '../entity';
+import { Account, League, Log, User, UserHistory, UserLeague } from '../entity';
 import AdminUserType from '../entity/AdminUserType';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
+import LogAction from '../entity/LogAction';
 import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
@@ -279,6 +280,16 @@ export class UserResolver {
 				.execute(),
 		);
 
+		const log = new Log();
+
+		log.logAction = LogAction.Register;
+		log.logMessage = `${userToUpdate.userName} has finished registration`;
+		log.logAddedBy = user.userEmail;
+		log.logUpdatedBy = user.userEmail;
+		log.userID = user.userID;
+
+		promises.push(log.save());
+
 		await Promise.all(promises);
 
 		return User.findOneOrFail(user.userID);
@@ -326,6 +337,19 @@ export class UserResolver {
 			throw new Error('Invalid email passed in!');
 		}
 
+		const log = new Log();
+
+		log.logAction = LogAction.Unsubscribe;
+		log.logMessage = `${email} has unsubscribed from all communications`;
+		log.logAddedBy = email;
+		log.logUpdatedBy = email;
+
+		if (user) {
+			log.userID = user.userID;
+		}
+
+		await log.save();
+
 		await User.createQueryBuilder()
 			.update()
 			.set({ userCommunicationsOptedOut: true })
@@ -351,6 +375,15 @@ export class UserResolver {
 		userToUpdate.userPaid = amountPaid;
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
+
+		const log = new Log();
+
+		log.logAction = LogAction.Paid;
+		log.logMessage = `${userToUpdate.userName} has paid $${amountPaid}`;
+		log.logAddedBy = user.userEmail;
+		log.logUpdatedBy = user.userEmail;
+		log.userID = userID;
+		await log.save();
 
 		return userToUpdate.userPaid;
 	}

@@ -26,7 +26,8 @@ import {
 	Resolver,
 } from 'type-graphql';
 
-import { Game, SurvivorMV, SurvivorPick } from '../entity';
+import { Game, Log, SurvivorMV, SurvivorPick } from '../entity';
+import LogAction from '../entity/LogAction';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { log } from '../util/logging';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
@@ -143,6 +144,15 @@ export class SurvivorPickResolver {
 		pick.teamID = data.teamID;
 		pick.survivorPickUpdatedBy = user.userEmail;
 		await pick.save();
+
+		const newLog = new Log();
+
+		newLog.logAction = LogAction.SurvivorPick;
+		newLog.logMessage = `${user.userName} made their survivor pick for week ${data.survivorPickWeek}`;
+		newLog.logAddedBy = user.userEmail;
+		newLog.logUpdatedBy = user.userEmail;
+		newLog.userID = user.userID;
+		await newLog.save();
 
 		return pick;
 	}
