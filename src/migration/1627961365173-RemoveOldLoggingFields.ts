@@ -21,6 +21,7 @@ export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
 		await queryRunner.query(
 			`update Users set UserReferredByRaw = 'N/A' where UserReferredByRaw = 'RETURNING PLAYER'`,
 		);
+		await queryRunner.query(`drop index fk_ToUserID on Logs`);
 		await queryRunner.query(
 			`alter table Logs drop column LogIsRead, drop column LogIsDeleted, drop constraint fk_ToUserID, drop column ToUserID`,
 		);
