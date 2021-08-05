@@ -13,19 +13,39 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Authorized, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { In } from 'typeorm/find-options/operator/In';
 
 import { EmailModel } from '../dynamodb/email';
-import { Email, User } from '../entity';
-import { TUserType } from '../util/types';
+import { Email, Log, User } from '../entity';
+import LogAction from '../entity/LogAction';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Email)
 export class EmailResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Email)
-	async getEmail (@Arg('EmailID', () => String) emailID: string): Promise<Email> {
-		return EmailModel.get(emailID);
+	async getEmail (
+		@Arg('EmailID', () => String) emailID: string,
+		@Ctx() context: TCustomContext,
+	): Promise<Email> {
+		const { user } = context;
+		const email = await EmailModel.get(emailID);
+		const userName = user ? user.userEmail : [...email.to][0];
+		const log = new Log();
+
+		log.logAction = LogAction.ViewHTMLEmail;
+		log.logMessage = `${userName} viewed HTML version of email with subject ${email.subject}`;
+		log.logAddedBy = userName;
+		log.logUpdatedBy = userName;
+
+		if (user) {
+			log.userID = user.userID;
+		}
+
+		await log.save();
+
+		return email;
 	}
 
 	@FieldResolver()
