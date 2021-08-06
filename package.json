@@ -42,7 +42,7 @@
     "@saeris/apollo-server-vercel": "0.4.0",
     "@sentry/node": "6.3.5",
     "@sentry/tracing": "6.3.5",
-    "aws-sdk": "2.902.0",
+    "aws-sdk": "2.948.0",
     "class-validator": "0.13.1",
     "dynamoose": "2.7.3",
     "email-templates": "8.0.4",
