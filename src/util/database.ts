@@ -33,6 +33,9 @@ export const connectionPromise = createConnection({
 	migrations: [],
 	subscribers: [],
 	timezone: 'local',
+	extra: {
+		connectionLimit: 10,
+	},
 });
 
 // ts-prune-ignore-next

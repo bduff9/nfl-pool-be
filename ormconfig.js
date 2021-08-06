@@ -36,6 +36,9 @@ const config = {
 		migrationsDir: 'src/migration',
 		subscribersDir: 'src/subscriber',
 	},
+	extra: {
+		connectionLimit: 10,
+	},
 };
 
 module.exports = config;
