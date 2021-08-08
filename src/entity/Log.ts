@@ -110,31 +110,6 @@ export class Log extends BaseEntity {
 	@JoinColumn({ name: 'LeagueID' })
 	public league!: null | League;
 
-	@Field(() => Boolean, { nullable: true })
-	@Column('boolean', {
-		name: 'LogIsRead',
-		nullable: true,
-	})
-	public logIsRead!: boolean | null;
-
-	@Field(() => Boolean, { nullable: true })
-	@Column('boolean', {
-		name: 'LogIsDeleted',
-		nullable: true,
-	})
-	public logIsDeleted!: boolean | null;
-
-	@Column({ name: 'ToUserID', nullable: true, type: 'int' })
-	public toUserID!: null | number;
-
-	@Field(() => User, { nullable: true })
-	@ManyToOne(() => User, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	@JoinColumn({ name: 'ToUserID' })
-	public toUser!: null | User;
-
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({
 		default: () => 'CURRENT_TIMESTAMP',

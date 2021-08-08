@@ -18,16 +18,14 @@ import {
 	Authorized,
 	Ctx,
 	Field,
-	FieldResolver,
 	InputType,
 	Int,
 	Mutation,
 	Query,
 	Resolver,
-	Root,
 } from 'type-graphql';
 
-import { League, Log, User } from '../entity';
+import { Log } from '../entity';
 import LogAction from '../entity/LogAction';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -51,7 +49,7 @@ export class LogResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => [Log])
 	async getLogs (): Promise<Log[]> {
-		return Log.find();
+		return Log.find({ relations: ['user'] });
 	}
 
 	@Authorized<TUserType>('anonymous')
@@ -80,21 +78,6 @@ export class LogResolver {
 			})
 			.execute();
 
-		return await Log.findOneOrFail(result.identifiers[0].logID);
-	}
-
-	@FieldResolver()
-	async user (@Root() log: Log): Promise<undefined | User> {
-		return User.findOne({ where: { userID: log.userID } });
-	}
-
-	@FieldResolver()
-	async league (@Root() log: Log): Promise<undefined | League> {
-		return League.findOne({ where: { leagueID: log.leagueID } });
-	}
-
-	@FieldResolver()
-	async toUser (@Root() log: Log): Promise<undefined | User> {
-		return User.findOne({ where: { userID: log.toUserID } });
+		return await Log.findOneOrFail(result.identifiers[0].logID, { relations: ['user'] });
 	}
 }
