@@ -34,9 +34,9 @@ import {
 } from '../../src/entity';
 import { verifySeasonYearForReset } from '../../src/util/dates';
 import { populateWinnerHistory } from '../../src/util/history';
-import { updateSystemYear } from '../../src/util/systemValue';
+import { resetPrizeAmounts, updateSystemYear } from '../../src/util/systemValue';
 import { MyTimer } from '../../src/util/types';
-import { clearOldUserData } from '../../src/util/user';
+import { clearOldUserData, resetUsers } from '../../src/util/user';
 
 const { database, host, password, port, dbuser } = process.env;
 
@@ -91,8 +91,10 @@ const timerTrigger: AzureFunction = async (
 	await WeeklyMV.clear();
 	await Game.clear();
 	await clearOldUserData();
+	await resetUsers();
 	await VerificationRequest.clear();
 	await Session.clear();
+	await resetPrizeAmounts();
 	await entityManager.query('SET FOREIGN_KEY_CHECKS = 1');
 
 	// Populate new season data

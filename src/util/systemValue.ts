@@ -59,6 +59,19 @@ export const getSystemYear = async (): Promise<number> => {
 };
 
 // ts-prune-ignore-next
+export const resetPrizeAmounts = async (): Promise<void> => {
+	await SystemValue.update({ systemValueName: 'weeklyPrizes' }, { systemValueValue: null });
+	await SystemValue.update(
+		{ systemValueName: 'overallPrizes' },
+		{ systemValueValue: null },
+	);
+	await SystemValue.update(
+		{ systemValueName: 'SurvivorPrizes' },
+		{ systemValueValue: null },
+	);
+};
+
+// ts-prune-ignore-next
 export const updateSystemYear = async (year: number): Promise<void> => {
 	await SystemValue.update(
 		{ systemValueName: 'YearUpdated' },

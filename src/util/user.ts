@@ -23,7 +23,7 @@ import {
 	UserLeague,
 } from '../entity';
 
-import { ADMIN_USER } from './constants';
+import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
 import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { registerForSurvivor } from './survivor';
@@ -123,4 +123,17 @@ export const populateUserData = async (
 	if (isInSurvivor) {
 		await registerForSurvivor(userID);
 	}
+};
+
+// ts-prune-ignore-next
+export const resetUsers = async (): Promise<void> => {
+	await User.createQueryBuilder('U')
+		.update()
+		.set({
+			userAutoPicksLeft: DEFAULT_AUTO_PICKS,
+			userDoneRegistering: false,
+			userPaid: 0,
+			userPlaysSurvivor: false,
+		})
+		.execute();
 };
