@@ -13,13 +13,12 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Authorized, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
-import { LessThanOrEqual } from 'typeorm';
+import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 
-import { User, Payment, SystemValue, WeeklyMV, OverallMV, SurvivorMV } from '../entity';
-import { WEEKS_IN_SEASON } from '../util/constants';
-import { addOrdinal } from '../util/numbers';
-import { getPoolCost, getSurvivorCost } from '../util/systemValue';
+import { Log, Payment, User } from '../entity';
+import LogAction from '../entity/LogAction';
+import PaymentType from '../entity/PaymentType';
+import { getUserPayments } from '../util/payment';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Payment)
@@ -27,129 +26,75 @@ export class PaymentResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Payment])
 	async getMyPayments (@Ctx() context: TCustomContext): Promise<Array<Payment>> {
-		const payments: Array<Payment> = [];
 		const { user } = context;
 
 		if (!user) {
 			throw new Error('Missing user from context!');
 		}
 
-		const { userDoneRegistering, userID, userPaid, userPlaysSurvivor } = user;
-
-		if (userDoneRegistering) {
-			const poolCost = await getPoolCost();
-
-			payments.push({
-				paymentDescription: 'Confidence Pool',
-				paymentWeek: null,
-				paymentAmount: poolCost * -1,
-				paymentUser: user,
-				userID,
-			});
-		}
-
-		if (userPlaysSurvivor) {
-			const poolCost = await getSurvivorCost();
-
-			payments.push({
-				paymentDescription: 'Survivor Pool',
-				paymentWeek: null,
-				paymentAmount: poolCost * -1,
-				paymentUser: user,
-				userID,
-			});
-		}
-
-		if (userPaid > 0) {
-			payments.push({
-				paymentDescription: 'Paid',
-				paymentWeek: null,
-				paymentAmount: userPaid,
-				paymentUser: user,
-				userID,
-			});
-		}
-
-		const { systemValueValue: weeklyPrizesStr } = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'WeeklyPrizes' },
-		});
-		const { systemValueValue: overallPrizesStr } = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'OverallPrizes' },
-		});
-
-		if (weeklyPrizesStr && overallPrizesStr) {
-			const weeklyPrizes = JSON.parse(weeklyPrizesStr);
-			const numWeeklyPrizes = weeklyPrizes.length - 1;
-			const myWeeklyPrizes = await WeeklyMV.find({
-				where: { rank: LessThanOrEqual(numWeeklyPrizes), userID: user.userID },
-			});
-
-			for (const prize of myWeeklyPrizes) {
-				payments.push({
-					paymentDescription: `${addOrdinal(prize.rank)} place in week ${prize.week}`,
-					paymentWeek: prize.week,
-					paymentAmount: weeklyPrizes[prize.rank],
-					paymentUser: user,
-					userID,
-				});
-			}
-
-			const overallPrizes = JSON.parse(overallPrizesStr);
-			const numOverallPrizes = overallPrizes.length - 1;
-			const myOverallPrizes = await OverallMV.find({
-				where: { rank: LessThanOrEqual(numOverallPrizes), userID: user.userID },
-			});
-
-			for (const prize of myOverallPrizes) {
-				payments.push({
-					paymentDescription: `${addOrdinal(prize.rank)} place overall`,
-					paymentWeek: null,
-					paymentAmount: overallPrizes[prize.rank],
-					paymentUser: user,
-					userID,
-				});
-			}
-		}
-
-		if (userPlaysSurvivor) {
-			const { systemValueValue: survivorPrizesStr } = await SystemValue.findOneOrFail({
-				where: { systemValueName: 'SurvivorPrizes' },
-			});
-
-			if (survivorPrizesStr) {
-				const survivorPrizes = JSON.parse(survivorPrizesStr);
-				const stillAlive = await SurvivorMV.find({
-					relations: ['user'],
-					where: { isAliveOverall: true },
-				});
-
-				if (stillAlive.length === 1 || stillAlive[0].weeksAlive === WEEKS_IN_SEASON) {
-					const mySurvivorRank = await SurvivorMV.findOne({
-						where: { userID: user.userID },
-					});
-
-					if (mySurvivorRank && mySurvivorRank.rank < survivorPrizes.length) {
-						payments.push({
-							paymentDescription: `${addOrdinal(
-								mySurvivorRank.rank,
-							)} place in survivor pool`,
-							paymentWeek: null,
-							paymentAmount: survivorPrizes[mySurvivorRank.rank],
-							paymentUser: user,
-							userID,
-						});
-					}
-				}
-			}
-		}
-
-		return payments;
+		return Payment.createQueryBuilder('P')
+			.where('P.UserID = :userID', { userID: user.userID })
+			.orderBy(`field(PaymentType, 'Fee', 'Paid', 'Prize', 'Payout')`, 'ASC')
+			.getMany();
 	}
 
-	@FieldResolver()
-	async paymentUser (@Root() payment: Payment): Promise<User> {
-		return User.findOneOrFail({
-			where: { userID: payment.userID },
-		});
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Int)
+	async updateUserPaid (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('AmountPaid') amountPaid: number,
+		@Ctx() context: TCustomContext,
+	): Promise<number> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const payment = new Payment();
+
+		payment.userID = userID;
+		payment.paymentType = PaymentType.Paid;
+		payment.paymentDescription = 'User Paid';
+		payment.paymentWeek = null;
+		payment.paymentAmount = amountPaid;
+		payment.paymentAddedBy = user.userEmail;
+		payment.paymentUpdatedBy = user.userEmail;
+		await payment.save();
+
+		const userToUpdate = await User.findOneOrFail({ where: { userID } });
+		const log = new Log();
+
+		log.logAction = LogAction.Paid;
+		log.logMessage = `${userToUpdate.userName} has paid $${amountPaid}`;
+		log.logAddedBy = user.userEmail;
+		log.logUpdatedBy = user.userEmail;
+		log.userID = userID;
+		await log.save();
+
+		return getUserPayments(userID, PaymentType.Paid);
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Int)
+	async updateUserPayout (
+		@Arg('UserID', () => Int) userID: number,
+		@Arg('AmountPaid') amountPaidOut: number,
+		@Ctx() context: TCustomContext,
+	): Promise<number> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const payment = new Payment();
+
+		payment.userID = userID;
+		payment.paymentType = PaymentType.Payout;
+		payment.paymentDescription = 'User Payout';
+		payment.paymentWeek = null;
+		payment.paymentAmount = amountPaidOut * -1;
+		payment.paymentAddedBy = user.userEmail;
+		payment.paymentUpdatedBy = user.userEmail;
+		await payment.save();
+
+		return payment.paymentAmount;
 	}
 }

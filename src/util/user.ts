@@ -26,8 +26,9 @@ import {
 import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
 import { getCurrentWeek } from './game';
 import { log } from './logging';
+import { getUserPayments } from './payment';
 import { registerForSurvivor } from './survivor';
-import { getPaymentDueDate, getPoolCost, getSurvivorCost } from './systemValue';
+import { getPaymentDueDate } from './systemValue';
 
 // ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
@@ -45,7 +46,6 @@ export const clearOldUserData = async (): Promise<void> => {
 		{
 			userDoneRegistering: false,
 			userPlaysSurvivor: false,
-			userPaid: 0,
 			userUpdatedBy: ADMIN_USER,
 		},
 	);
@@ -66,20 +66,14 @@ export const getAllRegisteredUsers = async (): Promise<Array<User>> => {
 
 export const getUserAlerts = async (user: User): Promise<Array<string>> => {
 	const alerts: Array<string> = [];
-	const poolCost = await getPoolCost();
-	const survivorCost = await getSurvivorCost();
-	let owe = poolCost;
+	const userBalance = await getUserPayments(user.userID);
 
-	if (user.userPlaysSurvivor) {
-		owe += survivorCost;
-	}
-
-	if (owe > user.userPaid) {
+	if (userBalance < 0) {
 		const paymentDueDate = await getPaymentDueDate();
 		const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
 
 		alerts.push(
-			`Please pay $${owe - user.userPaid} by ${formatter.format(paymentDueDate)}`,
+			`Please pay $${Math.abs(userBalance)} by ${formatter.format(paymentDueDate)}`,
 		);
 	}
 
@@ -132,7 +126,6 @@ export const resetUsers = async (): Promise<void> => {
 		.set({
 			userAutoPicksLeft: DEFAULT_AUTO_PICKS,
 			userDoneRegistering: false,
-			userPaid: 0,
 			userPlaysSurvivor: false,
 		})
 		.execute();

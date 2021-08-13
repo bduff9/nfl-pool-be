@@ -32,13 +32,16 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import { Account, League, Log, User, UserHistory, UserLeague } from '../entity';
+import { Account, League, Log, Payment, User, UserHistory, UserLeague } from '../entity';
 import AdminUserType from '../entity/AdminUserType';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import LogAction from '../entity/LogAction';
+import PaymentMethod from '../entity/PaymentMethod';
 import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
+import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
+import { getPoolCost } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
 import { getUserAlerts, populateUserData } from '../util/user';
 
@@ -59,8 +62,8 @@ class FinishRegistrationInput implements Partial<User> {
 	@Field(() => String, { nullable: false })
 	userPaymentAccount!: string;
 
-	@Field(() => PaymentType, { nullable: false })
-	userPaymentType!: PaymentType;
+	@Field(() => PaymentMethod, { nullable: false })
+	userPaymentType!: PaymentMethod;
 
 	@Field(() => Boolean, { nullable: false })
 	userPlaysSurvivor!: boolean;
@@ -86,8 +89,8 @@ class EditMyProfileInput implements Partial<User> {
 	@Field(() => String, { nullable: false })
 	userPaymentAccount!: string;
 
-	@Field(() => PaymentType, { nullable: false })
-	userPaymentType!: PaymentType;
+	@Field(() => PaymentMethod, { nullable: false })
+	userPaymentType!: PaymentMethod;
 
 	@Field(() => String, { nullable: true })
 	userTeamName!: null | string;
@@ -119,6 +122,18 @@ export class UserResolver {
 		if (!user) return [];
 
 		return getUserAlerts(user);
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => Number)
+	async getRegisteredCount (): Promise<number> {
+		return User.count({ userDoneRegistering: true });
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => Number)
+	async getSurvivorCount (): Promise<number> {
+		return User.count({ userPlaysSurvivor: true });
 	}
 
 	@Authorized<TUserType>('admin')
@@ -155,14 +170,21 @@ export class UserResolver {
 		}
 
 		if (userType === AdminUserType.Owes) {
-			return User.createQueryBuilder('U')
+			const qb = User.createQueryBuilder('U');
+			const userIDSubquery = qb
+				.subQuery()
+				.select('P.UserID')
+				.from(Payment, 'P')
+				.groupBy('P.UserID')
+				.having('sum(P.PaymentAmount) < 0')
+				.getQuery();
+
+			return qb
 				.leftJoinAndSelect('U.notifications', 'N')
 				.leftJoinAndSelect('N.notificationDefinition', 'ND')
 				.leftJoinAndSelect('U.userReferredByUser', 'UR')
 				.where('U.UserDoneRegistering = true')
-				.andWhere(
-					`U.UserPaid < cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'PoolCost') as decimal(5,2)) + case when U.UserPlaysSurvivor then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'SurvivorCost') as decimal(5,2)) else 0 end`,
-				)
+				.andWhere(`U.UserID in ${userIDSubquery}`)
 				.orderBy('U.UserLastName', 'ASC')
 				.getMany();
 		}
@@ -198,6 +220,25 @@ export class UserResolver {
 		}
 
 		throw new Error(`Invalid admin user type submitted: ${userType}`);
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => [User])
+	async getUserPaymentsForAdmin (): Promise<Array<User>> {
+		const qb = User.createQueryBuilder('U');
+		const userIDSubquery = qb
+			.subQuery()
+			.select('P.UserID')
+			.from(Payment, 'P')
+			.where(`P.PaymentType = 'Prize'`)
+			.groupBy('P.UserID')
+			.getQuery();
+
+		return qb
+			.leftJoinAndSelect('U.payments', 'P')
+			.where(`U.UserID in ${userIDSubquery}`)
+			.orderBy('U.UserLastName', 'ASC')
+			.getMany();
 	}
 
 	@Authorized<TUserType>('user')
@@ -270,7 +311,18 @@ export class UserResolver {
 		}
 
 		userToUpdate.userAutoPicksLeft = DEFAULT_AUTO_PICKS;
-		userToUpdate.userPaid = 0;
+
+		const poolCost = await getPoolCost();
+		const payment = new Payment();
+
+		payment.paymentAddedBy = user.userEmail;
+		payment.paymentAmount = -1 * poolCost;
+		payment.paymentDescription = 'Confidence Pool Entry Fee';
+		payment.paymentType = PaymentType.Fee;
+		payment.paymentUpdatedBy = user.userEmail;
+		payment.paymentWeek = null;
+		payment.userID = user.userID;
+		promises.push(payment.save());
 
 		promises.push(
 			User.createQueryBuilder()
@@ -360,35 +412,6 @@ export class UserResolver {
 	}
 
 	@Authorized<TUserType>('admin')
-	@Mutation(() => Int)
-	async updateUserPaid (
-		@Arg('UserID', () => Int) userID: number,
-		@Arg('AmountPaid') amountPaid: number,
-		@Ctx() context: TCustomContext,
-	): Promise<number> {
-		const { user } = context;
-
-		if (!user) throw new Error('Missing user from context');
-
-		const userToUpdate = await User.findOneOrFail({ where: { userID } });
-
-		userToUpdate.userPaid = amountPaid;
-		userToUpdate.userUpdatedBy = user.userEmail;
-		await userToUpdate.save();
-
-		const log = new Log();
-
-		log.logAction = LogAction.Paid;
-		log.logMessage = `${userToUpdate.userName} has paid $${amountPaid}`;
-		log.logAddedBy = user.userEmail;
-		log.logUpdatedBy = user.userEmail;
-		log.userID = userID;
-		await log.save();
-
-		return userToUpdate.userPaid;
-	}
-
-	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
 	async toggleSurvivor (
 		@Arg('UserID', () => Int) userID: number,
@@ -461,16 +484,28 @@ export class UserResolver {
 	}
 
 	@FieldResolver()
-	async userOwes (@Root() user: User): Promise<number> {
-		const result = await User.createQueryBuilder('U')
-			.select(
-				`case when U.UserDoneRegistering then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'PoolCost') as decimal(5,2)) else 0 end + case when U.UserPlaysSurvivor then cast((select S.SystemValueValue from SystemValues S where S.SystemValueName = 'SurvivorCost') as decimal(5,2)) else 0 end`,
-				'userOwes',
-			)
-			.where('U.UserID = :userID', { userID: user.userID })
-			.getRawOne<{ userOwes: number }>();
+	async userPaid (@Root() user: User): Promise<number> {
+		return getUserPayments(user.userID, PaymentType.Paid);
+	}
 
-		return result?.userOwes ?? 0;
+	@FieldResolver()
+	async userOwes (@Root() user: User): Promise<number> {
+		return getUserPayments(user.userID, PaymentType.Fee);
+	}
+
+	@FieldResolver()
+	async userWon (@Root() user: User): Promise<number> {
+		return getUserPayments(user.userID, PaymentType.Prize);
+	}
+
+	@FieldResolver()
+	async userPaidOut (@Root() user: User): Promise<number> {
+		return getUserPayments(user.userID, PaymentType.Payout);
+	}
+
+	@FieldResolver()
+	async userBalance (@Root() user: User): Promise<number> {
+		return getUserPayments(user.userID);
 	}
 
 	@FieldResolver()

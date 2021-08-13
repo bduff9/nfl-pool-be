@@ -30,6 +30,7 @@ import {
 	sendWeeklyEmails,
 	sendWeekStartedNotifications,
 } from '../../src/util/notification';
+import { updatePayouts } from '../../src/util/payment';
 import { updateMissedPicks } from '../../src/util/pick';
 import { markEmptySurvivorPicksAsDead } from '../../src/util/survivor';
 import { MyTimer } from '../../src/util/types';
@@ -104,6 +105,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	if (gamesLeft === 0) {
+		await updatePayouts(currentWeek);
 		await sendWeekEndedNotifications(currentWeek);
 		await sendWeeklyEmails(currentWeek);
 	}

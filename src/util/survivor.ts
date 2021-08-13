@@ -13,11 +13,13 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, SurvivorPick, User } from '../entity';
+import { Game, Payment, SurvivorPick, User } from '../entity';
+import PaymentType from '../entity/PaymentType';
 
 import { ADMIN_USER } from './constants';
 import { log } from './logging';
-import { getPoolCost } from './systemValue';
+import { getUserPayments } from './payment';
+import { getSurvivorCost } from './systemValue';
 
 const markUserDead = async (userID: number, week: number): Promise<void> => {
 	await SurvivorPick.createQueryBuilder()
@@ -34,17 +36,22 @@ const markUserDead = async (userID: number, week: number): Promise<void> => {
 // ts-prune-ignore-next
 export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> => {
 	if (week === 1) {
-		const poolCost = await getPoolCost();
 		const users = await SurvivorPick.createQueryBuilder('SP')
 			.innerJoin('SP.user', 'U')
-			.where('U.UserPaid <= :poolCost', { poolCost })
-			.andWhere('SP.SurvivorPickWeek = 1')
+			.where('SP.SurvivorPickWeek = 1')
 			.andWhere('SP.TeamID is null')
 			.getMany();
 
-		log.info(`Found ${users.length} users to unregister from survivor pool`);
+		log.info(
+			`Found ${users.length} users to try to unregister from survivor pool, verifying if they paid yet...`,
+		);
 
 		for (const user of users) {
+			const userBalance = await getUserPayments(user.userID);
+			const survivorCost = await getSurvivorCost();
+
+			if (userBalance > survivorCost * -1) continue;
+
 			await unregisterForSurvivor(user.userID);
 			log.info('Unregistered user from survivor pool', user);
 		}
@@ -96,6 +103,18 @@ export const registerForSurvivor = async (
 	user.userPlaysSurvivor = true;
 	user.userUpdatedBy = updatedBy ?? user.userEmail;
 	await user.save();
+
+	const survivorCost = await getSurvivorCost();
+	const payment = new Payment();
+
+	payment.paymentAddedBy = updatedBy ?? user.userEmail;
+	payment.paymentAmount = -1 * survivorCost;
+	payment.paymentDescription = 'Survivor Pool Entry Fee';
+	payment.paymentType = PaymentType.Fee;
+	payment.paymentUpdatedBy = user.userEmail;
+	payment.paymentWeek = null;
+	payment.userID = userID;
+	await payment.save();
 };
 
 export const unregisterForSurvivor = async (
@@ -117,4 +136,6 @@ export const unregisterForSurvivor = async (
 		{ userID },
 		{ userPlaysSurvivor: false, userUpdatedBy: updatedBy ?? user.userEmail },
 	);
+
+	await Payment.delete({ userID, paymentDescription: 'Survivor Pool Entry Fee' });
 };

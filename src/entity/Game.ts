@@ -47,7 +47,7 @@ export class Game extends BaseEntity {
 	@Field(() => Int, { nullable: false })
 	@Column('int', { name: 'GameWeek', nullable: false })
 	@Min(1)
-	@Max(17)
+	@Max(18)
 	public gameWeek!: number;
 
 	@Field(() => Int, { nullable: false })

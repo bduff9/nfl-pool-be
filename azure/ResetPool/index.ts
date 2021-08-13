@@ -25,6 +25,7 @@ import {
 	Game,
 	Log,
 	OverallMV,
+	Payment,
 	Pick,
 	Session,
 	SurvivorPick,
@@ -94,6 +95,7 @@ const timerTrigger: AzureFunction = async (
 	await resetUsers();
 	await VerificationRequest.clear();
 	await Session.clear();
+	await Payment.clear();
 	await resetPrizeAmounts();
 	await entityManager.query('SET FOREIGN_KEY_CHECKS = 1');
 

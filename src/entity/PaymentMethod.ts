@@ -15,16 +15,15 @@
  */
 import { registerEnumType } from 'type-graphql';
 
-enum PaymentType {
-	Fee = 'Fee',
-	Paid = 'Paid',
-	Payout = 'Payout',
-	Prize = 'Prize',
+enum PaymentMethod {
+	Paypal = 'Paypal',
+	Venmo = 'Venmo',
+	Zelle = 'Zelle',
 }
 
-registerEnumType(PaymentType, {
-	description: 'The payment type for the payment',
-	name: 'PaymentType',
+registerEnumType(PaymentMethod, {
+	description: 'The chosen payment method for the user',
+	name: 'PaymentMethod',
 });
 
-export default PaymentType;
+export default PaymentMethod;

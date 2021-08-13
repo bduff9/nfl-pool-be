@@ -17,6 +17,26 @@ import { Game, SystemValue } from '../entity';
 
 import { ADMIN_USER } from './constants';
 
+export const getOverallPrizeAmounts = async (): Promise<
+	[number, number, number, number]
+> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'OverallPrizes' },
+	});
+
+	if (!systemValue.systemValueValue) return [0, 0, 0, 0];
+
+	return JSON.parse(systemValue.systemValueValue);
+};
+
+export const getOverallPrizeForLastPlace = async (): Promise<number> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'PoolCost' },
+	});
+
+	return +(systemValue.systemValueValue ?? '0');
+};
+
 export const getPaymentDueDate = async (): Promise<Date> => {
 	const systemValue = await SystemValue.findOneOrFail({
 		where: { systemValueName: 'PaymentDueWeek' },
@@ -48,6 +68,16 @@ export const getSurvivorCost = async (): Promise<number> => {
 	return cost;
 };
 
+export const getSurvivorPrizeAmounts = async (): Promise<[number, number, number]> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'SurvivorPrizes' },
+	});
+
+	if (!systemValue.systemValueValue) return [0, 0, 0];
+
+	return JSON.parse(systemValue.systemValueValue);
+};
+
 export const getSystemYear = async (): Promise<number> => {
 	const systemValue = await SystemValue.findOneOrFail({
 		where: { systemValueName: 'YearUpdated' },
@@ -56,6 +86,16 @@ export const getSystemYear = async (): Promise<number> => {
 	if (systemValue.systemValueValue) return +systemValue.systemValueValue;
 
 	return 0;
+};
+
+export const getWeeklyPrizeAmounts = async (): Promise<[number, number, number]> => {
+	const systemValue = await SystemValue.findOneOrFail({
+		where: { systemValueName: 'WeeklyPrizes' },
+	});
+
+	if (!systemValue.systemValueValue) return [0, 0, 0];
+
+	return JSON.parse(systemValue.systemValueValue);
 };
 
 // ts-prune-ignore-next
