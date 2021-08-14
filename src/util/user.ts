@@ -96,7 +96,8 @@ export const populateUserData = async (
 		const lowest = await OverallMV.findOneOrFail({ order: { rank: 'DESC' } });
 
 		result = await Pick.query(
-			`insert into Picks (UserID, LeagueID, GameID, TeamID, PickPoints, PickAddedBy, PickUpdatedBy) select ${user.userID}, LeagueID, GameID, TeamID, PickPoints, ${user.userEmail}, ${user.userEmail} from Picks where UserID = ${lowest.userID}`,
+			'insert into Picks (UserID, LeagueID, GameID, TeamID, PickPoints, PickAddedBy, PickUpdatedBy) select ?, LeagueID, GameID, TeamID, PickPoints, ?, ? from Picks where UserID = ?',
+			[user.userID, user.userEmail, user.userEmail, lowest.userID],
 		);
 	} else {
 		result = await Pick.query(
