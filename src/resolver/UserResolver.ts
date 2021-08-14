@@ -41,7 +41,7 @@ import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
 import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
-import { getPoolCost } from '../util/systemValue';
+import { getPoolCost, getSystemYear } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
 import { getUserAlerts, populateUserData } from '../util/user';
 
@@ -299,14 +299,16 @@ export class UserResolver {
 					.execute(),
 			);
 			promises.push(
-				UserHistory.createQueryBuilder()
-					.insert()
-					.values({
-						userID: user.userID,
-						leagueID: league.leagueID,
-						userHistoryYear: new Date().getFullYear(),
-					})
-					.execute(),
+				getSystemYear().then(year =>
+					UserHistory.createQueryBuilder()
+						.insert()
+						.values({
+							userID: user.userID,
+							leagueID: league.leagueID,
+							userHistoryYear: year,
+						})
+						.execute(),
+				),
 			);
 		}
 
