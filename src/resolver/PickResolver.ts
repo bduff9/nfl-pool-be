@@ -72,12 +72,15 @@ export class PickResolver {
 		if (!user) throw new Error('Missing user from context');
 
 		const unused = JSON.parse(unusedStr) as Array<number>;
-		const unusedCount = await Pick.createQueryBuilder('P')
-			.innerJoin('P.game', 'G')
-			.where('P.UserID = :userID', { userID: user.userID })
-			.andWhere('G.GameWeek = :week', { week })
-			.andWhere('P.PickPoints in(:...unused)', { unused })
-			.getCount();
+		const unusedCount =
+			!unused || unused.length === 0
+				? 0
+				: await Pick.createQueryBuilder('P')
+					.innerJoin('P.game', 'G')
+					.where('P.UserID = :userID', { userID: user.userID })
+					.andWhere('G.GameWeek = :week', { week })
+					.andWhere('P.PickPoints in(:...unused)', { unused })
+					.getCount();
 
 		if (unusedCount > 0) throw new Error('Points unused on FE are used on BE');
 
