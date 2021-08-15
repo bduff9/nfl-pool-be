@@ -111,7 +111,7 @@ export class PickResolver {
 
 		return Pick.createQueryBuilder('P')
 			.innerJoinAndSelect('P.game', 'G')
-			.innerJoinAndSelect('P.team', 'T')
+			.leftJoinAndSelect('P.team', 'T')
 			.where('G.gameWeek = :week', { week })
 			.andWhere('P.userID = :userID', { userID: user.userID })
 			.getMany();
