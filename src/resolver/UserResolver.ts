@@ -166,7 +166,7 @@ export class UserResolver {
 		}
 
 		if (userType === AdminUserType.Incomplete) {
-			return User.find({ order, relations, where: { userTrusted: false } });
+			return User.find({ order, relations, where: { userTrusted: Not(true) } });
 		}
 
 		if (userType === AdminUserType.Owes) {
@@ -458,6 +458,7 @@ export class UserResolver {
 		userToUpdate.userReferredBy = referredBy;
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
+		await sendNewUserEmail(userToUpdate);
 
 		return true;
 	}
