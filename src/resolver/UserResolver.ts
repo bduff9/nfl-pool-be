@@ -28,11 +28,11 @@ import {
 	Root,
 } from 'type-graphql';
 import { Not } from 'typeorm/find-options/operator/Not';
+import { Raw } from 'typeorm/find-options/operator/Raw';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
-import sendNewUserEmail from '../emails/newUser';
 import sendUntrustedEmail from '../emails/untrusted';
-import { Account, League, Log, Payment, User, UserHistory, UserLeague } from '../entity';
+import { Account, Log, Payment, User, UserHistory } from '../entity';
 import AdminUserType from '../entity/AdminUserType';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import LogAction from '../entity/LogAction';
@@ -41,9 +41,9 @@ import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
 import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
-import { getPoolCost, getSystemYear } from '../util/systemValue';
+import { getPoolCost } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
-import { getUserAlerts, populateUserData } from '../util/user';
+import { getUserAlerts, registerUser } from '../util/user';
 
 @InputType({ description: 'User registration data' })
 class FinishRegistrationInput implements Partial<User> {
@@ -166,7 +166,7 @@ export class UserResolver {
 		}
 
 		if (userType === AdminUserType.Incomplete) {
-			return User.find({ order, relations, where: { userTrusted: Not(true) } });
+			return User.find({ order, relations, where: { userTrusted: Raw('is not true') } });
 		}
 
 		if (userType === AdminUserType.Owes) {
@@ -283,33 +283,7 @@ export class UserResolver {
 		}
 
 		if (userToUpdate.userDoneRegistering) {
-			promises.push(populateUserData(user.userID, data.userPlaysSurvivor));
-			promises.push(sendNewUserEmail({ ...context.user, ...data } as User));
-			const league = await League.findOneOrFail();
-
-			promises.push(
-				UserLeague.createQueryBuilder()
-					.insert()
-					.values({
-						userID: user.userID,
-						leagueID: league.leagueID,
-						userLeagueAddedBy: `${user.userID}`,
-						userLeagueUpdatedBy: `${user.userID}`,
-					})
-					.execute(),
-			);
-			promises.push(
-				getSystemYear().then(year =>
-					UserHistory.createQueryBuilder()
-						.insert()
-						.values({
-							userID: user.userID,
-							leagueID: league.leagueID,
-							userHistoryYear: year,
-						})
-						.execute(),
-				),
-			);
+			promises.push(...registerUser({ ...context.user, ...data } as User));
 		}
 
 		userToUpdate.userAutoPicksLeft = DEFAULT_AUTO_PICKS;
@@ -455,10 +429,11 @@ export class UserResolver {
 		}
 
 		userToUpdate.userTrusted = true;
+		userToUpdate.userDoneRegistering = true;
 		userToUpdate.userReferredBy = referredBy;
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
-		await sendNewUserEmail(userToUpdate);
+		await Promise.all(registerUser(userToUpdate));
 
 		return true;
 	}

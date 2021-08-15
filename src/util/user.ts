@@ -13,6 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import sendNewUserEmail from '../emails/newUser';
 import {
 	League,
 	Notification,
@@ -20,6 +21,7 @@ import {
 	Pick,
 	Tiebreaker,
 	User,
+	UserHistory,
 	UserLeague,
 } from '../entity';
 
@@ -28,7 +30,7 @@ import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { getUserPayments } from './payment';
 import { registerForSurvivor } from './survivor';
-import { getPaymentDueDate } from './systemValue';
+import { getPaymentDueDate, getSystemYear } from './systemValue';
 
 // ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
@@ -118,6 +120,40 @@ export const populateUserData = async (
 	if (isInSurvivor) {
 		await registerForSurvivor(userID);
 	}
+};
+
+export const registerUser = (user: User): Array<Promise<unknown>> => {
+	const promises: Array<Promise<unknown>> = [];
+
+	promises.push(populateUserData(user.userID, user.userPlaysSurvivor));
+	promises.push(sendNewUserEmail(user));
+	League.findOneOrFail().then(league => {
+		promises.push(
+			UserLeague.createQueryBuilder()
+				.insert()
+				.values({
+					userID: user.userID,
+					leagueID: league.leagueID,
+					userLeagueAddedBy: `${user.userID}`,
+					userLeagueUpdatedBy: `${user.userID}`,
+				})
+				.execute(),
+		);
+		promises.push(
+			getSystemYear().then(year =>
+				UserHistory.createQueryBuilder()
+					.insert()
+					.values({
+						userID: user.userID,
+						leagueID: league.leagueID,
+						userHistoryYear: year,
+					})
+					.execute(),
+			),
+		);
+	});
+
+	return promises;
 };
 
 // ts-prune-ignore-next
