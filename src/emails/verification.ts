@@ -20,8 +20,8 @@ import { log } from '../util/logging';
 
 const sendVerificationEmail = async (email: string, url: string): Promise<void> => {
 	const host = new URL(url).hostname;
-	const user = await User.findOneOrFail({ where: { userEmail: email } });
-	const hasName = !!user.userFirstName && !!user.userLastName;
+	const user = await User.findOne({ where: { userEmail: email } });
+	const hasName = !!user?.userFirstName && !!user?.userLastName;
 
 	try {
 		await sendEmail({
