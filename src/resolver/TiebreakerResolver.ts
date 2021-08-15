@@ -105,7 +105,7 @@ export class TiebreakerResolver {
 
 		const picks = await Pick.createQueryBuilder('P')
 			.innerJoinAndSelect('P.game', 'G')
-			.innerJoinAndSelect('P.team', 'T')
+			.leftJoinAndSelect('P.team', 'T')
 			.where('P.UserID = :userID', { userID: user.userID })
 			.andWhere('G.GameWeek = :week', { week })
 			.orderBy('P.PickPoints', 'ASC')
