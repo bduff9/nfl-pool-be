@@ -46,14 +46,14 @@ export const sendSMS = async (
 		await EmailModel.create({
 			emailID,
 			emailType: type,
-			to: new Set(to),
+			to: new Set([to]),
 		});
 	} catch (error) {
 		log.error('Failed to create SMS record in DynamoDB:', {
 			emailID,
 			emailType: type,
 			error,
-			to: new Set(to),
+			to: new Set([to]),
 		});
 	}
 

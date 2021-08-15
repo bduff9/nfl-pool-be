@@ -24,7 +24,9 @@ import {
 	getSystemYear,
 } from '../util/systemValue';
 
-const sendInterestEmail = async (user: User): Promise<void> => {
+const sendInterestEmail = async (
+	user: Pick<User, 'userEmail' | 'userFirstName'>,
+): Promise<void> => {
 	const poolYear = await getSystemYear();
 	const payByDateRaw = await getPaymentDueDate();
 	const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });

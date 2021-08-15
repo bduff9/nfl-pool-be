@@ -13,11 +13,22 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import {
+	Arg,
+	Authorized,
+	Ctx,
+	FieldResolver,
+	Mutation,
+	Query,
+	Resolver,
+	Root,
+} from 'type-graphql';
 import { In } from 'typeorm/find-options/operator/In';
 
 import { EmailModel } from '../dynamodb/email';
+import sendInterestEmail from '../emails/interest';
 import { Email, Log, User } from '../entity';
+import EmailType from '../entity/EmailType';
 import LogAction from '../entity/LogAction';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -46,6 +57,42 @@ export class EmailResolver {
 		await log.save();
 
 		return email;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Boolean)
+	async sendAdminEmail (
+		@Arg('EmailType', () => EmailType) emailType: EmailType,
+		@Arg('SendTo', () => String) sendTo: string,
+		@Arg('UserEmail', () => String, { nullable: true }) userEmail: null | string,
+		@Arg('UserFirstname', () => String, { nullable: true }) userFirstName: null | string,
+		@Ctx() context: TCustomContext,
+	): Promise<true> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		switch (emailType) {
+			case EmailType.interest:
+				if (sendTo === 'All') {
+					const users = await User.find({ where: { userCommunicationsOptedOut: false } });
+
+					for (const user of users) {
+						await sendInterestEmail(user);
+					}
+				} else {
+					if (!userEmail) throw new Error('Must pass in email to send interest email to!');
+
+					await sendInterestEmail({ userEmail, userFirstName });
+				}
+
+				break;
+			default:
+				console.error(`Invalid email requested: ${emailType}`);
+				break;
+		}
+
+		return true;
 	}
 
 	@FieldResolver()
