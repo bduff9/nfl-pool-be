@@ -76,7 +76,7 @@
     "@azure/functions": "1.2.3",
     "@types/email-templates": "8.0.4",
     "@types/eslint": "7.28.0",
-    "@types/jest": "26.0.24",
+    "@types/jest": "27.0.1",
     "@types/mjml": "4.7.0",
     "@types/node": "16.4.12",
     "@types/node-sass": "4.11.2",
