@@ -15,6 +15,7 @@
  */
 export * from './Account';
 export * from './APICall';
+export * from './Backup';
 export * from './Email';
 export * from './FAQ';
 export * from './Game';

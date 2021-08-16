@@ -13,6 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import mysql from 'mysql2';
+import type { Connection } from 'mysql2';
 import { createConnection } from 'typeorm';
 
 import * as entities from '../entity';
@@ -48,3 +50,30 @@ export const getBackupName = (): string => {
 
 	return `NFLBackup-${year}-${month}-${day}-${amPm}.sql`;
 };
+
+const getConnectionForFiles = (): Connection =>
+	mysql.createConnection({
+		database,
+		host,
+		password,
+		port: port !== undefined ? +port : port,
+		timezone: 'local',
+		user: dbuser,
+		multipleStatements: true,
+	});
+
+export const executeSqlFile = (fileContents: string): Promise<unknown> =>
+	new Promise((resolve, reject): void => {
+		const connection = getConnectionForFiles();
+
+		connection.connect();
+		connection.query(fileContents, (error, results): void => {
+			if (error) {
+				reject(error);
+			} else {
+				resolve(results);
+			}
+
+			connection.end();
+		});
+	});

@@ -18,6 +18,7 @@ import { registerEnumType } from 'type-graphql';
 enum LogAction {
 	Error404 = '404',
 	AuthenticationError = 'AUTH_ERROR',
+	BackupRestore = 'BACKUP_RESTORE',
 	CreatedAccount = 'CREATE_ACCOUNT',
 	EmailActivity = 'EMAIL_ACTIVITY',
 	LinkedAccount = 'LINK_ACCOUNT',

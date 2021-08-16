@@ -15,6 +15,7 @@
  */
 export * from './AccountResolver';
 export * from './APICallResolver';
+export * from './BackupResolver';
 export * from './EmailResolver';
 export * from './FAQResolver';
 export * from './GameResolver';

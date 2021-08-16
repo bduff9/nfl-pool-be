@@ -13,19 +13,19 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { ObjectType, Field } from 'type-graphql';
+
+import AmPm from './AmPm';
 
 // ts-prune-ignore-next
-export class AddLogActionTypes1616374033435 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.query(
-			`alter table Logs modify LogAction enum('404', 'AUTH_ERROR', 'BACKUP_RESTORE', 'CREATE_ACCOUNT', 'LINK_ACCOUNT', 'LOGIN', 'LOGOUT', 'MESSAGE', 'PAID', 'REGISTER', 'SLACK', 'SUBMIT_PICKS', 'SURVIVOR_PICK') not null`,
-		);
-	}
+@ObjectType()
+export class Backup {
+	@Field(() => String, { nullable: false })
+	public backupName!: string;
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.query(
-			`alter table Logs modify LogAction enum('404', 'LOGIN', 'LOGOUT', 'MESSAGE', 'PAID', 'REGISTER', 'SLACK', 'SUBMIT_PICKS', 'SURVIVOR_PICK') not null`,
-		);
-	}
+	@Field(() => Date, { nullable: false })
+	public backupDate!: Date;
+
+	@Field(() => AmPm, { nullable: false })
+	public backupWhen!: AmPm;
 }

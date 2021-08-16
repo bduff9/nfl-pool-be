@@ -17,6 +17,8 @@ export const {
 	AWS_AK_ID,
 	AWS_R,
 	AWS_SAK_ID,
+	AzureWebJobsStorage,
+	containerName,
 	EMAIL_FROM,
 	NEXT_PUBLIC_SENTRY_DSN,
 	VERCEL_ENV,

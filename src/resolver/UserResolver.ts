@@ -27,8 +27,8 @@ import {
 	Resolver,
 	Root,
 } from 'type-graphql';
+import { IsNull } from 'typeorm/find-options/operator/IsNull';
 import { Not } from 'typeorm/find-options/operator/Not';
-import { Raw } from 'typeorm/find-options/operator/Raw';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import sendUntrustedEmail from '../emails/untrusted';
@@ -166,7 +166,7 @@ export class UserResolver {
 		}
 
 		if (userType === AdminUserType.Incomplete) {
-			return User.find({ order, relations, where: { userTrusted: Raw('is not true') } });
+			return User.find({ order, relations, where: { userTrusted: IsNull() } });
 		}
 
 		if (userType === AdminUserType.Owes) {
@@ -434,6 +434,7 @@ export class UserResolver {
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
 		await Promise.all(registerUser(userToUpdate));
+		//TODO: send email to userToUpdate in future telling them they've been approved
 
 		return true;
 	}
