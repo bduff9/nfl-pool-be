@@ -2,7 +2,7 @@
   <mj-head>
     <mj-title>The {{ poolYear }} Confidence Pool is Now Open
     </mj-title>
-    <mj-preview>{{{formatPreview 'The {{ poolYear }} confidence pool is open and ready for registration.'}}}</mj-preview>
+    <mj-preview>{{{formatPreview (concat 'The ' poolYear ' confidence pool is open and ready for registration!')}}}</mj-preview>
     {{> styles }}
     <mj-style>
       .subtitle {
