@@ -62,7 +62,7 @@ export class GameResolver {
 			.orderBy('Game.GameKickoff', 'DESC')
 			.getRawOne<{ lastWeek: number; useCurrentWeek: '0' | '1' }>();
 
-		if (!lastWeekResult) throw new Error('Missing last weej result');
+		if (!lastWeekResult) throw new Error('Missing last week result');
 
 		const { lastWeek, useCurrentWeek } = lastWeekResult;
 

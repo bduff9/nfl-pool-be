@@ -23,6 +23,7 @@ import {
 	User,
 	UserHistory,
 	UserLeague,
+	WeeklyMV,
 } from '../entity';
 
 import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
@@ -93,29 +94,51 @@ export const populateUserData = async (
 	const week = await getCurrentWeek();
 	let result;
 
-	// Populate picks
 	if (week > 1) {
 		const lowest = await OverallMV.findOneOrFail({ order: { rank: 'DESC' } });
 
+		// Populate picks
 		result = await Pick.query(
 			'insert into Picks (UserID, LeagueID, GameID, TeamID, PickPoints, PickAddedBy, PickUpdatedBy) select ?, LeagueID, GameID, TeamID, PickPoints, ?, ? from Picks where UserID = ?',
 			[user.userID, user.userEmail, user.userEmail, lowest.userID],
 		);
+		log.info(`Inserted lowest score picks for user ${userID}`, result);
+
+		// Populate tiebreakers
+		result = await Tiebreaker.query(
+			'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerLastScore, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, TiebreakerWeek, TiebreakerLastScore, TiebreakerHasSubmitted, ?, ? from Tiebreakers where UserID = ?',
+			[userID, league.leagueID, user.userEmail, user.userEmail, lowest.userID],
+		);
+		log.info(`Inserted lowest score tiebreakers for user ${userID}`, result);
+
+		// Populate WeeklyMV
+		result = await WeeklyMV.query(
+			`insert into WeeklyMV (Week, \`Rank\`, Tied, UserID, TeamName, UserName, PointsEarned, PointsWrong, PointsPossible, PointsTotal, GamesCorrect, GamesWrong, GamesPossible, GamesTotal, GamesMissed, TiebreakerScore, LastScore, TiebreakerIsUnder, TiebreakerDiffAbsolute, IsEliminated, LastUpdated) select W.Week, W.\`Rank\`, true, U.UserID, U.UserTeamName, U.UserName, W.PointsEarned, W.PointsWrong, W.PointsPossible, W.PointsTotal, W.GamesCorrect, W.GamesWrong, W.GamesPossible, W.GamesTotal, W.GamesMissed, W.TiebreakerScore, W.LastScore, W.TiebreakerIsUnder, W.TiebreakerDiffAbsolute, W.IsEliminated, W.LastUpdated from WeeklyMV W join Users U on U.UserID = ? where W.UserID = ?`,
+			[user.userID, lowest.userID],
+		);
+		log.info(`Inserted lowest score WeeklyMV for user ${userID}`, result);
+
+		// Populate OverallMV
+		result = await OverallMV.query(
+			`insert into OverallMV (\`Rank\`, Tied, UserID, TeamName, UserName, PointsEarned, PointsWrong, PointsPossible, PointsTotal, GamesCorrect, GamesWrong, GamesPossible, GamesTotal, GamesMissed, IsEliminated, LastUpdated) select O.\`Rank\`, true, U.UserID, U.UserTeamName, U.UserName, O.PointsEarned, O.PointsWrong, O.PointsPossible, O.PointsTotal, O.GamesCorrect, O.GamesWrong, O.GamesPossible, O.GamesTotal, O.GamesMissed, O.IsEliminated, O.LastUpdated from OverallMV O join Users U on U.UserID = ? where O.UserID = ?`,
+			[user.userID, lowest.userID],
+		);
+		log.info(`Inserted lowest score OverallMV for user ${userID}`, result);
 	} else {
+		// Populate picks
 		result = await Pick.query(
 			'insert into Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) select ?, ?, GameID, ?, ? from Games',
 			[userID, league.leagueID, user.userEmail, user.userEmail],
 		);
+		log.info(`Inserted picks for user ${userID}`, result);
+
+		// Populate tiebreakers
+		result = await Tiebreaker.query(
+			'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, GameWeek, false, ?, ? from Games group by GameWeek',
+			[userID, league.leagueID, user.userEmail, user.userEmail],
+		);
+		log.info(`Inserted tiebreakers for user ${userID}`, result);
 	}
-
-	log.info(`Inserted picks for user ${userID}`, result);
-
-	// Populate tiebreakers
-	result = await Tiebreaker.query(
-		'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, GameWeek, false, ?, ? from Games group by GameWeek',
-		[userID, league.leagueID, user.userEmail, user.userEmail],
-	);
-	log.info(`Inserted tiebreakers for user ${userID}`, result);
 
 	if (isInSurvivor) {
 		await registerForSurvivor(userID);
