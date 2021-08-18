@@ -17,7 +17,10 @@ import 'reflect-metadata';
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
+import { Log } from '../src/entity';
+import LogAction from '../src/entity/LogAction';
 import { allowCors } from '../src/util/auth';
+import { ADMIN_USER } from '../src/util/constants';
 import { connectionPromise } from '../src/util/database';
 import { Sentry } from '../src/util/error';
 import { log } from '../src/util/logging';
@@ -34,8 +37,17 @@ export default allowCors(
 
 		try {
 			if (req.method === 'POST') {
-				log.info('Incoming request:', req.method, req.body);
-				//TODO: parse incoming event and write it to log table
+				log.info('Incoming SNS request:', req.method, req.body);
+
+				const snsLog = new Log();
+				const message = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+
+				snsLog.logAction = LogAction.EmailActivity;
+				snsLog.logAddedBy = ADMIN_USER;
+				snsLog.logMessage = message.substring(0, 500);
+				snsLog.logUpdatedBy = ADMIN_USER;
+
+				await snsLog.save();
 			}
 
 			res.statusCode = 200;
