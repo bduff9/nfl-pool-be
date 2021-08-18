@@ -24,8 +24,9 @@ import {
 	Query,
 	Resolver,
 } from 'type-graphql';
+import { FindConditions } from 'typeorm';
 
-import { Log } from '../entity';
+import { Log, LogResult } from '../entity';
 import LogAction from '../entity/LogAction';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -47,9 +48,43 @@ class WriteLogInput implements Partial<Log> {
 @Resolver(Log)
 export class LogResolver {
 	@Authorized<TUserType>('admin')
-	@Query(() => [Log])
-	async getLogs (): Promise<Log[]> {
-		return Log.find({ relations: ['user'] });
+	@Query(() => LogResult)
+	async getLogs (
+		@Arg('Sort') orderBy: string,
+		@Arg('SortDir', () => String) orderByDir: 'ASC' | 'DESC',
+		@Arg('PerPage', () => Int) limit: number,
+		@Arg('Page', () => Int, { nullable: true }) page: null | number,
+		@Arg('UserID', () => Int, { nullable: true }) userID: null | number,
+		@Arg('LogAction', () => LogAction, { nullable: true }) logAction: LogAction,
+	): Promise<LogResult> {
+		const where: FindConditions<Log> = {};
+
+		if (userID) where.userID = userID;
+
+		if (logAction) where.logAction = logAction;
+
+		const [logs, totalCount] = await Log.findAndCount({
+			order: { [orderBy]: orderByDir },
+			relations: ['user'],
+			skip: ((page ?? 1) - 1) * limit,
+			take: limit,
+			where,
+		});
+
+		const logResults = new LogResult();
+
+		logResults.count = logs.length;
+		logResults.page = page ?? 1;
+		logResults.results = logs;
+		logResults.totalCount = totalCount;
+
+		return logResults;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => [[String]])
+	async getLogActions (): Promise<Array<Array<string>>> {
+		return Object.entries(LogAction);
 	}
 
 	@Authorized<TUserType>('anonymous')
