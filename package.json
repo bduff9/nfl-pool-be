@@ -66,7 +66,7 @@
     "mysqldump": "3.2.0",
     "node-sass": "6.0.1",
     "reflect-metadata": "0.1.13",
-    "tslog": "3.2.0",
+    "tslog": "3.2.1",
     "twilio": "3.67.0",
     "type-graphql": "1.1.1",
     "typeorm": "0.2.37",
