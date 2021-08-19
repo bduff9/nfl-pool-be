@@ -435,7 +435,7 @@ export class UserResolver {
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
 		await Promise.all(registerUser(userToUpdate));
-		await sendUserTrustedEmail(user);
+		await sendUserTrustedEmail(userToUpdate);
 
 		return true;
 	}
