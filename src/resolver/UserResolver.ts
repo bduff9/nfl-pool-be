@@ -32,6 +32,7 @@ import { Not } from 'typeorm/find-options/operator/Not';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import sendUntrustedEmail from '../emails/untrusted';
+import sendUserTrustedEmail from '../emails/userTrusted';
 import { Account, Log, Payment, User, UserHistory } from '../entity';
 import AdminUserType from '../entity/AdminUserType';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
@@ -434,7 +435,7 @@ export class UserResolver {
 		userToUpdate.userUpdatedBy = user.userEmail;
 		await userToUpdate.save();
 		await Promise.all(registerUser(userToUpdate));
-		//TODO: send email to userToUpdate in future telling them they've been approved
+		await sendUserTrustedEmail(user);
 
 		return true;
 	}

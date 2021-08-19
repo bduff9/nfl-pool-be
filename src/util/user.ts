@@ -27,6 +27,7 @@ import {
 } from '../entity';
 
 import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
+import { formatDueDate } from './dates';
 import { getCurrentWeek } from './game';
 import { log } from './logging';
 import { getUserPayments } from './payment';
@@ -73,11 +74,9 @@ export const getUserAlerts = async (user: User): Promise<Array<string>> => {
 
 	if (userBalance < 0) {
 		const paymentDueDate = await getPaymentDueDate();
-		const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
+		const dueDate = formatDueDate(paymentDueDate);
 
-		alerts.push(
-			`Please pay $${Math.abs(userBalance)} by ${formatter.format(paymentDueDate)}`,
-		);
+		alerts.push(`Please pay $${Math.abs(userBalance)} by ${dueDate}`);
 	}
 
 	return alerts;

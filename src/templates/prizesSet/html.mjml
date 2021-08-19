@@ -1,0 +1,65 @@
+<mjml owa="desktop" version="4.6.3">
+  <mj-head>
+    <mj-title>Prizes have officially been set!</mj-title>
+    <mj-preview>{{{formatPreview 'This is an automated notification to let you know that the prizes for this season have now been locked in'}}}</mj-preview>
+    {{> styles }}
+    <mj-style inline="inline">
+      .prizes ul {
+        list-style-type: none;
+        padding-left: 0px;
+        margin-top: 2px;
+      }
+
+      .prizes li {
+        font-size: 16px;
+      }
+
+      .red {
+        color: #dc2626;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    {{> header }}
+
+    <mj-section padding="0px" text-align="center">
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text css-class="prizes" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
+          <p>Hi {{ user.userFirstName }},</p>
+          <p>This is a notification that everyone has now paid and so the payouts for this season have now been set.</p>
+          <p><u>Weekly Payouts</u></p>
+          <ul>
+            <li>1st place - ${{ firstPlaceWeekly }}</li>
+            <li>2nd place - ${{ secondPlaceWeekly }}</li>
+          </ul>
+
+          <p><u>Overall Payouts</u></p>
+          <ul>
+            <li>1st place - ${{ firstPlaceOverall }}</li>
+            <li>2nd place - ${{ secondPlaceOverall }}</li>
+            <li>3rd place - ${{ thirdPlaceOverall }}</li>
+            <li>Last place<span class="red">*</span> - ${{ lastPlaceOverall }}</li>
+          </ul>
+          <strong class="red">* - Must not miss picking any games from this point forward to be eligible for the last place prize</strong>
+
+          <p><u>Survivor Payouts</u></p>
+          <ul>
+            <li>1st place - ${{ firstPlaceSurvivor }}</li>
+            <li>2nd place - ${{ secondPlaceSurvivor }}</li>
+          </ul>
+
+          <p>Reminder that all payouts will be done after the season has completed. Any questions or concerns please let us know!</p>
+          <p>You can view all current prizes you've won at the link below.</p>
+        </mj-text>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/users/payments" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">View my Prizes</span>
+        </mj-button>
+        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
+          <span>If you did not request this email you can safely ignore it.</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{> footer }}
+  </mj-body>
+</mjml>

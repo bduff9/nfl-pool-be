@@ -1,0 +1,33 @@
+<mjml owa="desktop" version="4.6.3">
+  <mj-head>
+    <mj-title>You have been approved for the {{ year }} season!</mj-title>
+    <mj-preview>{{{formatPreview 'This is an automated notification to let you know that an admin has approved your registration for this season'}}}</mj-preview>
+    {{> styles }}
+    <mj-style inline="inline">
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    {{> header }}
+
+    <mj-section padding="0px" text-align="center">
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text css-class="userTrusted" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
+          <p>Hi {{ user.userFirstName }},</p>
+          <p>This is a notification that your request to register for the {{ year }} NFL Confidence Pool has just been approved by an admin.</p>
+          <p>You can now login and begin making your picks.</p>
+          <p>Please be sure to pay your entry fees by {{ paymentDueDate }}.</p>
+          <p>You can reply to this email if you have any questions, and the pool can be accessed at the link below.</p>
+          <p>Best of luck to you!</p>
+        </mj-text>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">Visit the Pool</span>
+        </mj-button>
+        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
+          <span>If you did not request this email you can safely ignore it.</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{> footer }}
+  </mj-body>
+</mjml>

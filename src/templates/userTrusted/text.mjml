@@ -1,0 +1,13 @@
+Hi {{ user.userFirstName }},
+
+This is a notification that your request to register for the {{ year }} NFL Confidence Pool has just been approved by an admin.
+
+You can now login and begin making your picks.
+
+Please be sure to pay your entry fees by {{ paymentDueDate }}.
+
+You can reply to this email if you have any questions, and the pool can be accessed at the link below.
+
+Best of luck to you!
+
+{{ domain }}/

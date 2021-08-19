@@ -13,29 +13,32 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import { User } from '../entity';
+import EmailType from '../entity/EmailType';
+import { formatDueDate } from '../util/dates';
+import { sendEmail } from '../util/email';
+import { log } from '../util/logging';
+import { getPaymentDueDate, getSystemYear } from '../util/systemValue';
 
-enum EmailType {
-	interest = 'interest',
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	picksSubmitted = 'picksSubmitted',
-	prizesSet = 'prizesSet',
-	quickPick = 'quickPick',
-	quickPickConfirmation = 'quickPickConfirmation',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	userTrusted = 'userTrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+const sendUserTrustedEmail = async (user: User): Promise<void> => {
+	const year = await getSystemYear();
+	const dueDate = await getPaymentDueDate();
+	const paymentDueDate = formatDueDate(dueDate);
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
+	try {
+		await sendEmail({
+			locals: { paymentDueDate, user, year },
+			to: [user.userEmail],
+			type: EmailType.userTrusted,
+		});
+	} catch (error) {
+		log.error('Failed to send user trusted email: ', {
+			error,
+			locals: { paymentDueDate, user, year },
+			to: [user.userEmail],
+			type: EmailType.userTrusted,
+		});
+	}
+};
 
-export default EmailType;
+export default sendUserTrustedEmail;

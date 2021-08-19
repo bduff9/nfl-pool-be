@@ -15,40 +15,55 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { formatDueDate } from '../util/dates';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
-import {
-	getPaymentDueDate,
-	getPoolCost,
-	getSurvivorCost,
-	getSystemYear,
-} from '../util/systemValue';
+import { getPoolCost } from '../util/systemValue';
 
-const sendInterestEmail = async (
-	user: Pick<User, 'userEmail' | 'userFirstName'>,
+const sendPrizesSetEmail = async (
+	user: User,
+	weeklyPrizes: Array<number>,
+	overallPrizes: Array<number>,
+	survivorPrizes: Array<number>,
 ): Promise<void> => {
-	const poolYear = await getSystemYear();
-	const payByDateRaw = await getPaymentDueDate();
-	const payByDate = formatDueDate(payByDateRaw);
-	const poolCost = await getPoolCost();
-	const survivorCost = await getSurvivorCost();
+	const [, firstPlaceWeekly, secondPlaceWeekly] = weeklyPrizes;
+	const [, firstPlaceOverall, secondPlaceOverall, thirdPlaceOverall] = overallPrizes;
+	const [, firstPlaceSurvivor, secondPlaceSurvivor] = survivorPrizes;
+	const lastPlaceOverall = await getPoolCost();
 
 	try {
 		await sendEmail({
-			locals: { payByDate, poolCost, poolYear, survivorCost, user },
+			locals: {
+				firstPlaceOverall,
+				firstPlaceSurvivor,
+				firstPlaceWeekly,
+				lastPlaceOverall,
+				secondPlaceOverall,
+				secondPlaceSurvivor,
+				secondPlaceWeekly,
+				thirdPlaceOverall,
+				user,
+			},
 			to: [user.userEmail],
-			type: EmailType.interest,
+			type: EmailType.prizesSet,
 		});
 	} catch (error) {
-		log.error('Failed to send interest email:', {
+		log.error('Failed to send prizes set email: ', {
 			error,
-			locals: { payByDate, poolCost, poolYear, survivorCost, user },
+			locals: {
+				firstPlaceOverall,
+				firstPlaceSurvivor,
+				firstPlaceWeekly,
+				lastPlaceOverall,
+				secondPlaceOverall,
+				secondPlaceSurvivor,
+				secondPlaceWeekly,
+				thirdPlaceOverall,
+				user,
+			},
 			to: [user.userEmail],
-			type: EmailType.interest,
+			type: EmailType.prizesSet,
 		});
 	}
 };
 
-// ts-prune-ignore-next
-export default sendInterestEmail;
+export default sendPrizesSetEmail;

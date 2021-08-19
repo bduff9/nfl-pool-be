@@ -15,7 +15,8 @@
  */
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
-import { SystemValue } from '../entity';
+import sendPrizesSetEmail from '../emails/prizesSet';
+import { SystemValue, User } from '../entity';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SystemValue)
@@ -102,6 +103,14 @@ export class SystemValueResolver {
 		survivor.systemValueValue = survivorPrizes;
 		survivor.systemValueUpdatedBy = user.userEmail;
 		await survivor.save();
+
+		const users = await User.find({
+			where: { userCommunicationsOptedOut: false, userDoneRegistering: true },
+		});
+
+		for (const user of users) {
+			await sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor);
+		}
 
 		return true;
 	}

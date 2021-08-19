@@ -25,6 +25,12 @@ export const convertEpoch = (epoch: number): Date => {
 	return d;
 };
 
+export const formatDueDate = (date: Date): string => {
+	const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
+
+	return formatter.format(date);
+};
+
 const getCurrentSeasonYear = (): number => {
 	const currDate = new Date();
 	const currMonth = currDate.getMonth();
