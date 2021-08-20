@@ -43,7 +43,7 @@
     "test:coverage": "jest --coverage --env=jsdom",
     "test:watch": "jest --watch",
     "typeCheck": "tsc",
-    "validate": "npm run lint && tsc --noEmit && npx ts-prune",
+    "validate": "npm run lint && tsc --noEmit && npx ts-prune -e",
     "vercel-build": "tsc && typeorm migration:run"
   },
   "config": {},

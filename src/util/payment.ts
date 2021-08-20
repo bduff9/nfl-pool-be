@@ -76,6 +76,7 @@ export const getUserPayments = async (
 	return type ? Math.abs(amount) : amount;
 };
 
+// ts-prune-ignore-next
 export const updatePayouts = async (week: number): Promise<void> => {
 	const weeklyPrizes = await getWeeklyPrizeAmounts();
 

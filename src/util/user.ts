@@ -82,10 +82,7 @@ export const getUserAlerts = async (user: User): Promise<Array<string>> => {
 	return alerts;
 };
 
-export const populateUserData = async (
-	userID: number,
-	isInSurvivor: boolean,
-): Promise<void> => {
+const populateUserData = async (userID: number, isInSurvivor: boolean): Promise<void> => {
 	const user = await User.findOneOrFail(userID);
 	const league = await League.findOneOrFail({
 		where: { leagueName: 'public' },
