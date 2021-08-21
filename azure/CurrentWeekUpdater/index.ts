@@ -19,6 +19,7 @@ import 'reflect-metadata';
 import { getGamesForWeek } from '../../src/api';
 import { waitForConnection } from '../../src/util/database';
 import { getCurrentWeek, getHoursToWeekStart, updateSpreads } from '../../src/util/game';
+import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { sendReminderEmails, sendReminderTexts } from '../../src/util/notification';
 import { MyTimer } from '../../src/util/types';
 
@@ -38,11 +39,12 @@ const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
 ): Promise<void> => {
+	updateLoggerForAzure(context);
+	await waitForConnection();
+
 	if (myTimer.isPastDue) {
 		context.log('Current week updater function is running late!');
 	}
-
-	await waitForConnection();
 
 	const timeStamp = new Date().toISOString();
 	const currentWeek = await getCurrentWeek();
@@ -61,6 +63,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	context.log('Current week updater function ran!', timeStamp);
+	resetLogger();
 };
 
 export default timerTrigger;

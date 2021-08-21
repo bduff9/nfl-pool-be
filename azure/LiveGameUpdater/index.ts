@@ -26,6 +26,7 @@ import {
 	getDBGameFromAPI,
 	updateDBGame,
 } from '../../src/util/game';
+import { resetLogger, updateLoggerForAzure } from '../../src/util/logging';
 import { updateOverallMV, updateSurvivorMV, updateWeeklyMV } from '../../src/util/mv';
 import {
 	sendWeekEndedNotifications,
@@ -53,11 +54,13 @@ const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
 ): Promise<void> => {
+	updateLoggerForAzure(context);
+	await waitForConnection();
+
 	if (myTimer.isPastDue) {
 		context.log('Live game updater function is running late!');
 	}
 
-	await waitForConnection();
 	const timeStamp = new Date().toISOString();
 	const currentWeek = await getCurrentWeek();
 	const needUpdates = await checkDBIfUpdatesNeeded(currentWeek);
@@ -114,6 +117,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	context.log('Live game updater function ran!', timeStamp);
+	resetLogger();
 };
 
 export default timerTrigger;

@@ -21,6 +21,7 @@ import { healPicks, healWeek } from '../../src/api/healing';
 import { WEEKS_IN_SEASON } from '../../src/util/constants';
 import { waitForConnection } from '../../src/util/database';
 import { getCurrentWeek } from '../../src/util/game';
+import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { getSystemYear } from '../../src/util/systemValue';
 import { MyTimer } from '../../src/util/types';
 
@@ -40,11 +41,13 @@ const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
 ): Promise<void> => {
+	updateLoggerForAzure(context);
+	await waitForConnection();
+
 	if (myTimer.isPastDue) {
 		context.log('Future game updater function is running late!');
 	}
 
-	await waitForConnection();
 	const timeStamp = new Date().toISOString();
 	const year = await getSystemYear();
 	const season = await getEntireSeasonFromAPI(year);
@@ -63,6 +66,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	context.log('Future game updater function ran!', timeStamp);
+	resetLogger();
 };
 
 export default timerTrigger;

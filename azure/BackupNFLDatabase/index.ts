@@ -21,6 +21,7 @@ import mysqldump from 'mysqldump';
 import 'reflect-metadata';
 
 import { waitForConnection, getBackupName } from '../../src/util/database';
+import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { MyTimer } from '../../src/util/types';
 
 const {
@@ -56,11 +57,13 @@ const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
 ): Promise<void> => {
+	updateLoggerForAzure(context);
+	await waitForConnection();
+
 	if (myTimer.isPastDue) {
 		context.log('Backup NFL database function is running late!');
 	}
 
-	await waitForConnection();
 	const timeStamp = new Date().toISOString();
 
 	context.log(`Executing mysqldump at ${timeStamp}...`);
@@ -149,6 +152,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	context.log('Backup NFL database function ran!', timeStamp);
+	resetLogger();
 };
 
 export default timerTrigger;

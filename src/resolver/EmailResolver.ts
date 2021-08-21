@@ -30,6 +30,7 @@ import sendInterestEmail from '../emails/interest';
 import { Email, Log, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import LogAction from '../entity/LogAction';
+import { log } from '../util/logging';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Email)
@@ -88,7 +89,7 @@ export class EmailResolver {
 
 				break;
 			default:
-				console.error(`Invalid email requested: ${emailType}`);
+				log.error(`Invalid email requested: ${emailType}`);
 				break;
 		}
 

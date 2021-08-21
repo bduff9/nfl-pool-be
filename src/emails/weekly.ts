@@ -71,7 +71,13 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 
 	survivorUpdates.push(`${newlyDead.length} people went out of survivor this week`);
 
-	if (stillAlive.length === 1 || stillAlive[0].weeksAlive === WEEKS_IN_SEASON) {
+	//TODO: does not handle case where more than one person ties for first by going out together in some week before the end
+	//TODO: also does not handle case where one person wins and then continues to play, as they will be announced as winning every single week (Payment issue besides email?)
+	//TODO: instead of still alive, let's get all first place users.  If only one, or multiple ones, then we can check if they just went out this week or made it to the end of the season
+	if (
+		stillAlive.length === 1 ||
+		(stillAlive.length > 1 && stillAlive[0].weeksAlive === WEEKS_IN_SEASON)
+	) {
 		const names = stillAlive
 			.map(({ user }) => `${user.userFirstName} ${user.userLastName}`)
 			.reduce((acc, name, i, list) => {

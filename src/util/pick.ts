@@ -31,9 +31,6 @@ export const getLowestUnusedPoint = async (
 		.getRawMany<{ points: number }>();
 	const used = usedResult.map(({ points }) => points).filter(points => !!points);
 
-	//TODO: remove after debugging
-	console.log({ used, usedResult, userID, week });
-
 	for (let point = 1; point <= usedResult.length; point++) {
 		if (used.includes(point)) continue;
 
@@ -81,6 +78,9 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 			throw new Error('User missed pick but has no picks remaining');
 		}
 
+		pick.pickPoints = lowestPoint;
+		pick.pickUpdatedBy = ADMIN_USER;
+
 		if (pick.user.userAutoPickStrategy && pick.user.userAutoPicksLeft > 0) {
 			pick.user.userAutoPicksLeft -= 1;
 			pick.pickUpdatedBy = ADMIN_USER;
@@ -97,8 +97,6 @@ export const updateMissedPicks = async (game: Game): Promise<void> => {
 			log.info('Auto assigned points for missed pick', { pick });
 		}
 
-		pick.pickPoints = lowestPoint;
-		pick.pickUpdatedBy = ADMIN_USER;
 		await pick.save();
 	}
 };

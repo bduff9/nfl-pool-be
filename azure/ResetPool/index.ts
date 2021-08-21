@@ -37,6 +37,7 @@ import {
 import { waitForConnection } from '../../src/util/database';
 import { verifySeasonYearForReset } from '../../src/util/dates';
 import { populateWinnerHistory } from '../../src/util/history';
+import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { resetPrizeAmounts, updateSystemYear } from '../../src/util/systemValue';
 import { MyTimer } from '../../src/util/types';
 import { clearOldUserData, resetUsers } from '../../src/util/user';
@@ -57,11 +58,13 @@ const timerTrigger: AzureFunction = async (
 	context: Context,
 	myTimer: MyTimer,
 ): Promise<void> => {
+	updateLoggerForAzure(context);
+	await waitForConnection();
+
 	if (myTimer.isPastDue) {
 		context.log('Reset pool function is running late!');
 	}
 
-	await waitForConnection;
 	// Validate reset function can be run
 	const timeStamp = new Date().toISOString();
 	const nextSeasonYear = await verifySeasonYearForReset();
@@ -110,6 +113,7 @@ const timerTrigger: AzureFunction = async (
 	await Promise.all([apiCallsPromise, emailsPromise]);
 
 	context.log('Reset pool function ran!', timeStamp);
+	resetLogger();
 };
 
 export default timerTrigger;
