@@ -21,7 +21,7 @@ import { Log } from '../src/entity';
 import LogAction from '../src/entity/LogAction';
 import { allowCors } from '../src/util/auth';
 import { ADMIN_USER } from '../src/util/constants';
-import { connectionPromise } from '../src/util/database';
+import { waitForConnection } from '../src/util/database';
 import { Sentry } from '../src/util/error';
 import { log } from '../src/util/logging';
 
@@ -33,7 +33,7 @@ export default allowCors(
 			name: 'Log request',
 		});
 
-		await connectionPromise;
+		await waitForConnection();
 
 		try {
 			if (req.method === 'POST') {

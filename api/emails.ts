@@ -19,7 +19,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 
 import sendVerificationEmail from '../src/emails/verification';
 import { allowCors } from '../src/util/auth';
-import { connectionPromise } from '../src/util/database';
+import { waitForConnection } from '../src/util/database';
 import { Sentry } from '../src/util/error';
 import { log } from '../src/util/logging';
 
@@ -31,7 +31,7 @@ export default allowCors(
 			name: 'Email request',
 		});
 
-		await connectionPromise;
+		await waitForConnection();
 
 		try {
 			const { email, url } = req.query;

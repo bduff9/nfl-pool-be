@@ -14,31 +14,45 @@
  * Home: https://asitewithnoname.com/
  */
 import mysql from 'mysql2';
-import type { Connection } from 'mysql2';
-import { createConnection } from 'typeorm';
+import { Connection, createConnection } from 'typeorm';
 
 import * as entities from '../entity';
 
 import { database, host, password, port, dbuser } from './constants';
+import { log } from './logging';
 
-export const connectionPromise = createConnection({
-	name: 'default',
-	type: 'mysql',
-	database,
-	host,
-	password,
-	port: port !== undefined ? +port : port,
-	username: dbuser,
-	synchronize: false,
-	logging: true,
-	entities: Object.values(entities),
-	migrations: [],
-	subscribers: [],
-	timezone: 'local',
-	extra: {
-		connectionLimit: 10,
-	},
-});
+let connection: Connection | null = null;
+
+export const waitForConnection = async (): Promise<Connection | null> => {
+	if (!connection) {
+		try {
+			const conn = await createConnection({
+				name: 'default',
+				type: 'mysql',
+				database,
+				host,
+				password,
+				port: port !== undefined ? +port : port,
+				username: dbuser,
+				synchronize: false,
+				logging: true,
+				entities: Object.values(entities),
+				migrations: [],
+				subscribers: [],
+				timezone: 'local',
+				extra: {
+					connectionLimit: 10,
+				},
+			});
+
+			connection = conn;
+		} catch (error) {
+			log.error('Failed to create MySQL/TypeORM connection: ', error);
+		}
+	}
+
+	return connection;
+};
 
 // ts-prune-ignore-next
 export const getBackupName = (): string => {
@@ -51,7 +65,7 @@ export const getBackupName = (): string => {
 	return `NFLBackup-${year}-${month}-${day}-${amPm}.sql`;
 };
 
-const getConnectionForFiles = (): Connection =>
+const getConnectionForFiles = (): mysql.Connection =>
 	mysql.createConnection({
 		database,
 		host,

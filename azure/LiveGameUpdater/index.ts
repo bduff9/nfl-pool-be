@@ -18,7 +18,7 @@ import 'reflect-metadata';
 
 import { getGamesForWeek } from '../../src/api';
 import { parseTeamsFromApi } from '../../src/api/util';
-import { connectionPromise } from '../../src/util/database';
+import { waitForConnection } from '../../src/util/database';
 import { convertEpoch } from '../../src/util/dates';
 import {
 	checkDBIfUpdatesNeeded,
@@ -57,7 +57,7 @@ const timerTrigger: AzureFunction = async (
 		context.log('Live game updater function is running late!');
 	}
 
-	await connectionPromise;
+	await waitForConnection();
 	const timeStamp = new Date().toISOString();
 	const currentWeek = await getCurrentWeek();
 	const needUpdates = await checkDBIfUpdatesNeeded(currentWeek);

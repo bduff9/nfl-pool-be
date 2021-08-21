@@ -17,7 +17,7 @@ import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 import 'reflect-metadata';
 
 import { getGamesForWeek } from '../../src/api';
-import { connectionPromise } from '../../src/util/database';
+import { waitForConnection } from '../../src/util/database';
 import { getCurrentWeek, getHoursToWeekStart, updateSpreads } from '../../src/util/game';
 import { sendReminderEmails, sendReminderTexts } from '../../src/util/notification';
 import { MyTimer } from '../../src/util/types';
@@ -42,7 +42,7 @@ const timerTrigger: AzureFunction = async (
 		context.log('Current week updater function is running late!');
 	}
 
-	await connectionPromise;
+	await waitForConnection();
 
 	const timeStamp = new Date().toISOString();
 	const currentWeek = await getCurrentWeek();
