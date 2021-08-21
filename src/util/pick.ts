@@ -26,11 +26,13 @@ export const getLowestUnusedPoint = async (
 	const usedResult = await Pick.createQueryBuilder('P')
 		.select('P.PickPoints', 'points')
 		.innerJoin('P.game', 'G')
-		.innerJoinAndSelect('P.user', 'U')
 		.where('G.GameWeek = :week', { week })
 		.andWhere('P.UserID = :userID', { userID })
 		.getRawMany<{ points: number }>();
 	const used = usedResult.map(({ points }) => points).filter(points => !!points);
+
+	//TODO: remove after debugging
+	console.log({ used, usedResult, userID, week });
 
 	for (let point = 1; point <= usedResult.length; point++) {
 		if (used.includes(point)) continue;
