@@ -18,10 +18,12 @@ import { Logger } from 'tslog';
 
 export let log: Logger = new Logger({});
 
+// ts-prune-ignore-next
 export const resetLogger = (): void => {
 	log = new Logger({});
 };
 
+// ts-prune-ignore-next
 export const updateLoggerForAzure = (context: Context): void => {
 	log.attachTransport(
 		{
