@@ -20,6 +20,7 @@ import PaymentType from '../entity/PaymentType';
 
 import { ADMIN_USER } from './constants';
 import { addOrdinal } from './numbers';
+import { getSurvivorPoolStatus } from './survivor';
 import {
 	getOverallPrizeAmounts,
 	getOverallPrizeForLastPlace,
@@ -155,9 +156,9 @@ export const updatePayouts = async (week: number): Promise<void> => {
 		}
 	}
 
-	const stillAlive = await SurvivorMV.count({ where: { rank: 1 } });
+	const { justEnded } = await getSurvivorPoolStatus(week);
 
-	if (stillAlive === 1 || seasonIsOver) {
+	if (justEnded) {
 		const survivorPrizes = await getSurvivorPrizeAmounts();
 		const winners = await SurvivorMV.find({
 			where: { rank: LessThan(survivorPrizes.length) },

@@ -17,10 +17,10 @@ import { LessThan } from 'typeorm';
 
 import { SurvivorMV, User, WeeklyMV } from '../entity';
 import EmailType from '../entity/EmailType';
-import { WEEKS_IN_SEASON } from '../util/constants';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { addOrdinal } from '../util/numbers';
+import { getSurvivorPoolStatus } from '../util/survivor';
 import { getUserAlerts } from '../util/user';
 
 const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
@@ -32,10 +32,6 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 	const poolRanks = await WeeklyMV.find({
 		relations: ['user'],
 		where: { week, rank: LessThan(3) },
-	});
-	const stillAlive = await SurvivorMV.find({
-		relations: ['user'],
-		where: { isAliveOverall: true },
 	});
 	const newlyDead = await SurvivorMV.find({
 		relations: ['user'],
@@ -71,14 +67,10 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 
 	survivorUpdates.push(`${newlyDead.length} people went out of survivor this week`);
 
-	//TODO: does not handle case where more than one person ties for first by going out together in some week before the end
-	//TODO: also does not handle case where one person wins and then continues to play, as they will be announced as winning every single week (Payment issue besides email?)
-	//TODO: instead of still alive, let's get all first place users.  If only one, or multiple ones, then we can check if they just went out this week or made it to the end of the season
-	if (
-		stillAlive.length === 1 ||
-		(stillAlive.length > 1 && stillAlive[0].weeksAlive === WEEKS_IN_SEASON)
-	) {
-		const names = stillAlive
+	const survivorStatus = await getSurvivorPoolStatus(week);
+
+	if (survivorStatus.ended) {
+		const names = survivorStatus.winners
 			.map(({ user }) => `${user.userFirstName} ${user.userLastName}`)
 			.reduce((acc, name, i, list) => {
 				if (!acc) return name;
@@ -92,7 +84,9 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 			`The survivor pool is officially over.  ${names} won this season's pool.  Congrats!`,
 		);
 	} else {
-		survivorUpdates.push(`There are still ${stillAlive.length} people left alive`);
+		survivorUpdates.push(
+			`There are still ${survivorStatus.stillAlive.length} people left alive`,
+		);
 	}
 
 	try {

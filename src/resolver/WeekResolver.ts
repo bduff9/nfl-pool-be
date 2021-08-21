@@ -23,7 +23,7 @@ import {
 	MINUTES_IN_HOUR,
 	SECONDS_IN_MINUTE,
 } from '../util/constants';
-import { getCurrentWeekInProgress } from '../util/game';
+import { getCurrentWeekInProgress, getSeasonStatus } from '../util/game';
 import { log } from '../util/logging';
 import { TUserType } from '../util/types';
 
@@ -136,24 +136,7 @@ export class WeekResolver {
 
 	@FieldResolver()
 	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
-		const result = await Game.createQueryBuilder()
-			.select(`sum(case when GameStatus = 'Pregame' then 1 else 0 end)`, 'NotStarted')
-			.addSelect(`sum(case when GameStatus = 'Final' then 1 else 0 end)`, 'Completed')
-			.addSelect(
-				`sum(case when GameStatus not in ('Pregame', 'Final') then 1 else 0 end)`,
-				'InProgress',
-			)
-			.getRawOne<{ Completed: number; InProgress: number; NotStarted: number }>();
-
-		if (!result) throw new Error('Missing season status');
-
-		const { Completed, InProgress, NotStarted } = result;
-
-		if (+Completed + +InProgress === 0) return SeasonStatus.NotStarted;
-
-		if (+NotStarted + +InProgress === 0) return SeasonStatus.Complete;
-
-		return SeasonStatus.InProgress;
+		return getSeasonStatus();
 	}
 
 	@FieldResolver()

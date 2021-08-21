@@ -13,13 +13,50 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, Payment, SurvivorPick, User } from '../entity';
+import { Not } from 'typeorm/find-options/operator/Not';
+
+import { Game, Payment, SurvivorMV, SurvivorPick, User } from '../entity';
 import PaymentType from '../entity/PaymentType';
 
 import { ADMIN_USER } from './constants';
 import { log } from './logging';
 import { getUserPayments } from './payment';
 import { getSurvivorCost } from './systemValue';
+
+type SurvivorPoolStatus =
+	| { ended: false; justEnded: false; stillAlive: Array<SurvivorMV> }
+	| { ended: true; justEnded: boolean; winners: Array<SurvivorMV> };
+
+export const getSurvivorPoolStatus = async (week: number): Promise<SurvivorPoolStatus> => {
+	const winners = await SurvivorMV.find({
+		relations: ['user'],
+		where: { rank: 1 },
+	});
+	const gamesLeft = await Game.count({ where: { gameStatus: Not('Final') } });
+	const seasonIsOver = gamesLeft === 0;
+	const winnersAreAlive = winners.every(winner => winner.isAliveOverall);
+	const ended = seasonIsOver || winners.length <= 1 || !winnersAreAlive;
+
+	if (ended) {
+		let justEnded = winnersAreAlive && seasonIsOver;
+
+		if (!justEnded) {
+			justEnded = !winnersAreAlive && winners.every(winner => winner.weeksAlive === week);
+		}
+
+		if (!justEnded) {
+			const secondPlace = await SurvivorMV.find({
+				where: { rank: 2 },
+			});
+
+			justEnded = winnersAreAlive && secondPlace.every(user => user.weeksAlive === week);
+		}
+
+		return { ended, justEnded, winners };
+	}
+
+	return { ended, justEnded: false, stillAlive: winners };
+};
 
 const markUserDead = async (userID: number, week: number): Promise<void> => {
 	await SurvivorPick.createQueryBuilder()

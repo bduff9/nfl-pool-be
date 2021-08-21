@@ -27,13 +27,13 @@ export const resetLogger = (): void => {
 export const updateLoggerForAzure = (context: Context): void => {
 	log.attachTransport(
 		{
-			debug: context.log.info,
-			error: context.log.error,
-			fatal: context.log.error,
-			info: context.log.info,
-			silly: context.log.info,
-			trace: context.log.info,
-			warn: context.log.warn,
+			debug: logObject => context.log.info(JSON.stringify(logObject)),
+			error: logObject => context.log.error(JSON.stringify(logObject)),
+			fatal: logObject => context.log.error(JSON.stringify(logObject)),
+			info: logObject => context.log.info(JSON.stringify(logObject)),
+			silly: logObject => context.log.info(JSON.stringify(logObject)),
+			trace: logObject => context.log.info(JSON.stringify(logObject)),
+			warn: logObject => context.log.warn(JSON.stringify(logObject)),
 		},
 		'silly',
 	);

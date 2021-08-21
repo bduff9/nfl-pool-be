@@ -19,6 +19,7 @@ import { TAPIResponseMatchup } from '../api/types';
 import { parseTeamsFromApi } from '../api/util';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
+import SeasonStatus from '../entity/SeasonStatus';
 
 import { ADMIN_USER, WEEKS_IN_SEASON } from './constants';
 import { convertDateToEpoch, convertEpoch } from './dates';
@@ -167,6 +168,27 @@ export const updateDBGame = async (
 	await dbGame.save();
 
 	return dbGame;
+};
+
+export const getSeasonStatus = async (): Promise<SeasonStatus> => {
+	const result = await Game.createQueryBuilder()
+		.select(`sum(case when GameStatus = 'Pregame' then 1 else 0 end)`, 'NotStarted')
+		.addSelect(`sum(case when GameStatus = 'Final' then 1 else 0 end)`, 'Completed')
+		.addSelect(
+			`sum(case when GameStatus not in ('Pregame', 'Final') then 1 else 0 end)`,
+			'InProgress',
+		)
+		.getRawOne<{ Completed: number; InProgress: number; NotStarted: number }>();
+
+	if (!result) throw new Error('Missing season status');
+
+	const { Completed, InProgress, NotStarted } = result;
+
+	if (+Completed + +InProgress === 0) return SeasonStatus.NotStarted;
+
+	if (+NotStarted + +InProgress === 0) return SeasonStatus.Complete;
+
+	return SeasonStatus.InProgress;
 };
 
 // ts-prune-ignore-next
