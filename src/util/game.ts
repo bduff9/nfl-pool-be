@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { LessThanOrEqual, MoreThan, Not } from 'typeorm';
+import { MoreThan, Not, Raw } from 'typeorm';
 
 import { TAPIResponseMatchup } from '../api/types';
 import { parseTeamsFromApi } from '../api/util';
@@ -31,7 +31,7 @@ export const checkDBIfUpdatesNeeded = async (week: number): Promise<boolean> => 
 		where: {
 			gameWeek: week,
 			gameStatus: Not('Final'),
-			gameKickoff: LessThanOrEqual(() => 'CURRENT_TIMESTAMP'),
+			gameKickoff: Raw(alias => `${alias} <= CURRENT_TIMESTAMP`),
 		},
 	});
 
