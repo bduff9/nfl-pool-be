@@ -130,7 +130,7 @@ export const updatePayouts = async (week: number): Promise<void> => {
 		const lastPlacePrizes = [0];
 		const lastPlace = await OverallMV.createQueryBuilder('O')
 			.select('max(O.`Rank`)', 'Lowest')
-			.where('O2.GamesMissed = 0')
+			.where('O.GamesMissed = 0')
 			.getRawOne<{ Lowest: number }>();
 
 		if (lastPlace) {
