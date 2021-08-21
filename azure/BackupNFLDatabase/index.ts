@@ -18,8 +18,9 @@ import { promises } from 'fs';
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
 import { BlobServiceClient } from '@azure/storage-blob';
 import mysqldump from 'mysqldump';
+import 'reflect-metadata';
 
-import { getBackupName } from '../../src/util/database';
+import { connectionPromise, getBackupName } from '../../src/util/database';
 import { MyTimer } from '../../src/util/types';
 
 const {
@@ -59,6 +60,7 @@ const timerTrigger: AzureFunction = async (
 		context.log('Backup NFL database function is running late!');
 	}
 
+	await connectionPromise;
 	const timeStamp = new Date().toISOString();
 
 	context.log(`Executing mysqldump at ${timeStamp}...`);

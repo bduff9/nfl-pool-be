@@ -14,6 +14,7 @@
  * Home: https://asitewithnoname.com/
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import 'reflect-metadata';
 import { getManager } from 'typeorm';
 
 import { getEntireSeasonFromAPI } from '../../src/api';
@@ -33,6 +34,7 @@ import {
 	VerificationRequest,
 	WeeklyMV,
 } from '../../src/entity';
+import { connectionPromise } from '../../src/util/database';
 import { verifySeasonYearForReset } from '../../src/util/dates';
 import { populateWinnerHistory } from '../../src/util/history';
 import { resetPrizeAmounts, updateSystemYear } from '../../src/util/systemValue';
@@ -59,6 +61,7 @@ const timerTrigger: AzureFunction = async (
 		context.log('Reset pool function is running late!');
 	}
 
+	await connectionPromise;
 	// Validate reset function can be run
 	const timeStamp = new Date().toISOString();
 	const nextSeasonYear = await verifySeasonYearForReset();

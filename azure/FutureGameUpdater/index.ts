@@ -14,10 +14,12 @@
  * Home: https://asitewithnoname.com/
  */
 import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import 'reflect-metadata';
 
 import { getEntireSeasonFromAPI } from '../../src/api';
 import { healPicks, healWeek } from '../../src/api/healing';
 import { WEEKS_IN_SEASON } from '../../src/util/constants';
+import { connectionPromise } from '../../src/util/database';
 import { getCurrentWeek } from '../../src/util/game';
 import { getSystemYear } from '../../src/util/systemValue';
 import { MyTimer } from '../../src/util/types';
@@ -42,6 +44,7 @@ const timerTrigger: AzureFunction = async (
 		context.log('Future game updater function is running late!');
 	}
 
+	await connectionPromise;
 	const timeStamp = new Date().toISOString();
 	const year = await getSystemYear();
 	const season = await getEntireSeasonFromAPI(year);
