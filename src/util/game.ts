@@ -31,7 +31,7 @@ export const checkDBIfUpdatesNeeded = async (week: number): Promise<boolean> => 
 		where: {
 			gameWeek: week,
 			gameStatus: Not('Final'),
-			gameKickoff: LessThanOrEqual('CURRENT_TIMESTAMP'),
+			gameKickoff: LessThanOrEqual(() => 'CURRENT_TIMESTAMP'),
 		},
 	});
 
