@@ -1,7 +1,7 @@
 <mjml owa="desktop" version="4.6.3">
   <mj-head>
     <mj-title>Week {{ week }} quick pick confirmation.</mj-title>
-    <mj-preview>{{{formatPreview 'Your week {{ week }} quick pick has been saved.'}}}</mj-preview>
+    <mj-preview>{{{formatPreview (concat 'Your week ' week ' quick pick has been saved.')}}}</mj-preview>
     {{> styles }}
   </mj-head>
   <mj-body>
