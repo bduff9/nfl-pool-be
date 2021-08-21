@@ -29,7 +29,7 @@ import { TUserType } from '../util/types';
 
 @Resolver(Week)
 export class WeekResolver {
-	//FIXME: Remove this once we have confirmed timestamps are 100% identical between BE and FE
+	//TODO: Remove this once we have confirmed timestamps are 100% identical between BE and FE
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Date)
 	async getTime (): Promise<Date> {

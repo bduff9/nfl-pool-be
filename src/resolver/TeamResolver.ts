@@ -21,15 +21,6 @@ import { TUserType } from '../util/types';
 
 @Resolver(Team)
 export class TeamResolver {
-	//FIXME: Not currently used, will we use for the make pick team detail component?
-	@Authorized<TUserType>('user')
-	@Query(() => Team)
-	async getTeam (@Arg('TeamShort', () => String) teamShort: string): Promise<Team> {
-		return Team.findOneOrFail({
-			where: [{ teamShortName: teamShort }, { teamAltShortName: teamShort }],
-		});
-	}
-
 	@Authorized<TUserType>('registered')
 	@Query(() => [Team])
 	async getTeamsOnBye (@Arg('Week', () => Int) week: number): Promise<Array<Team>> {
