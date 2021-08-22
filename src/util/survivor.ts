@@ -15,7 +15,7 @@
  */
 import { Not } from 'typeorm/find-options/operator/Not';
 
-import { Game, Payment, SurvivorMV, SurvivorPick, User } from '../entity';
+import { Game, Payment, SurvivorMV, SurvivorPick, User, UserLeague } from '../entity';
 import PaymentType from '../entity/PaymentType';
 
 import { ADMIN_USER } from './constants';
@@ -122,13 +122,11 @@ export const registerForSurvivor = async (
 
 	if (result === 0) throw new Error('Season has already started!');
 
-	const user = await User.createQueryBuilder('U')
-		.leftJoinAndSelect('UserLeagues', 'UL', 'U.UserID = UL.UserID')
-		.where('U.UserID = :userID', { userID })
-		.getOneOrFail();
+	const user = await User.findOneOrFail(userID);
+	const leagues = await UserLeague.find({ where: { userID } });
 	const insertQuery = `INSERT INTO SurvivorPicks (UserID, LeagueID, SurvivorPickWeek, GameID, SurvivorPickAddedBy, SurvivorPickUpdatedBy) SELECT ?, ?, GameWeek, GameID, ?, ? from Games Where GameNumber = 1`;
 
-	for (const league of user.userLeagues) {
+	for (const league of leagues) {
 		const insertVars = [
 			userID,
 			league.leagueID,
