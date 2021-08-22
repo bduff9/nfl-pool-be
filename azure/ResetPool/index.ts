@@ -29,6 +29,7 @@ import {
 	Payment,
 	Pick,
 	Session,
+	SurvivorMV,
 	SurvivorPick,
 	Tiebreaker,
 	VerificationRequest,
@@ -93,9 +94,10 @@ const timerTrigger: AzureFunction = async (
 	await Log.clear();
 	await Pick.clear();
 	await Tiebreaker.clear();
-	await SurvivorPick.clear();
 	await OverallMV.clear();
 	await WeeklyMV.clear();
+	await SurvivorPick.clear();
+	await SurvivorMV.clear();
 	await Game.clear();
 	await clearOldUserData();
 	await resetUsers();
