@@ -46,7 +46,7 @@ export class TeamResolver {
 			`select sum(if(WinnerTeamID = ${teamID}, 1, 0)) as wins, sum(if(WinnerTeamID <> ${teamID} and WinnerTeamID in (HomeTeamID, VisitorTeamID), 1, 0)) as losses, sum(if(WinnerTeamID <> ${teamID} and WinnerTeamID not in (HomeTeamID, VisitorTeamID), 1, 0)) as ties from Games where GameStatus = 'Final' and (HomeTeamID = ${teamID} or VisitorTeamID = ${teamID})`,
 		);
 
-		return `${result.wins}-${result.losses}-${result.ties}`;
+		return `${result.wins ?? 0}-${result.losses ?? 0}-${result.ties ?? 0}`;
 	}
 
 	@FieldResolver()
