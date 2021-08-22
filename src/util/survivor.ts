@@ -122,7 +122,10 @@ export const registerForSurvivor = async (
 
 	if (result === 0) throw new Error('Season has already started!');
 
-	const user = await User.findOneOrFail({ relations: ['userLeagues'], where: { userID } });
+	const user = await User.createQueryBuilder('U')
+		.leftJoinAndSelect('UserLeagues', 'UL', 'U.UserID = UL.UserID')
+		.where('U.UserID = :userID', { userID })
+		.getOneOrFail();
 	const insertQuery = `INSERT INTO SurvivorPicks (UserID, LeagueID, SurvivorPickWeek, GameID, SurvivorPickAddedBy, SurvivorPickUpdatedBy) SELECT ?, ?, GameWeek, GameID, ?, ? from Games Where GameNumber = 1`;
 
 	for (const league of user.userLeagues) {
