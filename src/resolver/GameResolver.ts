@@ -41,25 +41,25 @@ export class GameResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Int)
 	async getCurrentWeek (): Promise<number> {
-		const currentWeekResult = await Game.createQueryBuilder('Game')
-			.select(`COALESCE(MIN(Game.GameWeek), ${WEEKS_IN_SEASON})`, 'currentWeek')
-			.where('Game.GameStatus <> :status', { status: 'Final' })
-			.getRawOne<{ currentWeek: number }>();
+		const currentWeekResult = await Game.createQueryBuilder('G')
+			.select(`coalesce(min(G.GameWeek), ${WEEKS_IN_SEASON})`, 'currentWeek')
+			.where('G.GameStatus <> :status', { status: 'Final' })
+			.getRawOne<{ currentWeek: string }>();
 
 		if (!currentWeekResult) throw new Error('Missing current week result');
 
-		const { currentWeek } = currentWeekResult;
+		const currentWeek = +currentWeekResult.currentWeek;
 
 		if (currentWeek === 1) return currentWeek;
 
-		const lastWeekResult = await Game.createQueryBuilder('Game')
-			.select('Game.GameWeek', 'lastWeek')
+		const lastWeekResult = await Game.createQueryBuilder('G')
+			.select('G.GameWeek', 'lastWeek')
 			.addSelect(
-				'CURRENT_TIMESTAMP > DATE_ADD(Game.GameKickoff, INTERVAL 24 HOUR)',
+				'CURRENT_TIMESTAMP > DATE_ADD(G.GameKickoff, INTERVAL 24 HOUR)',
 				'useCurrentWeek',
 			)
-			.where('Game.GameStatus = :status', { status: 'Final' })
-			.orderBy('Game.GameKickoff', 'DESC')
+			.where('G.GameStatus = :status', { status: 'Final' })
+			.orderBy('G.GameKickoff', 'DESC')
 			.getRawOne<{ lastWeek: number; useCurrentWeek: '0' | '1' }>();
 
 		if (!lastWeekResult) throw new Error('Missing last week result');
