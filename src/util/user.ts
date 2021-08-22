@@ -15,13 +15,11 @@
  */
 import sendNewUserEmail from '../emails/newUser';
 import {
-	League,
 	Notification,
 	OverallMV,
 	Pick,
 	Tiebreaker,
 	User,
-	UserHistory,
 	UserLeague,
 	WeeklyMV,
 } from '../entity';
@@ -29,10 +27,12 @@ import {
 import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
 import { formatDueDate } from './dates';
 import { getCurrentWeek } from './game';
+import { ensureUserIsInPublicLeague, getPublicLeague } from './league';
 import { log } from './logging';
 import { getUserPayments } from './payment';
 import { registerForSurvivor } from './survivor';
-import { getPaymentDueDate, getSystemYear } from './systemValue';
+import { getPaymentDueDate } from './systemValue';
+import { insertUserHistoryRecord } from './userHistory';
 
 // ts-prune-ignore-next
 export const clearOldUserData = async (): Promise<void> => {
@@ -82,11 +82,9 @@ export const getUserAlerts = async (user: User): Promise<Array<string>> => {
 	return alerts;
 };
 
-const populateUserData = async (userID: number, isInSurvivor: boolean): Promise<void> => {
-	const user = await User.findOneOrFail(userID);
-	const league = await League.findOneOrFail({
-		where: { leagueName: 'public' },
-	});
+const populateUserData = async (user: User): Promise<void> => {
+	//NOTE: in the future, use the user's current leagues and loop over those to insert records
+	const leagueID = await getPublicLeague();
 	const week = await getCurrentWeek();
 	let result;
 
@@ -98,79 +96,56 @@ const populateUserData = async (userID: number, isInSurvivor: boolean): Promise<
 			'insert into Picks (UserID, LeagueID, GameID, TeamID, PickPoints, PickAddedBy, PickUpdatedBy) select ?, LeagueID, GameID, TeamID, PickPoints, ?, ? from Picks where UserID = ?',
 			[user.userID, user.userEmail, user.userEmail, lowest.userID],
 		);
-		log.info(`Inserted lowest score picks for user ${userID}`, result);
+		log.info(`Inserted lowest score picks for user ${user.userID}`, result);
 
 		// Populate tiebreakers
 		result = await Tiebreaker.query(
 			'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerLastScore, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, TiebreakerWeek, TiebreakerLastScore, TiebreakerHasSubmitted, ?, ? from Tiebreakers where UserID = ?',
-			[userID, league.leagueID, user.userEmail, user.userEmail, lowest.userID],
+			[user.userID, leagueID, user.userEmail, user.userEmail, lowest.userID],
 		);
-		log.info(`Inserted lowest score tiebreakers for user ${userID}`, result);
+		log.info(`Inserted lowest score tiebreakers for user ${user.userID}`, result);
 
 		// Populate WeeklyMV
 		result = await WeeklyMV.query(
 			`insert into WeeklyMV (Week, \`Rank\`, Tied, UserID, TeamName, UserName, PointsEarned, PointsWrong, PointsPossible, PointsTotal, GamesCorrect, GamesWrong, GamesPossible, GamesTotal, GamesMissed, TiebreakerScore, LastScore, TiebreakerIsUnder, TiebreakerDiffAbsolute, IsEliminated, LastUpdated) select W.Week, W.\`Rank\`, true, U.UserID, U.UserTeamName, U.UserName, W.PointsEarned, W.PointsWrong, W.PointsPossible, W.PointsTotal, W.GamesCorrect, W.GamesWrong, W.GamesPossible, W.GamesTotal, W.GamesMissed, W.TiebreakerScore, W.LastScore, W.TiebreakerIsUnder, W.TiebreakerDiffAbsolute, W.IsEliminated, W.LastUpdated from WeeklyMV W join Users U on U.UserID = ? where W.UserID = ?`,
 			[user.userID, lowest.userID],
 		);
-		log.info(`Inserted lowest score WeeklyMV for user ${userID}`, result);
+		log.info(`Inserted lowest score WeeklyMV for user ${user.userID}`, result);
 
 		// Populate OverallMV
 		result = await OverallMV.query(
 			`insert into OverallMV (\`Rank\`, Tied, UserID, TeamName, UserName, PointsEarned, PointsWrong, PointsPossible, PointsTotal, GamesCorrect, GamesWrong, GamesPossible, GamesTotal, GamesMissed, IsEliminated, LastUpdated) select O.\`Rank\`, true, U.UserID, U.UserTeamName, U.UserName, O.PointsEarned, O.PointsWrong, O.PointsPossible, O.PointsTotal, O.GamesCorrect, O.GamesWrong, O.GamesPossible, O.GamesTotal, O.GamesMissed, O.IsEliminated, O.LastUpdated from OverallMV O join Users U on U.UserID = ? where O.UserID = ?`,
 			[user.userID, lowest.userID],
 		);
-		log.info(`Inserted lowest score OverallMV for user ${userID}`, result);
+		log.info(`Inserted lowest score OverallMV for user ${user.userID}`, result);
 	} else {
 		// Populate picks
 		result = await Pick.query(
 			'insert into Picks (UserID, LeagueID, GameID, PickAddedBy, PickUpdatedBy) select ?, ?, GameID, ?, ? from Games',
-			[userID, league.leagueID, user.userEmail, user.userEmail],
+			[user.userID, leagueID, user.userEmail, user.userEmail],
 		);
-		log.info(`Inserted picks for user ${userID}`, result);
+		log.info(`Inserted picks for user ${user.userID}`, result);
 
 		// Populate tiebreakers
 		result = await Tiebreaker.query(
 			'insert into Tiebreakers (UserID, LeagueID, TiebreakerWeek, TiebreakerHasSubmitted, TiebreakerAddedBy, TiebreakerUpdatedBy) select ?, ?, GameWeek, false, ?, ? from Games group by GameWeek',
-			[userID, league.leagueID, user.userEmail, user.userEmail],
+			[user.userID, leagueID, user.userEmail, user.userEmail],
 		);
-		log.info(`Inserted tiebreakers for user ${userID}`, result);
+		log.info(`Inserted tiebreakers for user ${user.userID}`, result);
 	}
 
-	if (isInSurvivor) {
-		await registerForSurvivor(userID);
+	if (user.userPlaysSurvivor) {
+		await registerForSurvivor(user.userID);
 	}
 };
 
 export const registerUser = (user: User): Array<Promise<unknown>> => {
 	const promises: Array<Promise<unknown>> = [];
 
-	promises.push(populateUserData(user.userID, user.userPlaysSurvivor));
+	promises.push(populateUserData(user));
 	promises.push(sendNewUserEmail(user));
-	League.findOneOrFail().then(league => {
-		promises.push(
-			UserLeague.createQueryBuilder()
-				.insert()
-				.values({
-					userID: user.userID,
-					leagueID: league.leagueID,
-					userLeagueAddedBy: `${user.userID}`,
-					userLeagueUpdatedBy: `${user.userID}`,
-				})
-				.execute(),
-		);
-		promises.push(
-			getSystemYear().then(year =>
-				UserHistory.createQueryBuilder()
-					.insert()
-					.values({
-						userID: user.userID,
-						leagueID: league.leagueID,
-						userHistoryYear: year,
-					})
-					.execute(),
-			),
-		);
-	});
+	promises.push(ensureUserIsInPublicLeague(user));
+	promises.push(insertUserHistoryRecord(user));
 
 	return promises;
 };

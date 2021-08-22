@@ -13,27 +13,21 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { League, User, UserLeague } from '../entity';
+import { User, UserHistory } from '../entity';
 
-export const getPublicLeague = async (): Promise<number> => {
-	const league = await League.findOneOrFail({ where: { leagueName: 'public' } });
+import { getPublicLeague } from './league';
+import { getSystemYear } from './systemValue';
 
-	return league.leagueID;
-};
-
-export const ensureUserIsInPublicLeague = async (user: User): Promise<void> => {
+export const insertUserHistoryRecord = async (user: User): Promise<void> => {
 	const leagueID = await getPublicLeague();
-	const existing = await UserLeague.findOne({ where: { leagueID, userID: user.userID } });
+	const year = await getSystemYear();
 
-	if (existing) return;
-
-	await UserLeague.createQueryBuilder('UL')
+	await UserHistory.createQueryBuilder('UH')
 		.insert()
 		.values({
 			userID: user.userID,
-			leagueID: leagueID,
-			userLeagueAddedBy: `${user.userEmail}`,
-			userLeagueUpdatedBy: `${user.userEmail}`,
+			leagueID,
+			userHistoryYear: year,
 		})
 		.execute();
 };
