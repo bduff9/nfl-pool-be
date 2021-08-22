@@ -13,34 +13,21 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-export * from './Account';
-export * from './APICall';
-export * from './APICallResult';
-export * from './Backup';
-export * from './Email';
-export * from './EmailResult';
-export * from './FAQ';
-export * from './Game';
-export * from './History';
-export * from './League';
-export * from './Log';
-export * from './LogResult';
-export * from './Notification';
-export * from './NotificationType';
-export * from './OverallMV';
-export * from './Payment';
-export * from './Pick';
-export * from './Rule';
-export * from './Session';
-export * from './SupportContent';
-export * from './SurvivorMV';
-export * from './SurvivorPick';
-export * from './SystemValue';
-export * from './Team';
-export * from './Tiebreaker';
-export * from './User';
-export * from './UserHistory';
-export * from './UserLeague';
-export * from './VerificationRequest';
-export * from './Week';
-export * from './WeeklyMV';
+import { ObjectType, Field, Int } from 'type-graphql';
+
+import { Email } from '.';
+
+@ObjectType()
+export class EmailResult {
+	@Field(() => String, { nullable: true })
+	lastKey!: null | string;
+
+	@Field(() => Boolean, { nullable: false })
+	hasMore!: boolean;
+
+	@Field(() => Int, { nullable: false })
+	count!: number;
+
+	@Field(() => [Email], { nullable: false })
+	results!: Array<Email>;
+}

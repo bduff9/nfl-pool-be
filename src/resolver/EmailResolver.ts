@@ -18,6 +18,7 @@ import {
 	Authorized,
 	Ctx,
 	FieldResolver,
+	Int,
 	Mutation,
 	Query,
 	Resolver,
@@ -27,7 +28,7 @@ import { In } from 'typeorm/find-options/operator/In';
 
 import { EmailModel } from '../dynamodb/email';
 import sendInterestEmail from '../emails/interest';
-import { Email, Log, User } from '../entity';
+import { Email, EmailResult, Log, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import LogAction from '../entity/LogAction';
 import { log } from '../util/logging';
@@ -58,6 +59,26 @@ export class EmailResolver {
 		await log.save();
 
 		return email;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => EmailResult)
+	async loadEmails (
+		@Arg('Count', () => Int) count: number,
+		@Arg('LastKey', { nullable: true }) lastKey: string,
+	): Promise<EmailResult> {
+		const scan = EmailModel.scan();
+
+		if (lastKey) scan.startAt(JSON.parse(lastKey));
+
+		const results = await scan.limit(count).exec();
+
+		return {
+			count: results.count,
+			hasMore: !!results.lastKey,
+			lastKey: results.lastKey ? JSON.stringify(results.lastKey) : null,
+			results,
+		};
 	}
 
 	@Authorized<TUserType>('admin')
@@ -97,7 +118,12 @@ export class EmailResolver {
 	}
 
 	@FieldResolver()
-	async toUsers (@Root() email: Email): Promise<User> {
-		return User.findOneOrFail({ where: { userEmail: In([...email.to]) } });
+	async toUsers (@Root() email: Email): Promise<Array<User>> {
+		return User.find({
+			where: [
+				{ userEmail: In([...email.to]) },
+				{ userPhone: In([...email.to].map(phone => phone.replace('+1', ''))) },
+			],
+		});
 	}
 }

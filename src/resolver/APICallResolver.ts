@@ -16,14 +16,28 @@
 import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
 import { APICallModel } from '../dynamodb/apiCall';
-import { APICall } from '../entity';
+import { APICall, APICallResult } from '../entity';
 import { TUserType } from '../util/types';
 
 @Resolver(APICall)
 export class APICallResolver {
 	@Authorized<TUserType>('admin')
-	@Query(() => [APICall])
-	async getAPICallsForWeek (@Arg('Week', () => Int) week: number): Promise<Array<APICall>> {
-		return APICallModel.query('apiCallWeek').eq(week).exec();
+	@Query(() => APICallResult)
+	async loadAPICalls (
+		@Arg('Count', () => Int) count: number,
+		@Arg('LastKey', { nullable: true }) lastKey: string,
+	): Promise<APICallResult> {
+		const scan = APICallModel.scan();
+
+		if (lastKey) scan.startAt(JSON.parse(lastKey));
+
+		const results = await scan.limit(count).exec();
+
+		return {
+			count: results.count,
+			hasMore: !!results.lastKey,
+			lastKey: results.lastKey ? JSON.stringify(results.lastKey) : null,
+			results,
+		};
 	}
 }
