@@ -19,7 +19,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
-			`update Users set UserReferredByRaw = 'N/A' where UserReferredByRaw = 'RETURNING PLAYER'`,
+			`update Users set UserReferredByRaw = 'Not Applicable' where UserReferredByRaw = 'RETURNING PLAYER'`,
 		);
 		await queryRunner.query(`drop index fk_ToUserID on Logs`);
 		await queryRunner.query(
@@ -32,7 +32,7 @@ export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
 
 	public async down (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
-			`update Users set UserReferredByRaw = 'RETURNING PLAYER' where UserReferredByRaw = 'N/A'`,
+			`update Users set UserReferredByRaw = 'RETURNING PLAYER' where UserReferredByRaw = 'Not Applicable'`,
 		);
 		await queryRunner.query(`alter table Logs add column LogIsRead boolean after LeagueID`);
 		await queryRunner.query(
