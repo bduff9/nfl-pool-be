@@ -258,6 +258,10 @@ export class UserResolver {
 			);
 		}
 
+		if (user.userDoneRegistering) {
+			return user;
+		}
+
 		const userToUpdate: QueryDeepPartialEntity<User> = {
 			...data,
 			userUpdatedBy: user.userEmail,
