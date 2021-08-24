@@ -53,6 +53,20 @@ export const getUserPicksForWeek = async (
 		.andWhere('G.GameWeek = :week', { week })
 		.getMany();
 
+export const hasUserPickedFirstGameForWeek = async (
+	userID: number,
+	week: number,
+): Promise<boolean> => {
+	const pick = await Pick.createQueryBuilder('P')
+		.innerJoin('game', 'G')
+		.where('P.UserID = :userID', { userID })
+		.andWhere('G.GameWeek = :week', { week })
+		.andWhere('G.GameNumber = 1')
+		.getOneOrFail();
+
+	return !!pick.teamID && !!pick.pickPoints;
+};
+
 export const shouldAutoPickHome = (type: AutoPickStrategy): boolean => {
 	if (type === AutoPickStrategy.Home) return true;
 

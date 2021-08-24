@@ -58,6 +58,35 @@ export const getSurvivorPoolStatus = async (week: number): Promise<SurvivorPoolS
 	return { ended, justEnded: false, stillAlive: winners };
 };
 
+export const isAliveInSurvivor = async (user: User): Promise<boolean> => {
+	if (!user.userPlaysSurvivor) return false;
+
+	const count = await SurvivorMV.count();
+
+	if (count === 0) return true;
+
+	const myRank = await SurvivorMV.findOne({ where: { userID: user.userID } });
+
+	if (!myRank) return false;
+
+	return myRank.isAliveOverall;
+};
+
+export const hasUserSubmittedSurvivorPickForWeek = async (
+	user: User,
+	survivorPickWeek: number,
+): Promise<boolean> => {
+	const isAlive = await isAliveInSurvivor(user);
+
+	if (!isAlive) return true;
+
+	const survivorPick = await SurvivorPick.findOneOrFail({
+		where: { survivorPickWeek, userID: user.userID },
+	});
+
+	return !!survivorPick.gameID && !!survivorPick.teamID;
+};
+
 const markUserDead = async (userID: number, week: number): Promise<void> => {
 	await SurvivorPick.createQueryBuilder()
 		.update()

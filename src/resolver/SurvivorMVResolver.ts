@@ -30,6 +30,7 @@ import SeasonStatus from '../entity/SeasonStatus';
 import SurvivorStatus from '../entity/SurvivorStatus';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { getCurrentWeekInProgress } from '../util/game';
+import { isAliveInSurvivor } from '../util/survivor';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorMV)
@@ -57,17 +58,9 @@ export class SurvivorMVResolver {
 	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
 		const { user } = context;
 
-		if (!user?.userPlaysSurvivor) return false;
+		if (!user) throw new Error('Missing user from context');
 
-		const count = await SurvivorMV.count();
-
-		if (count === 0) return true;
-
-		const myRank = await SurvivorMV.findOne({ where: { userID: user.userID } });
-
-		if (!myRank) return false;
-
-		return myRank.isAliveOverall;
+		return isAliveInSurvivor(user);
 	}
 
 	@Authorized<TUserType>('registered')

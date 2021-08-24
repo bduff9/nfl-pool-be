@@ -1,7 +1,7 @@
 <mjml owa="desktop" version="4.6.3">
   <mj-head>
     <mj-title>Hurry up, {{ user.userFirstName }}!</mj-title>
-    <mj-preview>{{{formatPreview 'Don't fall out of survivor this week, act now to submit your survivor pick!'}}}</mj-preview>
+    <mj-preview>{{{formatPreview "Don't fall out of survivor this week, act now to submit your survivor pick!"}}}</mj-preview>
     {{> styles }}
   </mj-head>
   <mj-body>

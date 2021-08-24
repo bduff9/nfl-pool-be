@@ -30,6 +30,9 @@ import sendWeekEndedSMS from '../sms/weekEnded';
 import sendWeekStartedSMS from '../sms/weekStarted';
 
 import { log } from './logging';
+import { hasUserPickedFirstGameForWeek } from './pick';
+import { hasUserSubmittedSurvivorPickForWeek } from './survivor';
+import { hasUserSubmittedPicksForWeek } from './tiebreaker';
 
 // ts-prune-ignore-next
 export const sendReminderEmails = async (
@@ -51,15 +54,32 @@ export const sendReminderEmails = async (
 	});
 
 	for (const { notificationType, user } of notifications) {
+		let hasUserSubmittedForWeek: boolean;
+
 		switch (notificationType) {
 			case 'PickReminder':
-				await sendPickReminderEmail(user, week, hoursLeft);
+				hasUserSubmittedForWeek = await hasUserSubmittedPicksForWeek(user.userID, week);
+
+				if (!hasUserSubmittedForWeek) {
+					await sendPickReminderEmail(user, week, hoursLeft);
+				}
+
 				break;
 			case 'SurvivorReminder':
-				await sendSurvivorReminderEmail(user, week, hoursLeft);
+				hasUserSubmittedForWeek = await hasUserSubmittedSurvivorPickForWeek(user, week);
+
+				if (!hasUserSubmittedForWeek) {
+					await sendSurvivorReminderEmail(user, week, hoursLeft);
+				}
+
 				break;
 			case 'QuickPick':
-				await sendQuickPickEmail(user, week, hoursLeft);
+				hasUserSubmittedForWeek = await hasUserPickedFirstGameForWeek(user.userID, week);
+
+				if (!hasUserSubmittedForWeek) {
+					await sendQuickPickEmail(user, week, hoursLeft);
+				}
+
 				break;
 			default:
 				log.error('Invalid reminder email notification type found', {
@@ -123,12 +143,24 @@ export const sendReminderTexts = async (hoursLeft: number, week: number): Promis
 	log.info('Found reminder SMS to send', { count: notifications.length, hoursLeft, week });
 
 	for (const { notificationType, user } of notifications) {
+		let hasUserSubmittedForWeek: boolean;
+
 		switch (notificationType) {
 			case 'PickReminder':
-				await sendPickReminderSMS(user, week, hoursLeft);
+				hasUserSubmittedForWeek = await hasUserSubmittedPicksForWeek(user.userID, week);
+
+				if (!hasUserSubmittedForWeek) {
+					await sendPickReminderSMS(user, week, hoursLeft);
+				}
+
 				break;
 			case 'SurvivorReminder':
-				await sendSurvivorReminderSMS(user, week, hoursLeft);
+				hasUserSubmittedForWeek = await hasUserSubmittedSurvivorPickForWeek(user, week);
+
+				if (!hasUserSubmittedForWeek) {
+					await sendSurvivorReminderSMS(user, week, hoursLeft);
+				}
+
 				break;
 			default:
 				log.error('Invalid reminder SMS notification type found', {
