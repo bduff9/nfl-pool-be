@@ -52,7 +52,7 @@ export class ModifyNotificationsToBeOneRowPer1621205461577 implements MigrationI
 		);
 		await queryRunner.query(`delete from Notifications where NotificationType like '%SMS'`);
 		await queryRunner.query(
-			`update NotificationTypes set NotificationTypeHasEmail = true, NotificationTypeHasSMS = (case when NotificationType = 'QuickPick' then false else true end), NotificationTypeHasPushNotification = false`,
+			`update NotificationTypes set NotificationTypeHasEmail = true, NotificationTypeHasSMS = (case when NotificationType in ('Essentials', 'QuickPick', 'PicksSubmitted') then false else true end), NotificationTypeHasPushNotification = false`,
 		);
 	}
 
