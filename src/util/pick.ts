@@ -58,7 +58,7 @@ export const hasUserPickedFirstGameForWeek = async (
 	week: number,
 ): Promise<boolean> => {
 	const pick = await Pick.createQueryBuilder('P')
-		.innerJoin('game', 'G')
+		.innerJoin('P.game', 'G')
 		.where('P.UserID = :userID', { userID })
 		.andWhere('G.GameWeek = :week', { week })
 		.andWhere('G.GameNumber = 1')
