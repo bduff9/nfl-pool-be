@@ -38,6 +38,7 @@ const apiCallSchema = new dynamoose.Schema(
 			type: String,
 		},
 		apiCallDate: {
+			default: (): Date => new Date(),
 			rangeKey: true,
 			type: Date,
 		},
@@ -61,9 +62,7 @@ const apiCallSchema = new dynamoose.Schema(
 	},
 	{
 		saveUnknown: true,
-		timestamps: {
-			createdAt: 'apiCallDate',
-		},
+		timestamps: false,
 	},
 );
 

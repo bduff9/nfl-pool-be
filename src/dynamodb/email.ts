@@ -42,10 +42,8 @@ const emailSchema = new dynamoose.Schema(
 			type: String,
 		},
 		createdAt: {
+			default: (): Date => new Date(),
 			rangeKey: true,
-			type: Date,
-		},
-		updatedAt: {
 			type: Date,
 		},
 		emailType: {
@@ -73,7 +71,9 @@ const emailSchema = new dynamoose.Schema(
 	},
 	{
 		saveUnknown: false,
-		timestamps: true,
+		timestamps: {
+			updatedAt: 'updatedAt',
+		},
 	},
 );
 
