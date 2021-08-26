@@ -27,11 +27,11 @@ export class APICallResolver {
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<APICallResult> {
-		const scan = APICallModel.scan();
+		let scan = APICallModel.scan().limit(count);
 
-		if (lastKey) scan.startAt(JSON.parse(lastKey));
+		if (lastKey) scan = scan.startAt(JSON.parse(lastKey));
 
-		const results = await scan.limit(count).exec();
+		const results = await scan.exec();
 
 		return {
 			count: results.count,

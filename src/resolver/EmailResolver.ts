@@ -67,11 +67,11 @@ export class EmailResolver {
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<EmailResult> {
-		const scan = EmailModel.scan();
+		let scan = EmailModel.scan().limit(count);
 
-		if (lastKey) scan.startAt(JSON.parse(lastKey));
+		if (lastKey) scan = scan.startAt(JSON.parse(lastKey));
 
-		const results = await scan.limit(count).exec();
+		const results = await scan.exec();
 
 		return {
 			count: results.count,
