@@ -23,7 +23,24 @@ import { log } from './logging';
 
 let connection: Connection | null = null;
 
+const get2DigitNumber = (value: number): string => `${value}`.padStart(2, '0');
+
+const getOffsetString = (): string => {
+	const date = new Date();
+	const offset = date.getTimezoneOffset();
+	const offsetHours = Math.floor(offset / 60);
+	const offsetMins = offset % 60;
+
+	return `${offset > 0 ? '-' : '+'}${get2DigitNumber(offsetHours)}:${get2DigitNumber(
+		offsetMins,
+	)}`;
+};
+
 export const waitForConnection = async (): Promise<Connection | null> => {
+	const offset = getOffsetString();
+
+	console.log('Current offset is: ', offset);
+
 	if (!connection) {
 		try {
 			const conn = await createConnection({
@@ -39,8 +56,7 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				entities: Object.values(entities),
 				migrations: [],
 				subscribers: [],
-				timezone: 'Z',
-				dateStrings: true,
+				timezone: offset,
 			});
 
 			connection = conn;
