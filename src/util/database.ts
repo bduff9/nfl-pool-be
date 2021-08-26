@@ -39,7 +39,7 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				entities: Object.values(entities),
 				migrations: [],
 				subscribers: [],
-				timezone: 'Z',
+				timezone: 'local',
 				extra: {
 					connectionLimit: 10,
 				},
