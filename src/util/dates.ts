@@ -13,6 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { get2DigitNumber } from './numbers';
 import { getSystemYear } from './systemValue';
 
 export const convertDateToEpoch = (date: Date): number => Math.floor(date.getTime() / 1000);
@@ -21,6 +22,9 @@ export const convertEpoch = (epoch: number): Date => {
 	const d = new Date(0);
 
 	d.setUTCSeconds(epoch);
+
+	//TODO: remove after debugging
+	console.log('Converted date: ', d);
 
 	return d;
 };
@@ -39,6 +43,17 @@ const getCurrentSeasonYear = (): number => {
 	if (currMonth < 3) return currYear - 1;
 
 	return currYear;
+};
+
+export const getOffsetString = (): string => {
+	const date = new Date();
+	const offset = date.getTimezoneOffset();
+	const offsetHours = Math.floor(offset / 60);
+	const offsetMins = offset % 60;
+
+	return `${offset > 0 ? '-' : '+'}${get2DigitNumber(offsetHours)}:${get2DigitNumber(
+		offsetMins,
+	)}`;
 };
 
 // ts-prune-ignore-next

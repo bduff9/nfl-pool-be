@@ -25,3 +25,5 @@ export const addOrdinal = (n: number): string => {
 
 	return `${n}th`;
 };
+
+export const get2DigitNumber = (value: number): string => `${value}`.padStart(2, '0');
