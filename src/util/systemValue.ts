@@ -47,7 +47,7 @@ export const getPaymentDueDate = async (): Promise<Date> => {
 		where: { gameWeek: dueWeek },
 	});
 
-	return new Date(lastGame.gameKickoff);
+	return lastGame.gameKickoff;
 };
 
 export const getPoolCost = async (): Promise<number> => {

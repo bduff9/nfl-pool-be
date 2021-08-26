@@ -42,9 +42,6 @@ const timerTrigger: AzureFunction = async (
 	updateLoggerForAzure(context);
 	await waitForConnection();
 
-	//TODO: remove after debugging
-	context.log('Offset is: ', new Date().getTimezoneOffset());
-
 	if (myTimer.isPastDue) {
 		context.log('Current week updater function is running late!');
 	}

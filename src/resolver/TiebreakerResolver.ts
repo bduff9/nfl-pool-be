@@ -74,7 +74,7 @@ export class TiebreakerResolver {
 			where: { gameWeek: week },
 		});
 
-		if (new Date(lastGame.gameKickoff) < new Date()) {
+		if (lastGame.gameKickoff < new Date()) {
 			throw new Error('Last game has already started!');
 		}
 
@@ -114,7 +114,7 @@ export class TiebreakerResolver {
 		for (let i = 0; i < picks.length; i++) {
 			const pick = picks[i];
 			const point = i + 1;
-			const hasGameStarted = new Date(pick.game.gameKickoff) < new Date();
+			const hasGameStarted = pick.game.gameKickoff < new Date();
 
 			if (pick.pickPoints !== point) throw new Error('Missing point value found!');
 
@@ -127,7 +127,7 @@ export class TiebreakerResolver {
 			order: { gameKickoff: 'DESC' },
 			where: { gameWeek: week },
 		});
-		const lastGameHasStarted = new Date(lastGame.gameKickoff) < new Date();
+		const lastGameHasStarted = lastGame.gameKickoff < new Date();
 
 		const myTiebreaker = await Tiebreaker.findOneOrFail({
 			where: { tiebreakerWeek: week, userID: user.userID },

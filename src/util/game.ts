@@ -104,9 +104,9 @@ export const getHoursToWeekStart = async (week: number): Promise<number> => {
 		.select('TIMESTAMPDIFF(HOUR, CURRENT_TIMESTAMP, GameKickoff)', 'hours')
 		.where('GameNumber = 1')
 		.andWhere('GameWeek = :week', { week })
-		.getRawOne<{ hours: number }>();
+		.getRawOne<{ hours: string }>();
 
-	return result?.hours ?? 0;
+	return +(result?.hours ?? '0');
 };
 
 // ts-prune-ignore-next
@@ -199,10 +199,11 @@ export const updateSpreads = async (
 	const { kickoff, team } = apiGame;
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(team);
 	const game = await getDBGameFromAPI(week, homeTeam.id, visitingTeam.id);
+	const apiKickoff = +kickoff;
 	const dbKickoff = convertDateToEpoch(game.gameKickoff);
 
-	if (dbKickoff !== +kickoff) {
-		game.gameKickoff = convertEpoch(+kickoff);
+	if (dbKickoff !== apiKickoff) {
+		game.gameKickoff = convertEpoch(apiKickoff);
 	}
 
 	game.gameHomeSpread = +homeTeam.spread;

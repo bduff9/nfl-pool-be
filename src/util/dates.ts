@@ -23,9 +23,6 @@ export const convertEpoch = (epoch: number): Date => {
 
 	d.setUTCSeconds(epoch);
 
-	//TODO: remove after debugging
-	console.log('Converted date: ', d);
-
 	return d;
 };
 

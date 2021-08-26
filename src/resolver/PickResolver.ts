@@ -138,7 +138,7 @@ export class PickResolver {
 			.getOne();
 
 		if (oldPick) {
-			const hasStarted = new Date(oldPick.game.gameKickoff) < new Date();
+			const hasStarted = oldPick.game.gameKickoff < new Date();
 
 			if (hasStarted) throw new Error('Game has already started!');
 
@@ -214,7 +214,7 @@ export class PickResolver {
 		const unmadePicks = picksForWeek.filter(pick => {
 			if (pick.pickPoints) return false;
 
-			const hasStarted = new Date(pick.game.gameKickoff) < new Date();
+			const hasStarted = pick.game.gameKickoff < new Date();
 
 			if (hasStarted) return false;
 
