@@ -44,7 +44,7 @@ export const findFutureGame = async (
 	visitorTeamID: number,
 	week: number,
 ): Promise<Game> =>
-	Game.findOneOrFail({ where: { homeTeamID, visitorTeamID, week: MoreThan(week) } });
+	Game.findOneOrFail({ where: { homeTeamID, visitorTeamID, gameWeek: MoreThan(week) } });
 
 /**
  * Returns current week, with the method of a week is not current until its first game has started

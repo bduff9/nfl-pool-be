@@ -261,6 +261,7 @@ export const healWeek = async (
 				await healPicks(futureWeek);
 				await healPicks(week);
 			} catch (error) {
+				console.log('Future game not found: ', error);
 				invalidAPIGames.push(game);
 				apiGames.splice(i, 1);
 			}
