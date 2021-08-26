@@ -22,13 +22,12 @@ import '.';
 
 class APICallClass extends Document {
 	apiCallID!: string;
+	apiCallDate!: Date;
 	apiCallError!: null | string;
 	apiCallResponse!: null | string;
 	apiCallUrl!: string;
 	apiCallWeek!: null | number;
 	apiCallYear!: number;
-	createdAt!: Date;
-	updatedAt!: Date | null;
 }
 
 const apiCallSchema = new dynamoose.Schema(
@@ -37,6 +36,10 @@ const apiCallSchema = new dynamoose.Schema(
 			hashKey: true,
 			required: true,
 			type: String,
+		},
+		apiCallDate: {
+			rangeKey: true,
+			type: Date,
 		},
 		apiCallError: {
 			type: String,
@@ -57,8 +60,10 @@ const apiCallSchema = new dynamoose.Schema(
 		},
 	},
 	{
-		saveUnknown: false,
-		timestamps: true,
+		saveUnknown: true,
+		timestamps: {
+			createdAt: 'apiCallDate',
+		},
 	},
 );
 

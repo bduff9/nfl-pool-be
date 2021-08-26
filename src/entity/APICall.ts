@@ -21,6 +21,9 @@ export class APICall {
 	@Field(() => String, { nullable: false })
 	public apiCallID!: string;
 
+	@Field(() => Date, { nullable: false })
+	public apiCallDate!: Date;
+
 	@Field(() => String, { nullable: true })
 	public apiCallError!: null | string;
 
@@ -38,10 +41,4 @@ export class APICall {
 	@Field(() => Int, { nullable: false })
 	@Min(2020)
 	public apiCallYear!: number;
-
-	@Field(() => Date, { nullable: false })
-	public createdAt!: Date;
-
-	@Field(() => Date, { nullable: true })
-	public updatedAt!: Date | null;
 }

@@ -41,6 +41,13 @@ const emailSchema = new dynamoose.Schema(
 			required: true,
 			type: String,
 		},
+		createdAt: {
+			rangeKey: true,
+			type: Date,
+		},
+		updatedAt: {
+			type: Date,
+		},
 		emailType: {
 			enum: emailTypes,
 			required: true,
