@@ -37,10 +37,17 @@ export default allowCors(
 
 		try {
 			if (req.method === 'POST') {
-				log.info('Incoming SNS request:', req.method, req.body);
+				log.info('Incoming SNS request: ', JSON.stringify(req.body));
+
+				const requestMessage = req.body?.Message;
+
+				if (!requestMessage) throw new Error('Empty request Message received');
 
 				const snsLog = new Log();
-				const message = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+				const message =
+					typeof requestMessage === 'string'
+						? requestMessage
+						: JSON.stringify(requestMessage);
 
 				snsLog.logAction = LogAction.EmailActivity;
 				snsLog.logAddedBy = ADMIN_USER;
