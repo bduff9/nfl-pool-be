@@ -34,6 +34,7 @@ const dynamoDB = new dynamoose.aws.sdk.DynamoDB({
 });
 
 dynamoose.aws.ddb.set(dynamoDB);
+// dynamoose.logger.providers.add(console);
 
 const createTable = async (table: CreateTableInput): Promise<void> => {
 	await dynamoDB.createTable(table).promise();

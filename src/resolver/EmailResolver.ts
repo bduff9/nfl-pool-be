@@ -43,7 +43,7 @@ export class EmailResolver {
 		@Ctx() context: TCustomContext,
 	): Promise<Email> {
 		const { user } = context;
-		const email = await EmailModel.get(emailID);
+		const [email] = await EmailModel.query('emailID').eq(emailID).exec();
 		const userName = user ? user.userEmail : [...email.to][0];
 		const log = new Log();
 
