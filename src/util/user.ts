@@ -167,7 +167,7 @@ export const resetUsers = async (): Promise<void> => {
 
 const isUsername = (value: string): boolean => !!value.match(/^[\w-]{3,20}$/);
 
-export const validatePaymentMethod = (type: PaymentMethod, account: string): boolean => {
+export const isValidPaymentMethod = (type: PaymentMethod, account: string): boolean => {
 	if (type === PaymentMethod.Zelle) {
 		return isEmail(account) || isPhoneNumber(account);
 	}

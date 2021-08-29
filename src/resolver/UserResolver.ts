@@ -44,7 +44,7 @@ import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { getPoolCost } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
-import { getUserAlerts, registerUser, validatePaymentMethod } from '../util/user';
+import { getUserAlerts, registerUser, isValidPaymentMethod } from '../util/user';
 
 @InputType({ description: 'User registration data' })
 class FinishRegistrationInput implements Partial<User> {
@@ -252,7 +252,7 @@ export class UserResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		if (validatePaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
+		if (!isValidPaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
 			throw new Error(
 				`Invalid payment account for ${data.userPaymentType}: ${data.userPaymentAccount}`,
 			);
@@ -338,7 +338,7 @@ export class UserResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		if (validatePaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
+		if (!isValidPaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
 			throw new Error(
 				`Invalid payment account for ${data.userPaymentType}: ${data.userPaymentAccount}`,
 			);
