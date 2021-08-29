@@ -70,10 +70,9 @@ export const APICallModel = dynamoose.model<APICallClass>(
 	`APICalls-${VERCEL_ENV}`,
 	apiCallSchema,
 	{
-		//TODO: set to false after tables are created in all envs
-		create: true, // false,
+		create: false,
 		waitForActive: {
-			enabled: true, // false,
+			enabled: false,
 		},
 	},
 );

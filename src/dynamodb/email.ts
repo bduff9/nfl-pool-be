@@ -78,9 +78,8 @@ const emailSchema = new dynamoose.Schema(
 );
 
 export const EmailModel = dynamoose.model<EmailClass>(`Emails-${VERCEL_ENV}`, emailSchema, {
-	//TODO: set to false after tables are created in all envs
-	create: true, // false,
+	create: false,
 	waitForActive: {
-		enabled: true, // false,
+		enabled: false,
 	},
 });
