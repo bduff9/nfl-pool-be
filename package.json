@@ -52,7 +52,7 @@
     "@saeris/apollo-server-vercel": "0.4.0",
     "@sentry/node": "6.11.0",
     "@sentry/tracing": "6.11.0",
-    "aws-sdk": "2.970.0",
+    "aws-sdk": "2.978.0",
     "axios": "0.21.1",
     "class-validator": "0.13.1",
     "dynamoose": "2.8.0",
