@@ -78,7 +78,9 @@ export class LogResolver {
 
 		logResults.count = logs.length;
 		logResults.page = page ?? 1;
-		logResults.results = logs;
+		logResults.results = logs.map(
+			(log): Log => ({ ...log, logData: JSON.stringify(log.logData) as any } as Log),
+		);
 		logResults.totalCount = totalCount;
 
 		return logResults;
