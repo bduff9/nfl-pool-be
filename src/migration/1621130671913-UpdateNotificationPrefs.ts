@@ -32,7 +32,7 @@ export class UpdateNotificationPrefs1621130671913 implements MigrationInterface 
 		await queryRunner.query(`insert into NotificationTypes
         (NotificationType, NotificationTypeDescription, NotificationTypeHasHours, NotificationTypeTooltip, NotificationTypeAddedBy, NotificationTypeUpdatedBy)
         values
-        ('EssentialsEmail', 'Essential Notifications', false, 'This includes payment reminders, season invites, and the weekly email.  There are sent at most once a week and are required, so as such cannot be turned off.', '${ADMIN_USER}', '${ADMIN_USER}'),
+        ('EssentialsEmail', 'Essential Notifications', false, 'This includes payment reminders, season invites, and the weekly email.  They are sent at most once a week and are required, so as such cannot be turned off.', '${ADMIN_USER}', '${ADMIN_USER}'),
         ('PickReminderEmail', 'Submit Pick Reminder', true, 'Do you want to receive an email once each week prior to the start of the week when you have not submitted yet?', '${ADMIN_USER}', '${ADMIN_USER}'),
         ('PickReminderSMS', 'Submit Pick Reminder', true, 'Do you want to receive an email once each week prior to the start of the week when you have not submitted yet?', '${ADMIN_USER}', '${ADMIN_USER}'),
         ('QuickPickEmail', 'Quick Pick', true, 'For the first game of the week, do you want an email with the ability to pick the winner with one click when not already selected?', '${ADMIN_USER}', '${ADMIN_USER}'),
