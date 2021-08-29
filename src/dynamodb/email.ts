@@ -17,34 +17,23 @@ import dynamoose from 'dynamoose';
 import { Document } from 'dynamoose/dist/Document';
 
 import EmailType from '../entity/EmailType';
+import { VERCEL_ENV } from '../util/constants';
+// Alway load index first here as it sets up Dynamoose <> DynamoDB connector
+import '.';
 
-import { AWS_AK_ID, AWS_R, AWS_SAK_ID, VERCEL_ENV } from './constants';
-
-if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
-
-if (!AWS_SAK_ID) throw new Error('Missing AWS Secret Access Key!');
-
-const dynamoDB = new dynamoose.aws.sdk.DynamoDB({
-	credentials: {
-		accessKeyId: AWS_AK_ID,
-		secretAccessKey: AWS_SAK_ID,
-	},
-	region: AWS_R,
-});
-
-dynamoose.aws.ddb.set(dynamoDB);
-
-class EmailClass extends Document {
+export class EmailClass extends Document {
 	emailID!: string;
 	emailType!: EmailType;
 	to!: Set<string>;
-	subject!: string;
+	subject!: null | string;
 	html!: null | string;
 	textOnly!: null | string;
 	sms!: null | string;
 	createdAt!: Date;
 	updatedAt!: Date | null;
 }
+
+const emailTypes = Object.values(EmailType);
 const emailSchema = new dynamoose.Schema(
 	{
 		emailID: {
@@ -52,8 +41,13 @@ const emailSchema = new dynamoose.Schema(
 			required: true,
 			type: String,
 		},
+		createdAt: {
+			default: (): Date => new Date(),
+			rangeKey: true,
+			type: Date,
+		},
 		emailType: {
-			enum: ['verification'],
+			enum: emailTypes,
 			required: true,
 			type: String,
 		},
@@ -77,12 +71,16 @@ const emailSchema = new dynamoose.Schema(
 	},
 	{
 		saveUnknown: false,
-		timestamps: true,
+		timestamps: {
+			updatedAt: 'updatedAt',
+		},
 	},
 );
+
 export const EmailModel = dynamoose.model<EmailClass>(`Emails-${VERCEL_ENV}`, emailSchema, {
-	create: true, //false,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	//@ts-ignore
-	waitForActive: false,
+	//TODO: set to false after tables are created in all envs
+	create: true, // false,
+	waitForActive: {
+		enabled: true, // false,
+	},
 });

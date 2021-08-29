@@ -1,0 +1,9 @@
+Hello forgetful {{ user.userFirstName }},
+
+This is just a friendly reminder that you have not submitted your picks yet for week {{ week }} of the NFL confidence pool and you now have less than {{ hoursLeft }} hours.
+
+You can copy and paste the link below to login and make your picks.
+
+Good luck!
+
+{{ domain }}/picks/set

@@ -18,16 +18,15 @@ import {
 	Authorized,
 	Ctx,
 	Field,
-	FieldResolver,
 	InputType,
 	Int,
 	Mutation,
 	Query,
 	Resolver,
-	Root,
 } from 'type-graphql';
+import { FindConditions } from 'typeorm';
 
-import { League, Log, User } from '../entity';
+import { Log, LogResult } from '../entity';
 import LogAction from '../entity/LogAction';
 import { TCustomContext, TUserType } from '../util/types';
 
@@ -36,8 +35,11 @@ class WriteLogInput implements Partial<Log> {
 	@Field(() => LogAction, { nullable: false })
 	logAction!: LogAction;
 
-	@Field(() => String, { nullable: false })
-	logMessage!: string;
+	@Field(() => String, { nullable: true })
+	logMessage!: null | string;
+
+	@Field(() => String, { nullable: true })
+	logDataString!: null | string;
 
 	@Field(() => Int, { nullable: true })
 	leagueID?: null | number;
@@ -49,9 +51,46 @@ class WriteLogInput implements Partial<Log> {
 @Resolver(Log)
 export class LogResolver {
 	@Authorized<TUserType>('admin')
-	@Query(() => [Log])
-	async getLogs (): Promise<Log[]> {
-		return Log.find();
+	@Query(() => LogResult)
+	async getLogs (
+		@Arg('Sort') orderBy: string,
+		@Arg('SortDir', () => String) orderByDir: 'ASC' | 'DESC',
+		@Arg('PerPage', () => Int) limit: number,
+		@Arg('Page', () => Int, { nullable: true }) page: null | number,
+		@Arg('UserID', () => Int, { nullable: true }) userID: null | number,
+		@Arg('LogAction', () => LogAction, { nullable: true }) logAction: LogAction,
+	): Promise<LogResult> {
+		const where: FindConditions<Log> = {};
+
+		if (userID) where.userID = userID;
+
+		if (logAction) where.logAction = logAction;
+
+		const [logs, totalCount] = await Log.findAndCount({
+			order: { [orderBy]: orderByDir },
+			relations: ['user'],
+			skip: ((page ?? 1) - 1) * limit,
+			take: limit,
+			where,
+		});
+
+		const logResults = new LogResult();
+
+		logResults.count = logs.length;
+		logResults.page = page ?? 1;
+		logResults.results = logs.map(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			(log): Log => ({ ...log, logData: JSON.stringify(log.logData) as any } as Log),
+		);
+		logResults.totalCount = totalCount;
+
+		return logResults;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => [[String]])
+	async getLogActions (): Promise<Array<Array<string>>> {
+		return Object.entries(LogAction);
 	}
 
 	@Authorized<TUserType>('anonymous')
@@ -67,6 +106,16 @@ export class LogResolver {
 				? parseInt(newLogData.sub, 10)
 				: null;
 		const auditUser = userID || 'unknown';
+		let logData: null | Record<string, string> = null;
+
+		if (newLogData.logDataString) {
+			try {
+				logData = JSON.parse(newLogData.logDataString);
+			} catch (error) {
+				console.error('Unable to convert logData into JSON: ', newLogData.logDataString);
+			}
+		}
+
 		const result = await Log.createQueryBuilder()
 			.insert()
 			.into(Log)
@@ -75,26 +124,12 @@ export class LogResolver {
 				logAction: newLogData.logAction,
 				logAddedBy: `${auditUser}`,
 				logMessage: newLogData.logMessage,
+				logData,
 				logUpdatedBy: `${auditUser}`,
 				userID,
 			})
 			.execute();
 
-		return await Log.findOneOrFail(result.identifiers[0].logID);
-	}
-
-	@FieldResolver()
-	async user (@Root() log: Log): Promise<undefined | User> {
-		return User.findOne({ where: { userID: log.userID } });
-	}
-
-	@FieldResolver()
-	async league (@Root() log: Log): Promise<undefined | League> {
-		return League.findOne({ where: { leagueID: log.leagueID } });
-	}
-
-	@FieldResolver()
-	async toUser (@Root() log: Log): Promise<undefined | User> {
-		return User.findOne({ where: { userID: log.toUserID } });
+		return await Log.findOneOrFail(result.identifiers[0].logID, { relations: ['user'] });
 	}
 }

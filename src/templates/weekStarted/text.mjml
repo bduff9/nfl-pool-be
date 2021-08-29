@@ -1,0 +1,8 @@
+Hello {{ user.userFirstName }},
+
+Week {{ week }} has just started with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+
+Go to the Pool here: {{ domain }}
+
+Manage your notifications here:
+{{ domain }}/users/edit

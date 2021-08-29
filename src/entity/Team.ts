@@ -29,6 +29,8 @@ import {
 import TeamConference from './TeamConference';
 import TeamDivision from './TeamDivision';
 
+import { Game } from '.';
+
 @Entity('Teams', { schema: 'NFL' })
 @Index('uk_Team', ['teamCity', 'teamName'], { unique: true })
 @Index('uk_TeamName', ['teamName'], { unique: true })
@@ -144,6 +146,12 @@ export class Team extends BaseEntity {
 	@Min(1)
 	@Max(17)
 	public teamByeWeek!: number;
+
+	@Field(() => String, { nullable: false })
+	public teamRecord!: string;
+
+	@Field(() => [Game], { nullable: false })
+	public teamHistory!: Array<Game>;
 
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({

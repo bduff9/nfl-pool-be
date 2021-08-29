@@ -24,3 +24,14 @@ export type TCustomContext = {
 };
 
 export type TUserType = 'admin' | 'anonymous' | 'registered' | 'survivorPlayer' | 'user';
+
+type Schedule = { adjustForDST: boolean };
+
+type ScheduleStatus = { last: string; next: string; lastUpdated: string };
+
+// ts-prune-ignore-next
+export type MyTimer = {
+	schedule: Schedule;
+	scheduleStatus: ScheduleStatus;
+	isPastDue: boolean;
+};

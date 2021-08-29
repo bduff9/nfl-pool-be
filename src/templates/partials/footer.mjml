@@ -1,0 +1,12 @@
+<mj-section background-size="auto" padding="50px 0px 20px 0px" text-align="center">
+      <mj-column>
+        <mj-text align="center" line-height="10px" color="#000000" padding="0px 20px 0px 20px">
+          <p><a href="https://www.asitewithnoname.com" class="footerLink">asitewithnoname.com</a></p>
+          <p><span class="footer" style="font-size:14px;">Chicago, IL USA</span></p>
+          <p><a href="{{ unsubscribeLink }}" class="footerLink">Unsubscribe</a>
+            <span style="font-size:16px;"> | </span>
+            <a href="{{ domain }}/users/edit" class="footerLink">Update Preferences</a>
+          </p>
+        </mj-text>
+      </mj-column>
+    </mj-section>

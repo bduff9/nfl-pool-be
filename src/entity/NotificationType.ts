@@ -13,17 +13,120 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import { ObjectType, Field } from 'type-graphql';
+import {
+	BaseEntity,
+	Column,
+	CreateDateColumn,
+	DeleteDateColumn,
+	Entity,
+	PrimaryColumn,
+	UpdateDateColumn,
+} from 'typeorm';
 
-enum NotificationType {
-	Email = 'Email',
-	QuickPickEmail = 'QuickPickEmail',
-	SMS = 'SMS',
+@Entity('NotificationTypes', { schema: 'NFL' })
+@ObjectType()
+export class NotificationType extends BaseEntity {
+	@Field(() => String, { nullable: false })
+	@PrimaryColumn({
+		length: 100,
+		name: 'NotificationType',
+		type: 'varchar',
+	})
+	public notificationType!: string;
+
+	@Field(() => String, { nullable: false })
+	@Column('varchar', {
+		length: 255,
+		name: 'NotificationTypeDescription',
+		nullable: false,
+	})
+	public notificationTypeDescription!: string;
+
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', { name: 'NotificationTypeHasEmail', nullable: false })
+	public notificationTypeHasEmail!: boolean;
+
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', { name: 'NotificationTypeHasSMS', nullable: false })
+	public notificationTypeHasSMS!: boolean;
+
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', { name: 'NotificationTypeHasPushNotification', nullable: false })
+	public notificationTypeHasPushNotification!: boolean;
+
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', { name: 'NotificationTypeHasHours', nullable: false })
+	public notificationTypeHasHours!: boolean;
+
+	@Field(() => String, { nullable: true })
+	@Column('varchar', {
+		default: null,
+		length: 255,
+		name: 'NotificationTypeTooltip',
+		nullable: true,
+	})
+	public notificationTypeTooltip!: null | string;
+
+	@Field(() => Date, { nullable: false })
+	@CreateDateColumn({
+		default: () => 'CURRENT_TIMESTAMP',
+		name: 'NotificationTypeAdded',
+		nullable: false,
+		precision: null,
+		type: 'timestamp',
+		update: false,
+	})
+	public notificationTypeAdded!: Date;
+
+	@Field(() => String, { nullable: false })
+	@Column({
+		length: 50,
+		name: 'NotificationTypeAddedBy',
+		nullable: false,
+		type: 'varchar',
+		update: false,
+	})
+	public notificationTypeAddedBy!: string;
+
+	@Field(() => Date, { nullable: false })
+	@UpdateDateColumn({
+		default: () => 'CURRENT_TIMESTAMP',
+		name: 'NotificationTypeUpdated',
+		nullable: false,
+		onUpdate: 'CURRENT_TIMESTAMP',
+		precision: null,
+		type: 'timestamp',
+	})
+	public notificationTypeUpdated!: Date;
+
+	@Field(() => String, { nullable: false })
+	@Column('varchar', {
+		length: 50,
+		name: 'NotificationTypeUpdatedBy',
+		nullable: false,
+	})
+	public notificationTypeUpdatedBy!: string;
+
+	@DeleteDateColumn({
+		default: null,
+		insert: false,
+		name: 'NotificationTypeDeleted',
+		nullable: true,
+		precision: null,
+		select: false,
+		type: 'timestamp',
+	})
+	public notificationTypeDeleted!: Date;
+
+	@Column({
+		default: null,
+		insert: false,
+		length: 50,
+		name: 'NotificationTypeDeletedBy',
+		nullable: true,
+		select: false,
+		type: 'varchar',
+	})
+	public notificationTypeDeletedBy!: null | string;
 }
-
-registerEnumType(NotificationType, {
-	description: 'The type of the notification',
-	name: 'NotificationType',
-});
-
-export default NotificationType;

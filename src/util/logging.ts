@@ -13,6 +13,28 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { Context } from '@azure/functions/Interfaces.d';
 import { Logger } from 'tslog';
 
-export const log: Logger = new Logger({});
+export let log: Logger = new Logger({});
+
+// ts-prune-ignore-next
+export const resetLogger = (): void => {
+	log = new Logger({});
+};
+
+// ts-prune-ignore-next
+export const updateLoggerForAzure = (context: Context): void => {
+	log.attachTransport(
+		{
+			debug: logObject => context.log.info(JSON.stringify(logObject)),
+			error: logObject => context.log.error(JSON.stringify(logObject)),
+			fatal: logObject => context.log.error(JSON.stringify(logObject)),
+			info: logObject => context.log.info(JSON.stringify(logObject)),
+			silly: logObject => context.log.info(JSON.stringify(logObject)),
+			trace: logObject => context.log.info(JSON.stringify(logObject)),
+			warn: logObject => context.log.warn(JSON.stringify(logObject)),
+		},
+		'silly',
+	);
+};

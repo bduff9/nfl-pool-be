@@ -12,7 +12,7 @@ module.exports = {
 		},
 		warnOnUnsupportedTypeScriptVersion: false,
 		ecmaVersion: 7,
-		project: './tsconfig.json',
+		projects: ['./tsconfig.json', './azure/tsconfig.json'],
 		sourceType: 'module',
 	},
 	plugins: ['graphql', 'import', 'prettierx', '@typescript-eslint'],
@@ -35,6 +35,7 @@ module.exports = {
 			2,
 			{
 				alignObjectProperties: false,
+				endOfLine: 'auto',
 				semi: true,
 				singleQuote: true,
 				spaceBeforeFunctionParen: true,

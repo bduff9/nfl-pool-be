@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 30 11,23 * 9-12,1 *"
+    }
+  ],
+  "scriptFile": "../dist/azure/FutureGameUpdater/index.js"
+}

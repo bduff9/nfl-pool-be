@@ -15,29 +15,31 @@
  */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+import { ADMIN_USER } from '../util/constants';
+
 // ts-prune-ignore-next
 export class InsertSystemValues1616369441663 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('PaymentDueWeek', '3', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('PaymentDueWeek', '3', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('PoolCost', '40', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('PoolCost', '40', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SurvivorCost', '5', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SurvivorCost', '5', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('WeeklyPrizes', '[0,25,10]', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('WeeklyPrizes', '[0,25,10]', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('OverallPrizes', '[0,210,125,75]', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('OverallPrizes', '[0,210,125,75]', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SurvivorPrizes', '[0,60,20]', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SurvivorPrizes', '[0,60,20]', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('StartAutoPickCount', '3', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('StartAutoPickCount', '3', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 	}
 

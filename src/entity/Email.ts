@@ -28,10 +28,11 @@ export class Email {
 	@Field(() => EmailType, { nullable: false })
 	public emailType!: EmailType;
 
+	@Field(() => [String], { nullable: false })
 	public to!: Set<string>;
 
 	@Field(() => [User], { nullable: false })
-	public toUsers?: User[];
+	public toUsers?: Array<User>;
 
 	@Field(() => String, { nullable: true })
 	public subject!: null | string;

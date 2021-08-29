@@ -1,0 +1,16 @@
+<mj-section padding="0px 0px 15px 0px">
+  <mj-column vertical-align="middle">
+    <mj-text align="left" font-size="15px" padding="0px">
+      <p style="text-align: center; margin: 10px 0px;">
+        <span>Email not displaying correctly? </span>
+        <a style="font-size: 15px;" href="{{ browserLink }}" class="link">View it in your browser</a>
+      </p>
+    </mj-text>
+  </mj-column>
+</mj-section>
+
+<mj-section background-repeat="no-repeat" background-size="100% 100%" background-url="{{ domain }}/bkgd-pitch.png" padding="25px 20px">
+  <mj-column background-color="transparent">
+    <mj-image align="center" alt="Football Image" border="none" src="{{ domain }}/football.png" title="Football Image" width="150px"></mj-image>
+  </mj-column>
+</mj-section>

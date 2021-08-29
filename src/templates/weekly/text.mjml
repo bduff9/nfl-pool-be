@@ -1,0 +1,19 @@
+Hello {{ user.userFirstName }},
+
+Your messages:
+{{#each userMessages}}
+  - {{ this }}
+{{/each}}
+
+Confidence Pool update
+{{#each poolUpdates}}
+  - {{ this }}
+{{/each}}
+
+Survivor Pool update
+{{#each survivorUpdates}}
+  - {{ this }}
+{{/each}}
+
+View your standings here:
+{{ domain }}/

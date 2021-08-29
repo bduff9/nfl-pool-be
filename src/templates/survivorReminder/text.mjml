@@ -1,0 +1,9 @@
+Hello forgetful {{ user.userFirstName }},
+
+This is just a friendly reminder that you have not submitted your survivor pick yet for week {{ week }} and you now have less than {{ hoursLeft }} hours.
+
+You can copy and paste the link below to login and make your survivor pick.
+
+Good luck!
+
+{{ domain }}/survivor/set

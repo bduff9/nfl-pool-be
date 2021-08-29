@@ -21,7 +21,7 @@ import { buildSchema } from 'type-graphql';
 
 import * as resolvers from '../src/resolver';
 import { allowCors, customAuthChecker, getUserFromContext } from '../src/util/auth';
-import { connectionPromise } from '../src/util/database';
+import { waitForConnection } from '../src/util/database';
 import { Sentry } from '../src/util/error';
 import { log } from '../src/util/logging';
 import { TCustomContext } from '../src/util/types';
@@ -41,7 +41,12 @@ let apolloServerHandler: TApolloServerHandler;
 
 const getApolloServerHandler = async (): Promise<TApolloServerHandler> => {
 	if (!apolloServerHandler) {
-		const dbConnection = await connectionPromise;
+		const dbConnection = await waitForConnection();
+
+		if (!dbConnection) {
+			throw new Error('Failed to setup database connection, please see previous errors');
+		}
+
 		const schema = await buildSchema({
 			authChecker: customAuthChecker,
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment

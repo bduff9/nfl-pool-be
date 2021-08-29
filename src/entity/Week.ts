@@ -15,6 +15,7 @@
  */
 import { ObjectType, Field, Int } from 'type-graphql';
 
+import SeasonStatus from './SeasonStatus';
 import WeekStatus from './WeekStatus';
 
 import { Game } from '.';
@@ -30,6 +31,9 @@ export class Week {
 
 	@Field(() => WeekStatus, { nullable: false })
 	public weekStatus!: WeekStatus;
+
+	@Field(() => SeasonStatus, { nullable: false })
+	public seasonStatus!: SeasonStatus;
 
 	@Field(() => Game, { nullable: false })
 	public weekFirstGame!: Game;

@@ -13,92 +13,147 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { Max, Min } from 'class-validator';
 import {
 	Arg,
 	Authorized,
 	Ctx,
-	FieldResolver,
+	Field,
+	InputType,
 	Int,
+	Mutation,
 	Query,
 	Resolver,
-	Root,
 } from 'type-graphql';
-import { Brackets } from 'typeorm';
 
-import { Game, League, SurvivorPick, Team, User } from '../entity';
+import { Game, Log, SurvivorMV, SurvivorPick } from '../entity';
+import LogAction from '../entity/LogAction';
+import { WEEKS_IN_SEASON } from '../util/constants';
 import { log } from '../util/logging';
+import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { TCustomContext, TUserType } from '../util/types';
+
+@InputType({ description: 'Survivor pick data' })
+class MakeSurvivorPickInput implements Partial<SurvivorPick> {
+	@Field(() => Int, { nullable: false })
+	@Min(1)
+	@Max(WEEKS_IN_SEASON)
+	survivorPickWeek!: number;
+
+	@Field(() => Int, { nullable: false })
+	gameID!: number;
+
+	@Field(() => Int, { nullable: false })
+	teamID!: number;
+}
 
 @Resolver(SurvivorPick)
 export class SurvivorPickResolver {
 	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
-	async getAllSurvivorPicksForWeek (
-		@Arg('Week', () => Int) week: number,
-	): Promise<SurvivorPick[]> {
-		const [{ hasStarted }] = await Game.createQueryBuilder('g')
-			.select('CURRENT_TIMESTAMP > g.GameKickoff', 'hasStarted')
-			.where('g.GameWeek = :week', { week })
-			.execute();
-
-		if (!hasStarted) {
-			throw new Error(`Week ${week} has not started yet!`);
-		}
-
-		return SurvivorPick.find({ where: { survivorPickWeek: week } });
-	}
-
-	@Authorized<TUserType>('survivorPlayer')
-	@Query(() => [SurvivorPick])
 	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<SurvivorPick[]> {
 		const { user } = context;
 
-		return SurvivorPick.find({ where: { userID: user?.userID } });
-	}
+		if (!user) throw new Error('Missing user from context');
 
-	@Authorized<TUserType>('registered')
-	@Query(() => Boolean)
-	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
-		const { user } = context;
-
-		if (!user?.userPlaysSurvivor) return false;
-
-		const [{ incorrect }] = await SurvivorPick.createQueryBuilder('sp')
-			.select('COUNT(*)', 'incorrect')
-			.leftJoin(Game, 'g', 'sp.GameID = g.GameID')
-			.where('sp.UserID = :userID', { userID: user?.userID })
-			.andWhere('g.GameStatus <> :status', { status: 'P' })
-			.andWhere(
-				new Brackets(qb => {
-					qb.where('g.WinnerTeamID <> sp.TeamID').orWhere('sp.TeamID is null');
-				}),
-			)
-			.execute();
-
-		log.debug({ incorrect });
-
-		return incorrect === 0;
-	}
-
-	@FieldResolver()
-	async user (@Root() survivorPick: SurvivorPick): Promise<User> {
-		return User.findOneOrFail({ where: { userID: survivorPick.userID } });
-	}
-
-	@FieldResolver()
-	async league (@Root() survivorPick: SurvivorPick): Promise<League> {
-		return League.findOneOrFail({
-			where: { leagueID: survivorPick.leagueID },
+		return SurvivorPick.find({
+			relations: ['game', 'team'],
+			where: { userID: user.userID },
 		});
 	}
 
-	@FieldResolver()
-	async game (@Root() survivorPick: SurvivorPick): Promise<undefined | Game> {
-		return Game.findOne({ where: { gameID: survivorPick.gameID } });
+	@Authorized<TUserType>('registered')
+	@Query(() => SurvivorPick, { nullable: true })
+	async getMySurvivorPickForWeek (
+		@Arg('Week', () => Int) week: number,
+		@Ctx() context: TCustomContext,
+	): Promise<SurvivorPick | undefined> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		return SurvivorPick.findOne({
+			relations: ['team'],
+			where: { survivorPickWeek: week, userID: user.userID },
+		});
 	}
 
-	@FieldResolver()
-	async team (@Root() survivorPick: SurvivorPick): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: survivorPick.teamID } });
+	@Authorized<TUserType>('registered')
+	@Mutation(() => Boolean)
+	async registerForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		await registerForSurvivor(user.userID);
+
+		return true;
+	}
+
+	@Authorized<TUserType>('survivorPlayer')
+	@Mutation(() => Boolean)
+	async unregisterForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		await unregisterForSurvivor(user.userID);
+
+		return true;
+	}
+
+	@Authorized<TUserType>('survivorPlayer')
+	@Mutation(() => SurvivorPick)
+	async makeSurvivorPick (
+		@Arg('data') data: MakeSurvivorPickInput,
+		@Ctx() context: TCustomContext,
+	): Promise<SurvivorPick> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		const mv = await SurvivorMV.findOne({ where: { userID: user.userID } });
+
+		if (mv?.isAliveOverall === false) {
+			throw new Error('Cannot make pick, user is already out of survivor');
+		}
+
+		const gamesStarted = await Game.createQueryBuilder('G')
+			.where('G.GameWeek = :week', { week: data.survivorPickWeek })
+			.andWhere('G.GameKickoff < CURRENT_TIMESTAMP')
+			.getCount();
+
+		if (gamesStarted > 0) {
+			throw new Error('Week has already started, no more survivor picks can be made');
+		}
+
+		const pick = await SurvivorPick.findOneOrFail({
+			where: { userID: user.userID, survivorPickWeek: data.survivorPickWeek },
+		});
+		const game = await Game.findOneOrFail({
+			where: { gameID: data.gameID, gameWeek: data.survivorPickWeek },
+		});
+
+		if (game.homeTeamID !== data.teamID && game.visitorTeamID !== data.teamID) {
+			log.error('Invalid game and team sent for week', { data, user });
+
+			throw new Error('Invalid game and team in week sent');
+		}
+
+		pick.gameID = data.gameID;
+		pick.teamID = data.teamID;
+		pick.survivorPickUpdatedBy = user.userEmail;
+		await pick.save();
+
+		const newLog = new Log();
+
+		newLog.logAction = LogAction.SurvivorPick;
+		newLog.logMessage = `${user.userName} made their survivor pick for week ${data.survivorPickWeek}`;
+		newLog.logAddedBy = user.userEmail;
+		newLog.logUpdatedBy = user.userEmail;
+		newLog.userID = user.userID;
+		await newLog.save();
+
+		return pick;
 	}
 }

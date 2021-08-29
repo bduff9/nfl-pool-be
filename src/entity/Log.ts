@@ -80,13 +80,20 @@ export class Log extends BaseEntity {
 
 	@Field(() => String, { nullable: true })
 	@Column({
-		length: 500,
 		name: 'LogMessage',
 		nullable: true,
-		type: 'varchar',
+		type: 'longtext',
 		update: false,
 	})
 	public logMessage!: null | string;
+
+	@Field(() => String, { nullable: true })
+	@Column({
+		name: 'LogData',
+		nullable: true,
+		type: 'json',
+	})
+	public logData!: null | Record<string, unknown>;
 
 	@Column({ name: 'UserID', nullable: true, type: 'int' })
 	public userID!: null | number;
@@ -109,31 +116,6 @@ export class Log extends BaseEntity {
 	})
 	@JoinColumn({ name: 'LeagueID' })
 	public league!: null | League;
-
-	@Field(() => Boolean, { nullable: true })
-	@Column('boolean', {
-		name: 'LogIsRead',
-		nullable: true,
-	})
-	public logIsRead!: boolean | null;
-
-	@Field(() => Boolean, { nullable: true })
-	@Column('boolean', {
-		name: 'LogIsDeleted',
-		nullable: true,
-	})
-	public logIsDeleted!: boolean | null;
-
-	@Column({ name: 'ToUserID', nullable: true, type: 'int' })
-	public toUserID!: null | number;
-
-	@Field(() => User, { nullable: true })
-	@ManyToOne(() => User, {
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
-	@JoinColumn({ name: 'ToUserID' })
-	public toUser!: null | User;
 
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({

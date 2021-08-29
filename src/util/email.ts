@@ -13,19 +13,26 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { promises as fs } from 'fs';
+import { promises as fs, readdirSync, readFileSync } from 'fs';
 import path from 'path';
 
 import { SES } from 'aws-sdk';
 import Email from 'email-templates';
 import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
-import { v4 as uuidv4 } from 'uuid';
 
+import { getID } from '../dynamodb';
+import { EmailClass, EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
 
-import { AWS_AK_ID, AWS_R, AWS_SAK_ID, domain, EMAIL_FROM } from './constants';
-import { EmailModel } from './dynamodb';
+import {
+	AWS_AK_ID,
+	AWS_R,
+	AWS_SAK_ID,
+	domain,
+	EMAIL_FROM,
+	EMAIL_SUBJECT_PREFIX,
+} from './constants';
 import { log } from './logging';
 
 if (!AWS_AK_ID) throw new Error('Missing AWS Access Key!');
@@ -43,15 +50,52 @@ const transport = {
 	}),
 };
 
+const concat = (...values: Array<string>): string =>
+	values.splice(0, values.length - 1).join('');
+
+const formatPreview = (previewText: string): string => {
+	const PREVIEW_LENGTH = 200;
+	const currentLength = previewText.length;
+	let toAdd = PREVIEW_LENGTH - currentLength;
+	let formatted = `${previewText}&nbsp;`;
+
+	while (toAdd--) formatted += '&zwnj;&nbsp;';
+
+	return formatted;
+};
+
+const getPartials = (): Record<
+	string,
+	HandlebarsTemplateDelegate<Record<string, unknown>>
+> => {
+	const partialsDir = path.join(__dirname, '..', 'templates', 'partials');
+	const files = readdirSync(partialsDir);
+	const partials: Record<string, HandlebarsTemplateDelegate<Record<string, unknown>>> = {};
+
+	for (const file of files) {
+		const fileStr = readFileSync(path.join(partialsDir, file)).toString();
+		const name = file.split('.')[0];
+		const partial = Handlebars.compile<Record<string, unknown>>(fileStr);
+
+		partials[name] = partial;
+	}
+
+	return partials;
+};
+
 const renderMJML = async <Data = Record<string, unknown>>(
 	view: string,
 	locals: Data,
 ): Promise<string> => {
+	// registerPartials();
 	const templatePath = path.join(__dirname, '..', 'templates', `${view}.mjml`);
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
-	const mjml = template(locals);
+	const mjml = template(locals, {
+		helpers: { concat, formatPreview },
+		partials: getPartials(),
+	});
 	const { errors, html } = view.endsWith('html')
 		? mjml2html(mjml, { validationLevel: 'strict' })
 		: { errors: [], html: mjml };
@@ -63,9 +107,7 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	return html;
 };
 
-export const emailSender = new Email<{
-	SUBJECT: string;
-	PREVIEW: string;
+const emailSender = new Email<{
 	[key: string]: unknown;
 }>({
 	message: {
@@ -73,7 +115,7 @@ export const emailSender = new Email<{
 	},
 	preview: false,
 	send: true,
-	subjectPrefix: '[NFL Confidence Pool] ',
+	subjectPrefix: EMAIL_SUBJECT_PREFIX,
 	transport,
 	render: renderMJML,
 	views: {
@@ -83,56 +125,37 @@ export const emailSender = new Email<{
 	},
 });
 
-export const getEmailID = (): string => uuidv4().replace(/-/g, '');
-
-export const formatPreview = (previewText: string): string => {
-	const PREVIEW_LENGTH = 200;
-	const currentLength = previewText.length;
-	let toAdd = PREVIEW_LENGTH - currentLength;
-	let formatted = `${previewText}&nbsp;`;
-
-	while (toAdd--) formatted += '&zwnj;&nbsp;';
-
-	return formatted;
-};
-
 type TSendEmailProps = {
 	locals: Record<string, unknown> & {
 		browserLink?: never;
 		domain?: never;
-		PREVIEW?: never;
-		SUBJECT?: never;
 	};
-	PREVIEW: string;
-	SUBJECT: string;
 	type: EmailType;
 } & ({ bcc: string[]; to?: never } | { bcc?: never; to: string[] });
 
 export const sendEmail = async ({
 	bcc,
 	locals,
-	PREVIEW,
-	SUBJECT,
 	to,
 	type,
 }: TSendEmailProps): Promise<void> => {
-	const emailID = getEmailID();
+	const emailID = getID();
 	const emails = bcc || to || [];
+	let newEmail: EmailClass | null = null;
 
 	try {
-		await EmailModel.create({
+		newEmail = await EmailModel.create({
 			emailID,
 			emailType: type,
 			to: new Set(emails),
-			subject: SUBJECT,
 		});
 	} catch (error) {
 		log.error('Failed to create email record in DynamoDB:', {
 			emailID,
 			emailType: type,
 			error,
+			newEmail,
 			to: new Set(emails),
-			subject: SUBJECT,
 		});
 	}
 
@@ -144,17 +167,22 @@ export const sendEmail = async ({
 			...locals,
 			browserLink: `${domain}/api/email/${emailID}`,
 			domain,
-			PREVIEW,
-			SUBJECT,
+			unsubscribeLink: `${domain}/api/email/unsubscribe${
+				emails.length === 1 ? `?email=${encodeURIComponent(emails[0])}` : ''
+			}`,
 		},
 		message: {
-			to: emails,
+			bcc,
+			to,
 		},
 	});
 
 	try {
-		await EmailModel.update({ emailID }, { html, textOnly: text, subject });
+		await EmailModel.update(
+			{ emailID, createdAt: newEmail?.createdAt },
+			{ html, textOnly: text, subject },
+		);
 	} catch (error) {
-		log.error('Failed to update email record in DynamoDB:', { emailID, error });
+		log.error('Failed to update email record in DynamoDB:', { emailID, error, newEmail });
 	}
 };

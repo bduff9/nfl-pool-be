@@ -13,24 +13,117 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, FieldResolver, Query, Resolver, Root } from 'type-graphql';
+import {
+	Arg,
+	Authorized,
+	Ctx,
+	FieldResolver,
+	Int,
+	Mutation,
+	Query,
+	Resolver,
+	Root,
+} from 'type-graphql';
 import { In } from 'typeorm/find-options/operator/In';
 
-import { User } from '../entity';
-import { Email } from '../entity/Email';
-import { EmailModel } from '../util/dynamodb';
-import { TUserType } from '../util/types';
+import { EmailModel } from '../dynamodb/email';
+import sendInterestEmail from '../emails/interest';
+import { Email, EmailResult, Log, User } from '../entity';
+import EmailType from '../entity/EmailType';
+import LogAction from '../entity/LogAction';
+import { log } from '../util/logging';
+import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Email)
 export class EmailResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Email)
-	async getEmail (@Arg('EmailID', () => String) emailID: string): Promise<Email> {
-		return EmailModel.get(emailID);
+	async getEmail (
+		@Arg('EmailID', () => String) emailID: string,
+		@Ctx() context: TCustomContext,
+	): Promise<Email> {
+		const { user } = context;
+		const email = await EmailModel.get(emailID);
+		const userName = user ? user.userEmail : [...email.to][0];
+		const log = new Log();
+
+		log.logAction = LogAction.ViewHTMLEmail;
+		log.logMessage = `${userName} viewed HTML version of email with subject ${email.subject}`;
+		log.logAddedBy = userName;
+		log.logUpdatedBy = userName;
+
+		if (user) {
+			log.userID = user.userID;
+		}
+
+		await log.save();
+
+		return email;
+	}
+
+	@Authorized<TUserType>('admin')
+	@Query(() => EmailResult)
+	async loadEmails (
+		@Arg('Count', () => Int) count: number,
+		@Arg('LastKey', { nullable: true }) lastKey: string,
+	): Promise<EmailResult> {
+		let scan = EmailModel.scan().limit(count);
+
+		if (lastKey) scan = scan.startAt(JSON.parse(lastKey));
+
+		const results = await scan.exec();
+
+		return {
+			count: results.count,
+			hasMore: !!results.lastKey,
+			lastKey: results.lastKey ? JSON.stringify(results.lastKey) : null,
+			results,
+		};
+	}
+
+	@Authorized<TUserType>('admin')
+	@Mutation(() => Boolean)
+	async sendAdminEmail (
+		@Arg('EmailType', () => EmailType) emailType: EmailType,
+		@Arg('SendTo', () => String) sendTo: string,
+		@Arg('UserEmail', () => String, { nullable: true }) userEmail: null | string,
+		@Arg('UserFirstname', () => String, { nullable: true }) userFirstName: null | string,
+		@Ctx() context: TCustomContext,
+	): Promise<true> {
+		const { user } = context;
+
+		if (!user) throw new Error('Missing user from context');
+
+		switch (emailType) {
+			case EmailType.interest:
+				if (sendTo === 'All') {
+					const users = await User.find({ where: { userCommunicationsOptedOut: false } });
+
+					for (const user of users) {
+						await sendInterestEmail(user);
+					}
+				} else {
+					if (!userEmail) throw new Error('Must pass in email to send interest email to!');
+
+					await sendInterestEmail({ userEmail, userFirstName });
+				}
+
+				break;
+			default:
+				log.error(`Invalid email requested: ${emailType}`);
+				break;
+		}
+
+		return true;
 	}
 
 	@FieldResolver()
-	async toUsers (@Root() email: Email): Promise<User> {
-		return User.findOneOrFail({ where: { userEmail: In([...email.to]) } });
+	async toUsers (@Root() email: Email): Promise<Array<User>> {
+		return User.find({
+			where: [
+				{ userEmail: In([...email.to]) },
+				{ userPhone: In([...email.to].map(phone => phone.replace('+1', ''))) },
+			],
+		});
 	}
 }

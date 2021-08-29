@@ -18,7 +18,9 @@ import { registerEnumType } from 'type-graphql';
 enum LogAction {
 	Error404 = '404',
 	AuthenticationError = 'AUTH_ERROR',
+	BackupRestore = 'BACKUP_RESTORE',
 	CreatedAccount = 'CREATE_ACCOUNT',
+	EmailActivity = 'EMAIL_ACTIVITY',
 	LinkedAccount = 'LINK_ACCOUNT',
 	Login = 'LOGIN',
 	Logout = 'LOGOUT',
@@ -27,7 +29,10 @@ enum LogAction {
 	Register = 'REGISTER',
 	Slack = 'SLACK',
 	SubmitPicks = 'SUBMIT_PICKS',
+	SupportSearch = 'SUPPORT_SEARCH',
 	SurvivorPick = 'SURVIVOR_PICK',
+	Unsubscribe = 'UNSUBSCRIBE',
+	ViewHTMLEmail = 'VIEW_HTML_EMAIL',
 }
 
 registerEnumType(LogAction, {

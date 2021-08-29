@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES6",
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["./**/*.ts"]
+}

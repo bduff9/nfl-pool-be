@@ -1,0 +1,53 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+name: Build and deploy Node.js project to Azure Function App - aswnn-nfl
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+env:
+  NODE_VERSION: "14.x"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v2
+
+      - name: "Install Azure CLI"
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+      - name: "Login via Azure CLI"
+        env:
+          AZURE_SP_APP_ID: ${{ secrets.AZURE_SP_APP_ID }}
+          AZURE_SP_PASSWORD: ${{ secrets.AZURE_SP_PASSWORD }}
+          AZURE_SP_TENANT_ID: ${{ secrets.AZURE_SP_TENANT_ID }}
+        run: az login --service-principal --username $AZURE_SP_APP_ID --password $AZURE_SP_PASSWORD --tenant $AZURE_SP_TENANT_ID
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "Resolve Project Dependencies Using Npm"
+        run: npm ci
+
+      - name: "Deploy dev using Azure CLI"
+        if: github.ref == 'refs/heads/develop'
+        run: npm run deploy:azure:dev
+
+      - name: "Deploy prod using Azure CLI"
+        if: github.ref == 'refs/heads/main'
+        run: npm run deploy:azure
+
+      - name: Notify Slack
+        if: always()
+        uses: kpritam/slack-job-status-action@v1
+        with:
+          job-status: ${{ job.status }}
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel: nfl-pool-be

@@ -1,0 +1,33 @@
+<mjml owa="desktop" version="4.6.3">
+  <mj-head>
+    <mj-title>Week {{ week }} quick pick confirmation.</mj-title>
+    <mj-preview>{{{formatPreview (concat 'Your week ' week ' quick pick has been saved.')}}}</mj-preview>
+    {{> styles }}
+  </mj-head>
+  <mj-body>
+    {{> header }}
+
+    <mj-section padding="0px" text-align="center">
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text padding="30px 25px 15px 25px" font-size="18px" align="center" line-height="1.4">
+          <h2>Phew {{ user.userFirstName }},</h2>
+          <p>That was a close one! Your week {{ week }} game 1 pick has been saved for {{ point }} points.</p>
+          <p style="font-size: smaller;">You picked the:</p>
+          <p style="font-size: 30px; color: {{ quickPickSelected.teamPrimaryColor }}; font-weight: bold; margin-bottom: 5px;">{{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }}</p>
+          <p style="font-size: smaller;">to beat the</p>
+          <p style="font-size: 20px; color: {{ quickPickNotSelected.teamPrimaryColor }}; font-weight: bolder; margin-top: 5px;">{{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}</p>
+        </mj-text>
+
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/set" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">Finish Your Picks</span>
+        </mj-button>
+
+        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
+          <span>If you did not request this email you can safely ignore it.</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{> footer }}
+  </mj-body>
+</mjml>

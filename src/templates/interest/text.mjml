@@ -1,0 +1,23 @@
+Hello {{ user.userFirstName }},
+
+You are getting this email because you either indicated an interest in participating in the {{ poolYear }} confidence pool or we thought you would be interested. All players are welcome, so even if you are not interested, please feel free to forward this along appropriately.
+
+For those of you who have never done a confidence pool before, they are very easy to do. The objective is to pick the winner of each game for the current week. When making your selections, you will assign a point value, or "confidence" value, based on how sure you are of each pick. 1 means it could go either way and 16 means it's a sure thing. If you are right, you win that amount of points and the player with the highest point total wins. Payouts are done to the winner(s) each week and top 3 places at the end for the overall score. More details about the confidence pool can be found here:
+
+{{ domain }}/support
+
+Registering:
+If you have played previously, you can click the button at the bottom of this email and sign in to complete registration for this upcoming season.
+
+If you are a new player, welcome! You will also need to click the button below, however, you will need to complete initial registration. You have the option of registering with an email and password, or with a Twitter or Google account. You also have the option of registering with email and then linking your Twitter and/or Google account, allowing you one-click sign-ins with all three methods. This is what we recommend, though certainly not required.
+
+Once you are fully registered, you will be able to sign in and start making picks. The pool contains full information on how to make your picks and play, however, if you have any questions, please do not hesitate to contact us at this email address.
+
+Survivor Pool:
+There is also an optional mini-game survivor pool. If you've never taken part in such a pool, it involves picking one team each week that you think will win. If your team wins in Week 1, you move on to make a pick in Week 2. If your team wins in Week 2, you can make a pick in Week 3, and so on. The catch is that you cannot pick the same team twice. You could use a heavy favorite in Week 1, but you would not have access to them later in the year if you're alive in the closing weeks. If you pick a team that loses, you are out of the pool for the remainder of the season.
+
+Entry Fees and Payouts
+The cost for this confidence pool is ${{ poolCost }} per person for the whole season. The survivor pool mini game is ${{ survivorCost }} for the whole season which you can sign up for in the pool after registering. Please pay your total entry fee by the end of the third week of the season (before the end of {{ payByDate }}). Payouts will be announced after that and will be based on how many people sign up. The more people who participate the better, as the payouts will be higher, so invite anyone who you think may be interested. New players will be accepted up until the start of the third week and will be assigned the number of points from the lowest score for the previous weeks.
+
+Please do not hesitate to let us know if there are any questions or concerns,
+Brian and Billy

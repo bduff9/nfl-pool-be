@@ -16,14 +16,14 @@
 import { registerEnumType } from 'type-graphql';
 
 enum PaymentType {
-	Cash = 'Cash',
-	Paypal = 'PayPal',
-	Venmo = 'Venmo',
-	Zelle = 'Zelle',
+	Fee = 'Fee',
+	Paid = 'Paid',
+	Payout = 'Payout',
+	Prize = 'Prize',
 }
 
 registerEnumType(PaymentType, {
-	description: 'The chosen payment type for the user',
+	description: 'The payment type for the payment',
 	name: 'PaymentType',
 });
 

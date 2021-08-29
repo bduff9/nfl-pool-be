@@ -15,6 +15,7 @@
  */
 export * from './AccountResolver';
 export * from './APICallResolver';
+export * from './BackupResolver';
 export * from './EmailResolver';
 export * from './FAQResolver';
 export * from './GameResolver';
@@ -22,12 +23,17 @@ export * from './HistoryResolver';
 export * from './LeagueResolver';
 export * from './LogResolver';
 export * from './NotificationResolver';
+export * from './NotificationTypeResolver';
+export * from './OverallMVResolver';
+export * from './PaymentResolver';
 export * from './PickResolver';
 export * from './RuleResolver';
+export * from './SurvivorMVResolver';
 export * from './SurvivorPickResolver';
 export * from './SystemValueResolver';
 export * from './TeamResolver';
 export * from './TiebreakerResolver';
 export * from './UserResolver';
 export * from './UserLeagueResolver';
+export * from './WeeklyMVResolver';
 export * from './WeekResolver';

@@ -16,9 +16,21 @@
 import { registerEnumType } from 'type-graphql';
 
 enum EmailType {
+	interest = 'interest',
+	invalidGamesFound = 'invalidGamesFound',
 	newUser = 'newUser',
+	pickReminder = 'pickReminder',
+	picksSubmitted = 'picksSubmitted',
+	prizesSet = 'prizesSet',
+	quickPick = 'quickPick',
+	quickPickConfirmation = 'quickPickConfirmation',
+	survivorReminder = 'survivorReminder',
 	untrusted = 'untrusted',
+	userTrusted = 'userTrusted',
 	verification = 'verification',
+	weekly = 'weekly',
+	weekEnded = 'weekEnded',
+	weekStarted = 'weekStarted',
 }
 
 registerEnumType(EmailType, {

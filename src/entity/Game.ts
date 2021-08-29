@@ -47,7 +47,7 @@ export class Game extends BaseEntity {
 	@Field(() => Int, { nullable: false })
 	@Column('int', { name: 'GameWeek', nullable: false })
 	@Min(1)
-	@Max(17)
+	@Max(18)
 	public gameWeek!: number;
 
 	@Field(() => Int, { nullable: false })
@@ -77,6 +77,14 @@ export class Game extends BaseEntity {
 	})
 	public gameHomeSpread!: number;
 
+	@Field(() => Number, { nullable: false })
+	@Column('int', {
+		default: 0,
+		name: 'GameHomeScore',
+		nullable: false,
+	})
+	public gameHomeScore!: number;
+
 	@Column({ name: 'VisitorTeamID', nullable: false, type: 'int' })
 	public visitorTeamID!: number;
 
@@ -98,6 +106,14 @@ export class Game extends BaseEntity {
 	})
 	public gameVisitorSpread!: number;
 
+	@Field(() => Number, { nullable: false })
+	@Column('int', {
+		default: 0,
+		name: 'GameVisitorScore',
+		nullable: false,
+	})
+	public gameVisitorScore!: number;
+
 	@Column({ name: 'WinnerTeamID', nullable: true, type: 'int' })
 	public winnerTeamID!: null | number;
 
@@ -111,8 +127,18 @@ export class Game extends BaseEntity {
 
 	@Field(() => GameStatus, { nullable: false })
 	@Column('enum', {
-		default: 'P',
-		enum: ['P', 'I', '1', '2', 'H', '3', '4', 'C'],
+		default: 'Pregame',
+		enum: [
+			'Pregame',
+			'Invalid',
+			'1st Quarter',
+			'2nd Quarter',
+			'Half Time',
+			'3rd Quarter',
+			'4th Quarter',
+			'Final',
+			'Overtime',
+		],
 		name: 'GameStatus',
 		nullable: false,
 	})
@@ -136,6 +162,16 @@ export class Game extends BaseEntity {
 	@Min(0)
 	@Max(3600)
 	public gameTimeLeftInSeconds!: number;
+
+	@Field(() => String, { nullable: false })
+	@Column({
+		default: '',
+		length: 10,
+		name: 'GameTimeLeftInQuarter',
+		nullable: false,
+		type: 'varchar',
+	})
+	public gameTimeLeftInQuarter!: string;
 
 	@Column({ name: 'GameHasPossession', nullable: true, type: 'int' })
 	public gameHasPossession!: null | number;

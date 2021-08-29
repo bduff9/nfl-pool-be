@@ -27,8 +27,7 @@ import {
 	UpdateDateColumn,
 } from 'typeorm';
 
-import NotificationType from './NotificationType';
-import { User } from './User';
+import { NotificationType, User } from './';
 
 @Index('uk_UserNotification', ['userID', 'notificationType'], { unique: true })
 @Entity('Notifications', { schema: 'NFL' })
@@ -53,17 +52,44 @@ export class Notification extends BaseEntity {
 	@JoinColumn({ name: 'UserID' })
 	public user!: User;
 
-	@Field(() => NotificationType, { nullable: false })
-	@Column('enum', {
-		enum: ['Email', 'QuickPickEmail', 'SMS'],
-		name: 'NotificationType',
-		nullable: false,
-	})
-	public notificationType!: NotificationType;
+	@Column({ length: 100, name: 'NotificationType', nullable: false, type: 'varchar' })
+	public notificationType!: string;
 
-	@Field(() => Int, { nullable: false })
-	@Column('int', { name: 'NotificationHoursBefore', nullable: false })
-	public notificationHoursBefore!: number;
+	@Field(() => NotificationType, { nullable: false })
+	@ManyToOne(() => NotificationType, {
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	})
+	@JoinColumn({ name: 'NotificationType' })
+	public notificationDefinition!: NotificationType;
+
+	@Field(() => Boolean, { nullable: true })
+	@Column('boolean', { default: false, name: 'NotificationEmail', nullable: true })
+	public notificationEmail!: boolean | null;
+
+	@Field(() => Int, { nullable: true })
+	@Column('int', { name: 'NotificationEmailHoursBefore', nullable: true })
+	public notificationEmailHoursBefore!: null | number;
+
+	@Field(() => Boolean, { nullable: true })
+	@Column('boolean', { default: false, name: 'NotificationSMS', nullable: true })
+	public notificationSMS!: boolean | null;
+
+	@Field(() => Int, { nullable: true })
+	@Column('int', { name: 'NotificationSMSHoursBefore', nullable: true })
+	public notificationSMSHoursBefore!: null | number;
+
+	@Field(() => Boolean, { nullable: true })
+	@Column('boolean', {
+		default: true,
+		name: 'NotificationPushNotification',
+		nullable: true,
+	})
+	public notificationPushNotification!: boolean | null;
+
+	@Field(() => Int, { nullable: true })
+	@Column('int', { name: 'NotificationPushNotificationHoursBefore', nullable: true })
+	public notificationPushNotificationHoursBefore!: null | number;
 
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({

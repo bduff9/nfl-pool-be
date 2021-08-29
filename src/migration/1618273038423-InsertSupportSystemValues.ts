@@ -15,6 +15,8 @@
  */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+import { ADMIN_USER } from '../util/constants';
+
 // ts-prune-ignore-next
 export class InsertSupportSystemValues1618273038423 implements MigrationInterface {
 	public async up (queryRunner: QueryRunner): Promise<void> {
@@ -28,10 +30,10 @@ export class InsertSupportSystemValues1618273038423 implements MigrationInterfac
 					unique (SystemValueName, SystemValueValue(230))`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SupportEmail', 'info@asitewithnoname.com', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SupportEmail', 'info@asitewithnoname.com', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 		await queryRunner.query(
-			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SlackLink', 'https://join.slack.com/t/asitewithnoname/shared_invite/enQtNDIyNzUxNTAxMzk0LTIxNmFjOWVkMDk2N2Q2ZDNmMjIxMjQ1NzgwMzUzZTFhMmU3OWIyZmVmZmQ1ZDViZmU5YTJhNmQwYjIxMjYwY2E', 'Admin', 'Admin')`,
+			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('SlackLink', 'https://join.slack.com/t/asitewithnoname/shared_invite/enQtNDIyNzUxNTAxMzk0LTIxNmFjOWVkMDk2N2Q2ZDNmMjIxMjQ1NzgwMzUzZTFhMmU3OWIyZmVmZmQ1ZDViZmU5YTJhNmQwYjIxMjYwY2E', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
 	}
 

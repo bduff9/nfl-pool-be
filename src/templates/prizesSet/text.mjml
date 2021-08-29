@@ -1,0 +1,23 @@
+Hi {{ user.userFirstName }},
+
+This is a notification that everyone has now paid and so the payouts for this season have now been set.
+
+Weekly Payouts
+- 1st place - ${{ firstPlaceWeekly }}
+- 2nd place - ${{ secondPlaceWeekly }}
+
+Overall Payouts
+- 1st place - ${{ firstPlaceOverall }}
+- 2nd place - ${{ secondPlaceOverall }}
+- 3rd place - ${{ thirdPlaceOverall }}
+- Last place* - ${{ lastPlaceOverall }}
+* - Must not miss picking any games from this point forward to be eligible for the last place prize
+
+Survivor Payouts
+- 1st place - ${{ firstPlaceSurvivor }}
+- 2nd place - ${{ secondPlaceSurvivor }}
+
+Reminder that all payouts will be done after the season has completed. Any questions or concerns please let us know!
+
+You can view all current prizes you've won at the link below:
+{{ domain }}/users/payments

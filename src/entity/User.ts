@@ -29,9 +29,9 @@ import {
 } from 'typeorm';
 
 import AutoPickStrategy from './AutoPickStrategy';
-import { Notification } from './Notification';
-import PaymentType from './PaymentType';
-import { UserLeague } from './UserLeague';
+import PaymentMethod from './PaymentMethod';
+
+import { Account, Notification, Payment, UserLeague } from '.';
 
 @Index('uk_UserEmail', ['userEmail'], { unique: true })
 @Entity('Users', { schema: 'NFL' })
@@ -116,14 +116,14 @@ export class User extends BaseEntity {
 	})
 	public userPlaysSurvivor!: boolean;
 
-	@Field(() => PaymentType, { nullable: true })
+	@Field(() => PaymentMethod, { nullable: true })
 	@Column('enum', {
 		default: null,
 		enum: ['Paypal', 'Venmo', 'Zelle'],
 		name: 'UserPaymentType',
 		nullable: true,
 	})
-	public userPaymentType!: null | PaymentType;
+	public userPaymentType!: null | PaymentMethod;
 
 	@Field(() => String, { nullable: true })
 	@Column('varchar', {
@@ -133,15 +133,27 @@ export class User extends BaseEntity {
 	})
 	public userPaymentAccount!: null | string;
 
-	@Field(() => Number, { nullable: false })
-	@Column('numeric', {
-		name: 'UserPaid',
-		nullable: false,
-		precision: 5,
-		scale: 2,
-		default: 0,
+	@Field(() => [Payment])
+	@OneToMany(() => Payment, payment => payment.user, {
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
 	})
+	public payments!: Array<Payment>;
+
+	@Field(() => Number, { nullable: false })
 	public userPaid!: number;
+
+	@Field(() => Number, { nullable: false })
+	public userOwes!: number;
+
+	@Field(() => Number, { nullable: false })
+	public userWon!: number;
+
+	@Field(() => Number, { nullable: false })
+	public userPaidOut!: number;
+
+	@Field(() => Number, { nullable: false })
+	public userBalance!: number;
 
 	@Field(() => Int, { nullable: false })
 	@Column('int', { default: 3, name: 'UserAutoPicksLeft', nullable: false })
@@ -155,7 +167,15 @@ export class User extends BaseEntity {
 	})
 	public userAutoPickStrategy!: AutoPickStrategy | null;
 
-	@Field(() => Notification)
+	@Field(() => Boolean, { nullable: false })
+	@Column('boolean', {
+		default: false,
+		name: 'UserCommunicationsOptedOut',
+		nullable: false,
+	})
+	public userCommunicationsOptedOut!: boolean;
+
+	@Field(() => [Notification])
 	@OneToMany(() => Notification, notification => notification.user, {
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
@@ -168,6 +188,12 @@ export class User extends BaseEntity {
 		onUpdate: 'CASCADE',
 	})
 	public userLeagues!: UserLeague[];
+
+	@Field(() => String, { nullable: false })
+	public yearsPlayed!: string;
+
+	@Field(() => [Account], { nullable: false })
+	public accounts!: Array<Account>;
 
 	@Field(() => Date, { nullable: false })
 	@CreateDateColumn({

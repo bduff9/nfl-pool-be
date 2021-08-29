@@ -1,0 +1,45 @@
+<mjml owa="desktop" version="4.6.3">
+  <mj-head>
+    <mj-title>{{ messages.length }} issues with week {{ week }} games found</mj-title>
+    <mj-preview>{{{formatPreview 'URGENT! Please read to resolve critical issues with the current NFL Pool schedule'}}}</mj-preview>
+    {{> styles }}
+    <mj-style inline="inline">
+      .invalidGames ul {
+        margin-top: 2px;
+      }
+      .invalidGames li {
+        font-size: 16px;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    {{> header }}
+
+    <mj-section padding="0px" text-align="center">
+      <mj-column width="100%" background-color="#fff" border-radius="10px">
+        <mj-text css-class="invalidGames" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
+          <p>Hello {{ admin.userFirstName }},</p>
+          <p>This is a notification that the following {{ messages.length }} games were found in week {{ week }} that could not be auto fixed:</p>
+          <ul>
+            {{#each messages}}
+              <li>Game: {{ this.game }}
+                <ul>
+                  <li>{{ this.reason }}</li>
+                </ul>
+              </li>
+            {{/each}}
+          </ul>
+          <p>These will need to be manually fixed in the database. You can also click below to view all API calls for this week.</p>
+        </mj-text>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/admin/api" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">View API Calls</span>
+        </mj-button>
+        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
+          <span>If you did not request this email you can safely ignore it.</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{> footer }}
+  </mj-body>
+</mjml>
