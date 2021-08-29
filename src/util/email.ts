@@ -87,7 +87,6 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	view: string,
 	locals: Data,
 ): Promise<string> => {
-	// registerPartials();
 	const templatePath = path.join(__dirname, '..', 'templates', `${view}.mjml`);
 	const templateBuffer = await fs.readFile(templatePath);
 	const templateStr = templateBuffer.toString();
