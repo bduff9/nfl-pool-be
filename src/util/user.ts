@@ -169,8 +169,8 @@ const isUsername = (value: string): boolean => !!value.match(/^[\w-]{3,20}$/);
 
 export const isValidPaymentMethod = (type: PaymentMethod, account: string): boolean => {
 	if (type === PaymentMethod.Zelle) {
-		return isEmail(account) || isPhoneNumber(account);
+		return isEmail(account) || isPhoneNumber(account, 'US');
 	}
 
-	return isEmail(account) || isPhoneNumber(account) || isUsername(account);
+	return isEmail(account) || isPhoneNumber(account, 'US') || isUsername(account);
 };
