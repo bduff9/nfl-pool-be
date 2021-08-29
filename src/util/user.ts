@@ -13,6 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { isEmail, isPhoneNumber } from 'class-validator';
+
 import sendNewUserEmail from '../emails/newUser';
 import {
 	Notification,
@@ -23,6 +25,7 @@ import {
 	UserLeague,
 	WeeklyMV,
 } from '../entity';
+import PaymentMethod from '../entity/PaymentMethod';
 
 import { ADMIN_USER, DEFAULT_AUTO_PICKS } from './constants';
 import { formatDueDate } from './dates';
@@ -160,4 +163,14 @@ export const resetUsers = async (): Promise<void> => {
 			userPlaysSurvivor: false,
 		})
 		.execute();
+};
+
+const isUsername = (value: string): boolean => !!value.match(/^[\w-]{3,20}$/);
+
+export const validatePaymentMethod = (type: PaymentMethod, account: string): boolean => {
+	if (type === PaymentMethod.Zelle) {
+		return isEmail(account) || isPhoneNumber(account);
+	}
+
+	return isEmail(account) || isPhoneNumber(account) || isUsername(account);
 };

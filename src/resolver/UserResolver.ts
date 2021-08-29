@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { isEmail, IsOptional, IsPhoneNumber, Matches, MinLength } from 'class-validator';
+import { IsOptional, IsPhoneNumber, Matches, MinLength } from 'class-validator';
 import {
 	Arg,
 	Authorized,
@@ -44,7 +44,7 @@ import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { getPoolCost } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
-import { getUserAlerts, registerUser } from '../util/user';
+import { getUserAlerts, registerUser, validatePaymentMethod } from '../util/user';
 
 @InputType({ description: 'User registration data' })
 class FinishRegistrationInput implements Partial<User> {
@@ -252,7 +252,7 @@ export class UserResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		if (data.userPaymentType !== 'Venmo' && !isEmail(data.userPaymentAccount)) {
+		if (validatePaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
 			throw new Error(
 				`Invalid payment account for ${data.userPaymentType}: ${data.userPaymentAccount}`,
 			);
@@ -338,7 +338,7 @@ export class UserResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		if (data.userPaymentType !== 'Venmo' && !isEmail(data.userPaymentAccount)) {
+		if (validatePaymentMethod(data.userPaymentType, data.userPaymentAccount)) {
 			throw new Error(
 				`Invalid payment account for ${data.userPaymentType}: ${data.userPaymentAccount}`,
 			);
