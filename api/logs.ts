@@ -37,9 +37,10 @@ export default allowCors(
 
 		try {
 			if (req.method === 'POST') {
-				log.info('Incoming SNS request: ', JSON.stringify(req.body));
+				log.info('Incoming SNS request: ', typeof req.body, JSON.stringify(req.body));
 
-				const requestMessage = req.body?.Message;
+				const requestMessage =
+					typeof req.body === 'string' ? JSON.parse(req.body).Message : req.body?.Message;
 
 				if (!requestMessage) throw new Error('Empty request Message received');
 
