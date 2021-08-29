@@ -79,6 +79,7 @@ export class LogResolver {
 		logResults.count = logs.length;
 		logResults.page = page ?? 1;
 		logResults.results = logs.map(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(log): Log => ({ ...log, logData: JSON.stringify(log.logData) as any } as Log),
 		);
 		logResults.totalCount = totalCount;
