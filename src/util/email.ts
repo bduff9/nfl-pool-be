@@ -22,7 +22,7 @@ import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
 
 import { getID } from '../dynamodb';
-import { EmailModel } from '../dynamodb/email';
+import { EmailClass, EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
 
 import {
@@ -141,9 +141,10 @@ export const sendEmail = async ({
 }: TSendEmailProps): Promise<void> => {
 	const emailID = getID();
 	const emails = bcc || to || [];
+	let newEmail: EmailClass | null = null;
 
 	try {
-		await EmailModel.create({
+		newEmail = await EmailModel.create({
 			emailID,
 			emailType: type,
 			to: new Set(emails),
@@ -153,6 +154,7 @@ export const sendEmail = async ({
 			emailID,
 			emailType: type,
 			error,
+			newEmail,
 			to: new Set(emails),
 		});
 	}
@@ -176,8 +178,11 @@ export const sendEmail = async ({
 	});
 
 	try {
-		await EmailModel.update({ emailID }, { html, textOnly: text, subject });
+		await EmailModel.update(
+			{ emailID, createdAt: newEmail?.createdAt },
+			{ html, textOnly: text, subject },
+		);
 	} catch (error) {
-		log.error('Failed to update email record in DynamoDB:', { emailID, error });
+		log.error('Failed to update email record in DynamoDB:', { emailID, error, newEmail });
 	}
 };

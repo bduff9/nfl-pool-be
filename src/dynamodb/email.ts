@@ -21,7 +21,7 @@ import { VERCEL_ENV } from '../util/constants';
 // Alway load index first here as it sets up Dynamoose <> DynamoDB connector
 import '.';
 
-class EmailClass extends Document {
+export class EmailClass extends Document {
 	emailID!: string;
 	emailType!: EmailType;
 	to!: Set<string>;
