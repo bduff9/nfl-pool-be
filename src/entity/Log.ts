@@ -80,13 +80,20 @@ export class Log extends BaseEntity {
 
 	@Field(() => String, { nullable: true })
 	@Column({
-		length: 500,
 		name: 'LogMessage',
 		nullable: true,
-		type: 'varchar',
+		type: 'longtext',
 		update: false,
 	})
 	public logMessage!: null | string;
+
+	@Field(() => String, { nullable: true })
+	@Column({
+		name: 'LogData',
+		nullable: true,
+		type: 'json',
+	})
+	public logData!: null | Record<string, unknown>;
 
 	@Column({ name: 'UserID', nullable: true, type: 'int' })
 	public userID!: null | number;

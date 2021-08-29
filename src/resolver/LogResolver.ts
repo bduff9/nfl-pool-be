@@ -35,8 +35,11 @@ class WriteLogInput implements Partial<Log> {
 	@Field(() => LogAction, { nullable: false })
 	logAction!: LogAction;
 
-	@Field(() => String, { nullable: false })
-	logMessage!: string;
+	@Field(() => String, { nullable: true })
+	logMessage!: null | string;
+
+	@Field(() => String, { nullable: true })
+	logDataString!: null | string;
 
 	@Field(() => Int, { nullable: true })
 	leagueID?: null | number;
@@ -100,6 +103,16 @@ export class LogResolver {
 				? parseInt(newLogData.sub, 10)
 				: null;
 		const auditUser = userID || 'unknown';
+		let logData: null | Record<string, string> = null;
+
+		if (newLogData.logDataString) {
+			try {
+				logData = JSON.parse(newLogData.logDataString);
+			} catch (error) {
+				console.error('Unable to convert logData into JSON: ', newLogData.logDataString);
+			}
+		}
+
 		const result = await Log.createQueryBuilder()
 			.insert()
 			.into(Log)
@@ -108,6 +121,7 @@ export class LogResolver {
 				logAction: newLogData.logAction,
 				logAddedBy: `${auditUser}`,
 				logMessage: newLogData.logMessage,
+				logData,
 				logUpdatedBy: `${auditUser}`,
 				userID,
 			})

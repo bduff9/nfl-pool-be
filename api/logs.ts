@@ -44,14 +44,11 @@ export default allowCors(
 				if (!requestMessage) throw new Error('Empty request Message received');
 
 				const snsLog = new Log();
-				const message =
-					typeof requestMessage === 'string'
-						? requestMessage
-						: JSON.stringify(requestMessage);
 
 				snsLog.logAction = LogAction.EmailActivity;
 				snsLog.logAddedBy = ADMIN_USER;
-				snsLog.logMessage = message.substring(0, 500);
+				snsLog.logMessage = 'Incoming SNS request:';
+				snsLog.logData = requestMessage;
 				snsLog.logUpdatedBy = ADMIN_USER;
 
 				await snsLog.save();
