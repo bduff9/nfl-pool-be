@@ -68,7 +68,7 @@ export class EmailResolver {
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<EmailResult> {
-		let query = EmailModel.query().sort('descending').limit(count);
+		let query = EmailModel.scan().limit(count);
 
 		if (lastKey) query = query.startAt(JSON.parse(lastKey));
 

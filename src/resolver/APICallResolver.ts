@@ -27,7 +27,7 @@ export class APICallResolver {
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<APICallResult> {
-		let query = APICallModel.query().sort('descending').limit(count);
+		let query = APICallModel.scan().limit(count);
 
 		if (lastKey) query = query.startAt(JSON.parse(lastKey));
 
