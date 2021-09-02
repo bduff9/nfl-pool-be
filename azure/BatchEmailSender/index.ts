@@ -20,7 +20,7 @@ import EmailSendTo from '../../src/entity/EmailSendTo';
 import EmailType from '../../src/entity/EmailType';
 import { waitForConnection } from '../../src/util/database';
 import { sendAdminEmail } from '../../src/util/email';
-import { log, updateLoggerForAzure } from '../../src/util/logging';
+import { log, resetLogger, updateLoggerForAzure } from '../../src/util/logging';
 
 type EmailMessage = {
 	emailType: EmailType;
@@ -61,6 +61,8 @@ const queueTrigger: AzureFunction = async function (
 	} catch (error) {
 		context.log.error('Failed to process email queue message: ', { emailMessage, error });
 	}
+
+	resetLogger();
 };
 
 // ts-prune-ignore-next
