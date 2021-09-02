@@ -27,11 +27,12 @@ import {
 import { In } from 'typeorm/find-options/operator/In';
 
 import { EmailModel } from '../dynamodb/email';
-import sendInterestEmail from '../emails/interest';
 import { Email, EmailResult, Log, User } from '../entity';
+import EmailSendTo from '../entity/EmailSendTo';
 import EmailType from '../entity/EmailType';
 import LogAction from '../entity/LogAction';
-import { log } from '../util/logging';
+import { sendAdminEmail } from '../util/email';
+import { addToEmailQueue } from '../util/queue';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Email)
@@ -67,11 +68,11 @@ export class EmailResolver {
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<EmailResult> {
-		let scan = EmailModel.scan().limit(count);
+		let query = EmailModel.query().sort('descending').limit(count);
 
-		if (lastKey) scan = scan.startAt(JSON.parse(lastKey));
+		if (lastKey) query = query.startAt(JSON.parse(lastKey));
 
-		const results = await scan.exec();
+		const results = await query.exec();
 
 		return {
 			count: results.count,
@@ -85,7 +86,7 @@ export class EmailResolver {
 	@Mutation(() => Boolean)
 	async sendAdminEmail (
 		@Arg('EmailType', () => EmailType) emailType: EmailType,
-		@Arg('SendTo', () => String) sendTo: string,
+		@Arg('SendTo', () => EmailSendTo) sendTo: EmailSendTo,
 		@Arg('UserEmail', () => String, { nullable: true }) userEmail: null | string,
 		@Arg('UserFirstname', () => String, { nullable: true }) userFirstName: null | string,
 		@Ctx() context: TCustomContext,
@@ -94,24 +95,18 @@ export class EmailResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		switch (emailType) {
-			case EmailType.interest:
-				if (sendTo === 'All') {
-					const users = await User.find({ where: { userCommunicationsOptedOut: false } });
+		if (sendTo === EmailSendTo.New) {
+			if (!userEmail) throw new Error('Missing user email address');
 
-					for (const user of users) {
-						await sendInterestEmail(user);
-					}
-				} else {
-					if (!userEmail) throw new Error('Must pass in email to send interest email to!');
+			await sendAdminEmail(emailType, { userEmail, userFirstName });
+		} else {
+			const message = JSON.stringify({
+				emailType,
+				sendTo,
+				adminUserID: user.userID,
+			});
 
-					await sendInterestEmail({ userEmail, userFirstName });
-				}
-
-				break;
-			default:
-				log.error(`Invalid email requested: ${emailType}`);
-				break;
+			await addToEmailQueue(message);
 		}
 
 		return true;

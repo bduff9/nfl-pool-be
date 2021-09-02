@@ -23,6 +23,8 @@ import mjml2html from 'mjml';
 
 import { getID } from '../dynamodb';
 import { EmailClass, EmailModel } from '../dynamodb/email';
+import sendInterestEmail from '../emails/interest';
+import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 
 import {
@@ -123,6 +125,21 @@ const emailSender = new Email<{
 		},
 	},
 });
+
+export const sendAdminEmail = async (
+	emailType: EmailType,
+	user: Pick<User, 'userEmail' | 'userFirstName'>,
+): Promise<void> => {
+	switch (emailType) {
+		case EmailType.interest:
+			await sendInterestEmail(user);
+
+			break;
+		default:
+			log.error(`Invalid email requested: ${emailType}`);
+			break;
+	}
+};
 
 type TSendEmailProps = {
 	locals: Record<string, unknown> & {

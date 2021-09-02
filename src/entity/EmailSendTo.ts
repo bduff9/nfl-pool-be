@@ -13,31 +13,16 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
+import { registerEnumType } from 'type-graphql';
 
-import { APICallModel } from '../dynamodb/apiCall';
-import { APICall, APICallResult } from '../entity';
-import { TUserType } from '../util/types';
-
-@Resolver(APICall)
-export class APICallResolver {
-	@Authorized<TUserType>('admin')
-	@Query(() => APICallResult)
-	async loadAPICalls (
-		@Arg('Count', () => Int) count: number,
-		@Arg('LastKey', { nullable: true }) lastKey: string,
-	): Promise<APICallResult> {
-		let query = APICallModel.query().sort('descending').limit(count);
-
-		if (lastKey) query = query.startAt(JSON.parse(lastKey));
-
-		const results = await query.exec();
-
-		return {
-			count: results.count,
-			hasMore: !!results.lastKey,
-			lastKey: results.lastKey ? JSON.stringify(results.lastKey) : null,
-			results,
-		};
-	}
+enum EmailSendTo {
+	All = 'All',
+	New = 'New',
 }
+
+registerEnumType(EmailSendTo, {
+	description: 'The group to send an email to',
+	name: 'EmailSendTo',
+});
+
+export default EmailSendTo;

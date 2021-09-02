@@ -20,6 +20,7 @@ export const {
 	AzureWebJobsStorage,
 	containerName,
 	EMAIL_FROM,
+	EMAIL_QUEUE_NAME,
 	NEXT_PUBLIC_SENTRY_DSN,
 	VERCEL_ENV,
 	database,
