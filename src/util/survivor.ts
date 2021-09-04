@@ -151,7 +151,7 @@ export const registerForSurvivor = async (
 
 	if (result === 0) throw new Error('Season has already started!');
 
-	const user = await User.findOneOrFail(userID);
+	const { userEmail } = await User.findOneOrFail(userID);
 	const leagues = await UserLeague.find({ where: { userID } });
 	const insertQuery = `INSERT INTO SurvivorPicks (UserID, LeagueID, SurvivorPickWeek, GameID, SurvivorPickAddedBy, SurvivorPickUpdatedBy) SELECT ?, ?, GameWeek, GameID, ?, ? from Games Where GameNumber = 1`;
 
@@ -159,26 +159,29 @@ export const registerForSurvivor = async (
 		const insertVars = [
 			userID,
 			league.leagueID,
-			updatedBy ?? user.userEmail,
-			updatedBy ?? user.userEmail,
+			updatedBy ?? userEmail,
+			updatedBy ?? userEmail,
 		];
 		const result = await SurvivorPick.query(insertQuery, insertVars);
 
 		log.info(`Inserted survivor picks for user ${userID}`, result);
 	}
 
-	user.userPlaysSurvivor = true;
-	user.userUpdatedBy = updatedBy ?? user.userEmail;
-	await user.save();
+	await User.createQueryBuilder()
+		.update()
+		.set({ userPlaysSurvivor: true, userUpdatedBy: updatedBy ?? userEmail })
+		.where('UserID = :userID', { userID })
+		.andWhere('UserPlaysSurvivor = false')
+		.execute();
 
 	const survivorCost = await getSurvivorCost();
 	const payment = new Payment();
 
-	payment.paymentAddedBy = updatedBy ?? user.userEmail;
+	payment.paymentAddedBy = updatedBy ?? userEmail;
 	payment.paymentAmount = -1 * survivorCost;
 	payment.paymentDescription = 'Survivor Pool Entry Fee';
 	payment.paymentType = PaymentType.Fee;
-	payment.paymentUpdatedBy = user.userEmail;
+	payment.paymentUpdatedBy = userEmail;
 	payment.paymentWeek = null;
 	payment.userID = userID;
 	await payment.save();
