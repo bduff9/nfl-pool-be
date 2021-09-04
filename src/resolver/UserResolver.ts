@@ -40,6 +40,7 @@ import LogAction from '../entity/LogAction';
 import PaymentMethod from '../entity/PaymentMethod';
 import PaymentType from '../entity/PaymentType';
 import { DEFAULT_AUTO_PICKS } from '../util/constants';
+import { log } from '../util/logging';
 import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { getPoolCost } from '../util/systemValue';
@@ -313,17 +314,25 @@ export class UserResolver {
 				.execute(),
 		);
 
-		const log = new Log();
+		const registerLog = new Log();
 
-		log.logAction = LogAction.Register;
-		log.logMessage = `${userToUpdate.userName} has finished registration`;
-		log.logAddedBy = user.userEmail;
-		log.logUpdatedBy = user.userEmail;
-		log.userID = user.userID;
+		registerLog.logAction = LogAction.Register;
+		registerLog.logMessage = `${userToUpdate.userName} has finished registration`;
+		registerLog.logAddedBy = user.userEmail;
+		registerLog.logUpdatedBy = user.userEmail;
+		registerLog.userID = user.userID;
 
-		promises.push(log.save());
+		promises.push(registerLog.save());
 
-		await Promise.all(promises);
+		try {
+			await Promise.allSettled(promises);
+		} catch (error) {
+			log.error('!!!Error registering user!!!', {
+				error: JSON.stringify(error),
+				user,
+				userToUpdate,
+			});
+		}
 
 		return User.findOneOrFail(user.userID);
 	}
