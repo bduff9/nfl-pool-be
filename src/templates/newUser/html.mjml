@@ -19,12 +19,16 @@
       <mj-column width="100%" background-color="#fff" border-radius="10px">
         <mj-text css-class="userInfo" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
           <p>Hello {{ admin.userFirstName }},</p>
-          <p>This is just a notice that a new user has just registered with the following information:</p>
+          <p>This is just a notice that a {{#if isReturning}}returning{{else}}new{{/if}} user has just registered with the following information:</p>
           <ul>
             <li>Name: {{ newUser.userFirstName }} {{ newUser.userLastName }}</li>
             <li>Team Name: {{ newUser.userTeamName }}</li>
             <li>Email: {{ newUser.userEmail }}</li>
-            <li>Referred By: {{ newUser.userReferredByRaw }}</li>
+            {{#if isReturning}}
+              <li>Previous Years Played: {{ yearsPlayed }}</li>
+            {{else}}
+              <li>Referred By: {{ newUser.userReferredByRaw }}</li>
+            {{/if}}
           </ul>
           <p>You can maintain this user below:</p>
         </mj-text>

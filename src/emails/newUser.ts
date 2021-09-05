@@ -13,12 +13,17 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { User } from '../entity';
+import { User, UserHistory } from '../entity';
 import EmailType from '../entity/EmailType';
 import { sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 const sendNewUserEmail = async (newUser: User): Promise<void> => {
+	const yearsPlayedResult = await UserHistory.find({ where: { userID: newUser.userID } });
+	const yearsPlayed = yearsPlayedResult
+		.map(({ userHistoryYear }) => userHistoryYear)
+		.slice(0, -1);
+	const isReturning = yearsPlayed.length > 0;
 	const admins = await User.find({ where: { userIsAdmin: true } });
 
 	await Promise.all(
@@ -27,14 +32,14 @@ const sendNewUserEmail = async (newUser: User): Promise<void> => {
 
 			try {
 				await sendEmail({
-					locals: { admin, newUser },
+					locals: { admin, isReturning, newUser, yearsPlayed },
 					to: [email],
 					type: EmailType.newUser,
 				});
 			} catch (error) {
 				log.error('Failed to send new user email:', {
 					error,
-					locals: { admin, newUser },
+					locals: { admin, isReturning, newUser, yearsPlayed },
 					to: [email],
 					type: EmailType.newUser,
 				});
