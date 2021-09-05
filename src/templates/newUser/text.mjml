@@ -1,11 +1,15 @@
 Hello {{ admin.userFirstName }},
 
-This is just a notice that a new user has just registered with the following information:
+This is just a notice that a {{#if isReturning}}returning{{else}}new{{/if}} user has just registered with the following information:
 
 Name: {{ newUser.userFirstName }} {{ newUser.userLastName }}
 Team Name: {{ newUser.userTeamName }}
 Email: {{ newUser.userEmail }}
-Referred By: {{ newUser.userReferredByRaw }}
+{{#if isReturning}}
+  Previous Years Played: {{ yearsPlayed }}
+{{else}}
+  Referred By: {{ newUser.userReferredByRaw }}
+{{/if}}
 
 You can maintain this user below:
 {{ domain }}/admin/users
