@@ -118,7 +118,7 @@ export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> 
 
 			if (userBalance > survivorCost * -1) continue;
 
-			await unregisterForSurvivor(user.userID);
+			await unregisterForSurvivor(user.userID, ADMIN_USER);
 			log.info('Unregistered user from survivor pool', user);
 		}
 	}
