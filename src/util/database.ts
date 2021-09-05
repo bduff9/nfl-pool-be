@@ -18,7 +18,7 @@ import { Connection, createConnection } from 'typeorm';
 
 import * as entities from '../entity';
 
-import { database, host, password, port, dbuser } from './constants';
+import { database, host, password, port, dbuser, VERCEL_ENV } from './constants';
 import { getOffsetString } from './dates';
 import { log } from './logging';
 
@@ -40,7 +40,7 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				port: port !== undefined ? +port : port,
 				username: dbuser,
 				synchronize: false,
-				logging: true,
+				logging: VERCEL_ENV === 'development',
 				entities: Object.values(entities),
 				migrations: [],
 				subscribers: [],
