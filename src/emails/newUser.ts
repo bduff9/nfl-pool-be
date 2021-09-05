@@ -32,7 +32,7 @@ const sendNewUserEmail = async (newUser: User): Promise<void> => {
 
 			try {
 				await sendEmail({
-					locals: { admin, isReturning, newUser, yearsPlayed },
+					locals: { admin, isReturning, newUser, yearsPlayed: yearsPlayed.join(', ') },
 					to: [email],
 					type: EmailType.newUser,
 				});
