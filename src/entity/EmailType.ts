@@ -17,6 +17,7 @@ import { registerEnumType } from 'type-graphql';
 
 enum EmailType {
 	interest = 'interest',
+	interestFinal = 'interestFinal',
 	invalidGamesFound = 'invalidGamesFound',
 	newUser = 'newUser',
 	pickReminder = 'pickReminder',

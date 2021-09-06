@@ -131,9 +131,12 @@ export const sendAdminEmail = async (
 	user: Pick<User, 'userEmail' | 'userFirstName'>,
 ): Promise<void> => {
 	switch (emailType) {
+		//TODO: add more email types to send from admin email screen
 		case EmailType.interest:
 			await sendInterestEmail(user);
-
+			break;
+		case EmailType.interestFinal:
+			await sendInterestEmail(user, true);
 			break;
 		default:
 			log.error(`Invalid email requested: ${emailType}`);
@@ -141,11 +144,29 @@ export const sendAdminEmail = async (
 	}
 };
 
+export type EmailView = 'html' | 'subject' | 'text';
+
+type EmailLocals = Record<string, unknown> & {
+	browserLink?: never;
+	domain?: never;
+};
+
+export const previewEmail = async (
+	type: EmailType,
+	view: EmailView,
+	locals: EmailLocals,
+): Promise<string> =>
+	emailSender.render(`${type}/${view}`, {
+		...locals,
+		browserLink: `${domain}/api/email/${locals.emailID}`,
+		domain,
+		unsubscribeLink: `${domain}/api/email/unsubscribe${
+			typeof locals.sendTo === 'string' ? `?email=${encodeURIComponent(locals.sendTo)}` : ''
+		}`,
+	});
+
 type TSendEmailProps = {
-	locals: Record<string, unknown> & {
-		browserLink?: never;
-		domain?: never;
-	};
+	locals: EmailLocals;
 	type: EmailType;
 } & ({ bcc: string[]; to?: never } | { bcc?: never; to: string[] });
 

@@ -1,5 +1,9 @@
 Hello {{ user.userFirstName }},
 
+{{#if isFinal}}
+  This is your final reminder to register and play! The first game of the season kicks off tomorrow!
+{{/if}}
+
 You are getting this email because you either indicated an interest in participating in the {{ poolYear }} confidence pool or we thought you would be interested. All players are welcome, so even if you are not interested, please feel free to forward this along appropriately.
 
 For those of you who have never done a confidence pool before, they are very easy to do. The objective is to pick the winner of each game for the current week. When making your selections, you will assign a point value, or "confidence" value, based on how sure you are of each pick. 1 means it could go either way and 16 means it's a sure thing. If you are right, you win that amount of points and the player with the highest point total wins. Payouts are done to the winner(s) each week and top 3 places at the end for the overall score. More details about the confidence pool can be found here:

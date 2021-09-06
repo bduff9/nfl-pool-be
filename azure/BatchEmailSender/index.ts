@@ -45,14 +45,23 @@ const queueTrigger: AzureFunction = async function (
 		switch (sendTo) {
 			case EmailSendTo.All:
 				users = await User.find({ where: { userCommunicationsOptedOut: false } });
-
-				await Promise.allSettled(users.map(user => sendAdminEmail(emailType, user)));
-
+				break;
+			case EmailSendTo.Registered:
+				users = await User.find({
+					where: { userCommunicationsOptedOut: false, userDoneRegistering: true },
+				});
+				break;
+			case EmailSendTo.Unregistered:
+				users = await User.find({
+					where: { userCommunicationsOptedOut: false, userDoneRegistering: false },
+				});
 				break;
 			default:
 				log.error(`Invalid send to group requested: ${sendTo}`);
 				break;
 		}
+
+		await Promise.allSettled(users.map(user => sendAdminEmail(emailType, user)));
 
 		context.log(
 			'Email queue trigger function finished processing work item: ',

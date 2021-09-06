@@ -18,6 +18,8 @@ import { registerEnumType } from 'type-graphql';
 enum EmailSendTo {
 	All = 'All',
 	New = 'New',
+	Registered = 'Registered',
+	Unregistered = 'Unregistered',
 }
 
 registerEnumType(EmailSendTo, {
