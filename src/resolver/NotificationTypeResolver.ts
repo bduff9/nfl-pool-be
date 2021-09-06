@@ -13,18 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Authorized, Query, Resolver } from 'type-graphql';
+import { Resolver } from 'type-graphql';
 
 import { NotificationType } from '../entity';
-import { TUserType } from '../util/types';
 
 @Resolver(NotificationType)
-export class NotificationTypeResolver {
-	@Authorized<TUserType>('admin')
-	@Query(() => [NotificationType])
-	async getNotificationTypes (): Promise<NotificationType[]> {
-		return NotificationType.find({
-			order: { notificationType: 'ASC' },
-		});
-	}
-}
+export class NotificationTypeResolver {}

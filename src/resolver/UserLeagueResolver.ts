@@ -13,19 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { FieldResolver, Resolver, Root } from 'type-graphql';
+import { Resolver } from 'type-graphql';
 
-import { League, User, UserLeague } from '../entity';
+import { UserLeague } from '../entity';
 
 @Resolver(UserLeague)
-export class UserLeagueResolver {
-	@FieldResolver()
-	async user (@Root() userLeague: UserLeague): Promise<undefined | User> {
-		return User.findOne(userLeague.userID);
-	}
-
-	@FieldResolver()
-	async league (@Root() userLeague: UserLeague): Promise<League | undefined> {
-		return League.findOne(userLeague.leagueID);
-	}
-}
+export class UserLeagueResolver {}

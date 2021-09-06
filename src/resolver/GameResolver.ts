@@ -13,10 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
-import { Game, Team } from '../entity';
-import { WEEKS_IN_SEASON } from '../util/constants';
+import { Game } from '../entity';
 import { TUserType } from '../util/types';
 
 @Resolver(Game)
@@ -25,6 +24,7 @@ export class GameResolver {
 	@Query(() => Game)
 	async getGame (@Arg('GameID', () => Int) gameID: number): Promise<Game> {
 		return Game.findOneOrFail({
+			relations: ['homeTeam', 'visitorTeam'],
 			where: { gameID },
 		});
 	}
@@ -34,65 +34,14 @@ export class GameResolver {
 	async getGamesForWeek (@Arg('Week', () => Int) gameWeek: number): Promise<Array<Game>> {
 		return Game.find({
 			order: { gameNumber: 'ASC' },
+			relations: [
+				'homeTeam',
+				'visitorTeam',
+				'winnerTeam',
+				'teamHasPossession',
+				'teamInRedzone',
+			],
 			where: { gameWeek },
 		});
-	}
-
-	@Authorized<TUserType>('anonymous')
-	@Query(() => Int)
-	async getCurrentWeek (): Promise<number> {
-		const currentWeekResult = await Game.createQueryBuilder('G')
-			.select(`coalesce(min(G.GameWeek), ${WEEKS_IN_SEASON})`, 'currentWeek')
-			.where('G.GameStatus <> :status', { status: 'Final' })
-			.getRawOne<{ currentWeek: string }>();
-
-		if (!currentWeekResult) throw new Error('Missing current week result');
-
-		const currentWeek = +currentWeekResult.currentWeek;
-
-		if (currentWeek === 1) return currentWeek;
-
-		const lastWeekResult = await Game.createQueryBuilder('G')
-			.select('G.GameWeek', 'lastWeek')
-			.addSelect(
-				'CURRENT_TIMESTAMP > DATE_ADD(G.GameKickoff, INTERVAL 24 HOUR)',
-				'useCurrentWeek',
-			)
-			.where('G.GameStatus = :status', { status: 'Final' })
-			.orderBy('G.GameKickoff', 'DESC')
-			.getRawOne<{ lastWeek: number; useCurrentWeek: '0' | '1' }>();
-
-		if (!lastWeekResult) throw new Error('Missing last week result');
-
-		const { lastWeek, useCurrentWeek } = lastWeekResult;
-
-		if (lastWeek !== currentWeek && useCurrentWeek === '0') return lastWeek;
-
-		return currentWeek;
-	}
-
-	@FieldResolver()
-	async homeTeam (@Root() game: Game): Promise<Team> {
-		return Team.findOneOrFail({ where: { teamID: game.homeTeamID } });
-	}
-
-	@FieldResolver()
-	async visitorTeam (@Root() game: Game): Promise<Team> {
-		return Team.findOneOrFail({ where: { teamID: game.visitorTeamID } });
-	}
-
-	@FieldResolver()
-	async winnerTeam (@Root() game: Game): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: game.winnerTeamID } });
-	}
-
-	@FieldResolver()
-	async teamHasPossession (@Root() game: Game): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: game.gameHasPossession } });
-	}
-
-	@FieldResolver()
-	async teamInRedzone (@Root() game: Game): Promise<undefined | Team> {
-		return Team.findOne({ where: { teamID: game.gameInRedzone } });
 	}
 }

@@ -51,13 +51,13 @@ class MakeSurvivorPickInput implements Partial<SurvivorPick> {
 export class SurvivorPickResolver {
 	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
-	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<SurvivorPick[]> {
+	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<Array<SurvivorPick>> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
 
 		return SurvivorPick.find({
-			relations: ['game', 'team'],
+			relations: ['team'],
 			where: { userID: user.userID },
 		});
 	}

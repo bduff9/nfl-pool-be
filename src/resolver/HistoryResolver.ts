@@ -13,16 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
+import { Resolver } from 'type-graphql';
 
 import { History } from '../entity';
-import { TUserType } from '../util/types';
 
 @Resolver(History)
-export class HistoryResolver {
-	@Authorized<TUserType>('user')
-	@Query(() => [History])
-	async getHistoryForYear (@Arg('Year', () => Int) year: number): Promise<Array<History>> {
-		return History.find({ relations: ['user'], where: { historyYear: year } });
-	}
-}
+export class HistoryResolver {}

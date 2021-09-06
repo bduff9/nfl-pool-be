@@ -13,9 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Authorized, Ctx, FieldResolver, Int, Query, Resolver, Root } from 'type-graphql';
+import { Authorized, Ctx, Int, Query, Resolver } from 'type-graphql';
 
-import { OverallMV, User } from '../entity';
+import { OverallMV } from '../entity';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(OverallMV)
@@ -60,10 +60,5 @@ export class OverallMVResolver {
 	@Query(() => Int)
 	async getOverallRankingsTotalCount (): Promise<number> {
 		return OverallMV.count();
-	}
-
-	@FieldResolver()
-	async user (@Root() overallMV: OverallMV): Promise<User> {
-		return User.findOneOrFail({ where: { userID: overallMV.userID } });
 	}
 }

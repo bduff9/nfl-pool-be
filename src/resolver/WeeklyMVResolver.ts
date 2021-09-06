@@ -13,18 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import {
-	Arg,
-	Authorized,
-	Ctx,
-	FieldResolver,
-	Int,
-	Query,
-	Resolver,
-	Root,
-} from 'type-graphql';
+import { Arg, Authorized, Ctx, Int, Query, Resolver } from 'type-graphql';
 
-import { User, WeeklyMV } from '../entity';
+import { WeeklyMV } from '../entity';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(WeeklyMV)
@@ -79,10 +70,5 @@ export class WeeklyMVResolver {
 		@Arg('Week', () => Int) week: number,
 	): Promise<number> {
 		return WeeklyMV.count({ where: { week } });
-	}
-
-	@FieldResolver()
-	async user (@Root() weeklyMV: WeeklyMV): Promise<User> {
-		return User.findOneOrFail({ where: { userID: weeklyMV.userID } });
 	}
 }

@@ -64,7 +64,7 @@ class NotificationInput implements Partial<Notification> {
 export class NotificationResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Notification])
-	async getMyNotifications (@Ctx() context: TCustomContext): Promise<Notification[]> {
+	async getMyNotifications (@Ctx() context: TCustomContext): Promise<Array<Notification>> {
 		const { user } = context;
 
 		if (!user) {
@@ -92,7 +92,7 @@ export class NotificationResolver {
 	async updateMyNotifications (
 		@Arg('data', () => [NotificationInput]) notifications: NotificationInput[],
 		@Ctx() context: TCustomContext,
-	): Promise<Notification[]> {
+	): Promise<Array<Notification>> {
 		const { user } = context;
 
 		if (!user) {

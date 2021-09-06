@@ -29,12 +29,6 @@ export class TeamResolver {
 		});
 	}
 
-	@Authorized<TUserType>('user')
-	@Query(() => [Team])
-	async getTeams (): Promise<Team[]> {
-		return Team.find();
-	}
-
 	@FieldResolver()
 	async teamRecord (@Root() team: Team): Promise<string> {
 		const { teamID } = team;

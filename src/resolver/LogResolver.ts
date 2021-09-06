@@ -87,12 +87,6 @@ export class LogResolver {
 		return logResults;
 	}
 
-	@Authorized<TUserType>('admin')
-	@Query(() => [[String]])
-	async getLogActions (): Promise<Array<Array<string>>> {
-		return Object.entries(LogAction);
-	}
-
 	@Authorized<TUserType>('anonymous')
 	@Mutation(() => Log)
 	async writeLog (
