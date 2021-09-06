@@ -48,6 +48,9 @@ export class TeamResolver {
 		const { teamID } = team;
 
 		return Game.createQueryBuilder('G')
+			.innerJoinAndSelect('G.homeTeam', 'HT')
+			.innerJoinAndSelect('G.visitorTeam', 'VT')
+			.leftJoinAndSelect('G.winnerTeam', 'WT')
 			.where('G.GameStatus = :status', { status: 'Final' })
 			.andWhere(
 				new Brackets(qb => {
