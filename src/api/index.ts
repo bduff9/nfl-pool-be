@@ -113,20 +113,22 @@ export const getEntireSeasonFromAPI = async (
 			});
 		}
 
-		try {
-			const apiCallID = getID();
+		if (error instanceof Error) {
+			try {
+				const apiCallID = getID();
 
-			await APICallModel.create({
-				apiCallID,
-				apiCallError: error.message,
-				apiCallUrl: url,
-				apiCallYear: year,
-			});
-		} catch (error) {
-			log.error('Error creating API call record in DynamoDB for all season', {
-				error,
-				year,
-			});
+				await APICallModel.create({
+					apiCallID,
+					apiCallError: error.message,
+					apiCallUrl: url,
+					apiCallYear: year,
+				});
+			} catch (error) {
+				log.error('Error creating API call record in DynamoDB for all season', {
+					error,
+					year,
+				});
+			}
 		}
 
 		return [];
@@ -196,22 +198,24 @@ export const getGamesForWeek = async (
 			});
 		}
 
-		try {
-			const apiCallID = getID();
+		if (error instanceof Error) {
+			try {
+				const apiCallID = getID();
 
-			await APICallModel.create({
-				apiCallID,
-				apiCallError: error.message,
-				apiCallUrl: url,
-				apiCallYear: year,
-				apiCallWeek: week,
-			});
-		} catch (error) {
-			log.error('Error creating API call record in DynamoDB for week', {
-				error,
-				week,
-				year,
-			});
+				await APICallModel.create({
+					apiCallID,
+					apiCallError: error.message,
+					apiCallUrl: url,
+					apiCallYear: year,
+					apiCallWeek: week,
+				});
+			} catch (error) {
+				log.error('Error creating API call record in DynamoDB for week', {
+					error,
+					week,
+					year,
+				});
+			}
 		}
 
 		return [];

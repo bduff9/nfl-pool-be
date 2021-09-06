@@ -27,7 +27,7 @@ let connection: Connection | null = null;
 export const waitForConnection = async (): Promise<Connection | null> => {
 	const offset = getOffsetString();
 
-	console.log('Current offset is: ', offset);
+	log.debug('Current offset is: ', offset);
 
 	if (!connection) {
 		try {
