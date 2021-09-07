@@ -27,6 +27,7 @@ import {
 
 const sendInterestEmail = async (
 	user: Pick<User, 'userEmail' | 'userFirstName'>,
+	isFinal = false,
 ): Promise<void> => {
 	const poolYear = await getSystemYear();
 	const payByDateRaw = await getPaymentDueDate();
@@ -36,14 +37,14 @@ const sendInterestEmail = async (
 
 	try {
 		await sendEmail({
-			locals: { payByDate, poolCost, poolYear, survivorCost, user },
+			locals: { isFinal, payByDate, poolCost, poolYear, survivorCost, user },
 			to: [user.userEmail],
 			type: EmailType.interest,
 		});
 	} catch (error) {
 		log.error('Failed to send interest email:', {
 			error,
-			locals: { payByDate, poolCost, poolYear, survivorCost, user },
+			locals: { isFinal, payByDate, poolCost, poolYear, survivorCost, user },
 			to: [user.userEmail],
 			type: EmailType.interest,
 		});

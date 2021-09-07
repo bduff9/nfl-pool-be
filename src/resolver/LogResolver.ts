@@ -28,6 +28,7 @@ import { FindConditions } from 'typeorm';
 
 import { Log, LogResult } from '../entity';
 import LogAction from '../entity/LogAction';
+import { log } from '../util/logging';
 import { TCustomContext, TUserType } from '../util/types';
 
 @InputType({ description: 'New log data' })
@@ -87,12 +88,6 @@ export class LogResolver {
 		return logResults;
 	}
 
-	@Authorized<TUserType>('admin')
-	@Query(() => [[String]])
-	async getLogActions (): Promise<Array<Array<string>>> {
-		return Object.entries(LogAction);
-	}
-
 	@Authorized<TUserType>('anonymous')
 	@Mutation(() => Log)
 	async writeLog (
@@ -112,7 +107,7 @@ export class LogResolver {
 			try {
 				logData = JSON.parse(newLogData.logDataString);
 			} catch (error) {
-				console.error('Unable to convert logData into JSON: ', newLogData.logDataString);
+				log.error('Unable to convert logData into JSON: ', newLogData.logDataString);
 			}
 		}
 

@@ -1,1 +1,5 @@
-{{ poolYear }} Confidence Pool is open for registration
+{{#if isFinal}}
+  Last reminder to register for the {{ poolYear }} Confidence Pool!
+{{else}}
+  {{ poolYear }} Confidence Pool is now open for registration
+{{/if}}

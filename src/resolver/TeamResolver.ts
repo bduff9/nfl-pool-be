@@ -29,12 +29,6 @@ export class TeamResolver {
 		});
 	}
 
-	@Authorized<TUserType>('user')
-	@Query(() => [Team])
-	async getTeams (): Promise<Team[]> {
-		return Team.find();
-	}
-
 	@FieldResolver()
 	async teamRecord (@Root() team: Team): Promise<string> {
 		const { teamID } = team;
@@ -54,6 +48,9 @@ export class TeamResolver {
 		const { teamID } = team;
 
 		return Game.createQueryBuilder('G')
+			.innerJoinAndSelect('G.homeTeam', 'HT')
+			.innerJoinAndSelect('G.visitorTeam', 'VT')
+			.leftJoinAndSelect('G.winnerTeam', 'WT')
 			.where('G.GameStatus = :status', { status: 'Final' })
 			.andWhere(
 				new Brackets(qb => {

@@ -29,7 +29,7 @@ import { TUserType } from '../util/types';
 
 @Resolver(Week)
 export class WeekResolver {
-	@Authorized<TUserType>('registered')
+	@Authorized<TUserType>('user')
 	@Query(() => Week)
 	async getWeek (@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
 		if (!week) {
@@ -116,23 +116,7 @@ export class WeekResolver {
 	}
 
 	@FieldResolver()
-	async weekFirstGame (@Root() week: Week): Promise<Game> {
-		return Game.findOneOrFail({
-			order: { gameKickoff: 'ASC', gameID: 'ASC' },
-			where: { gameWeek: week.weekNumber },
-		});
-	}
-
-	@FieldResolver()
 	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
 		return getSeasonStatus();
-	}
-
-	@FieldResolver()
-	async weekLastGame (@Root() week: Week): Promise<Game> {
-		return Game.findOneOrFail({
-			order: { gameKickoff: 'DESC', gameID: 'DESC' },
-			where: { gameWeek: week.weekNumber },
-		});
 	}
 }

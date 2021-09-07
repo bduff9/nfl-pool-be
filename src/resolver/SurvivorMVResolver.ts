@@ -25,7 +25,7 @@ import {
 } from 'type-graphql';
 import { IsNull, Not } from 'typeorm';
 
-import { SurvivorMV, SurvivorPick, Team, User } from '../entity';
+import { SurvivorMV, SurvivorPick, Team } from '../entity';
 import SeasonStatus from '../entity/SeasonStatus';
 import SurvivorStatus from '../entity/SurvivorStatus';
 import { WEEKS_IN_SEASON } from '../util/constants';
@@ -101,11 +101,6 @@ export class SurvivorMVResolver {
 		}
 
 		return SeasonStatus.InProgress;
-	}
-
-	@FieldResolver()
-	async user (@Root() survivorMV: SurvivorMV): Promise<User> {
-		return User.findOneOrFail({ where: { userID: survivorMV.userID } });
 	}
 
 	@FieldResolver()

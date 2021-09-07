@@ -40,25 +40,6 @@ export class TiebreakerResolver {
 	}
 
 	@Authorized<TUserType>('registered')
-	@Query(() => [Tiebreaker])
-	async getTiebreakersForWeek (
-		@Arg('Week', () => Int) week: number,
-		@Ctx() context: TCustomContext,
-	): Promise<Array<Tiebreaker>> {
-		const { user } = context;
-
-		if (!user) throw new Error('Missing user from context');
-
-		const myTiebreaker = await Tiebreaker.findOneOrFail({
-			where: { tiebreakerWeek: week, userID: user.userID },
-		});
-
-		if (!myTiebreaker.tiebreakerHasSubmitted) return [];
-
-		return Tiebreaker.find({ where: { tiebreakerWeek: week } });
-	}
-
-	@Authorized<TUserType>('registered')
 	@Mutation(() => Tiebreaker)
 	async updateMyTiebreakerScore (
 		@Arg('Week', () => Int) week: number,
