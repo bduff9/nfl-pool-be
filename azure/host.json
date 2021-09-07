@@ -1,11 +1,18 @@
 {
   "version": "2.0",
   "logging": {
+    "fileLoggingMode": "always",
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
         "excludedTypes": "Request"
       }
+    },
+    "logLevel": {
+      "default": "Debug",
+      "Host.Results": "Error",
+      "Function": "Trace",
+      "Host.Aggregator": "Trace"
     }
   },
   "extensionBundle": {
