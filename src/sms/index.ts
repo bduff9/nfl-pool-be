@@ -16,7 +16,7 @@
 import { Twilio } from 'twilio';
 
 import { getID } from '../dynamodb';
-import { EmailModel } from '../dynamodb/email';
+import { EmailClass, EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
 import { EMAIL_SUBJECT_PREFIX } from '../util/constants';
 import { log } from '../util/logging';
@@ -41,9 +41,10 @@ export const sendSMS = async (
 	const emailID = getID();
 	const to = sendTo.startsWith('+1') ? sendTo : `+1${sendTo}`;
 	const body = `${EMAIL_SUBJECT_PREFIX}${message}`;
+	let newSMS: EmailClass | null = null;
 
 	try {
-		await EmailModel.create({
+		newSMS = await EmailModel.create({
 			emailID,
 			emailType: type,
 			to: new Set([to]),
@@ -64,7 +65,10 @@ export const sendSMS = async (
 	});
 
 	try {
-		await EmailModel.update({ emailID }, { sms: sentMessage.body });
+		await EmailModel.update(
+			{ emailID, createdAt: newSMS?.createdAt },
+			{ sms: sentMessage.body },
+		);
 	} catch (error) {
 		log.error('Failed to update SMS record in DynamoDB:', { emailID, error });
 	}
