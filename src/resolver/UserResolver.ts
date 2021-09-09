@@ -272,8 +272,9 @@ export class UserResolver {
 		if (!user.userTrusted) {
 			const referredByUser = await User.findOne({
 				where: {
-					userName: data.userReferredByRaw,
 					userID: Not(user.userID),
+					userName: data.userReferredByRaw?.trim(),
+					userTrusted: true,
 				},
 			});
 
