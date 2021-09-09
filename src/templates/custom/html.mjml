@@ -1,23 +1,27 @@
 <mjml owa="desktop" version="4.6.3">
   <mj-head>
-    <mj-title>Week {{ week }} has just finished</mj-title>
-    <mj-preview>{{{formatPreview 'This is an automated email you requested to let you know when the week ends'}}}</mj-preview>
+    <mj-title>{{ subject }}
+    </mj-title>
+    <mj-preview>{{{formatPreview preview }}}</mj-preview>
     {{> styles }}
+    <mj-style>
+    </mj-style>
   </mj-head>
   <mj-body>
     {{> header }}
 
     <mj-section padding="0px" text-align="center">
       <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="10px 0px 10px 0px" font-size="18px" align="center">
+        <mj-text padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
           <p>Hello {{ user.userFirstName }},</p>
-          <p>Week {{ week }} has just ended with
-            {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
-          </p>
-          <p>The final score was {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.</p>
+
+          {{{ body }}}
+
+          <p>Please do not hesitate to let us know if there are any questions or concerns,</p>
+          <p>Brian and Billy</p>
         </mj-text>
         <mj-button align="center" background-color="#15803d" href="{{ domain }}" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
-          <span style="font-size:16px;">Check Your Ranking</span>
+          <span style="font-size:16px;">Go to pool</span>
         </mj-button>
       </mj-column>
     </mj-section>

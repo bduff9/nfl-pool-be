@@ -20,9 +20,6 @@
         <mj-button align="center" background-color="#15803d" href="{{ domain }}/admin/users" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Manage Users</span>
         </mj-button>
-        <mj-text align="center" color="#000000" padding="30px 25px 20px 25px">
-          <span>If you did not request this email you can safely ignore it.</span>
-        </mj-text>
       </mj-column>
     </mj-section>
     {{> footer }}

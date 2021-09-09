@@ -24,6 +24,7 @@ import { formatDueDate } from '../../src/util/dates';
 import { EmailView, previewEmail } from '../../src/util/email';
 import { Sentry } from '../../src/util/error';
 import { log } from '../../src/util/logging';
+import { stripHTMLTags } from '../../src/util/string';
 import {
 	getPaymentDueDate,
 	getPoolCost,
@@ -41,13 +42,8 @@ export default allowCors(
 
 		await waitForConnection();
 
-		const {
-			emailID,
-			emailType,
-			emailFormat = 'html',
-			sendTo,
-			userFirstName = 'MISSING',
-		} = req.query;
+		const { emailID, emailFormat = 'html', sendTo, userFirstName = 'MISSING' } = req.body;
+		const { emailType } = req.query;
 		const user = await getUserFromContext(req);
 		let html = '';
 
@@ -66,6 +62,15 @@ export default allowCors(
 		try {
 			switch (emailType as EmailType) {
 				//TODO: add more email types for preview here
+				case EmailType.custom:
+					html = await previewEmail(EmailType.custom, emailFormat as EmailView, {
+						body: req.body.body,
+						textBody: stripHTMLTags(req.body.body),
+						preview: req.body.preview,
+						subject: req.body.subject,
+						user: { userFirstName },
+					});
+					break;
 				case EmailType.interest:
 				case EmailType.interestFinal:
 					html = await previewEmail(EmailType.interest, emailFormat as EmailView, {

@@ -23,6 +23,7 @@ import mjml2html from 'mjml';
 
 import { getID } from '../dynamodb';
 import { EmailClass, EmailModel } from '../dynamodb/email';
+import sendCustomEmail from '../emails/custom';
 import sendInterestEmail from '../emails/interest';
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
@@ -129,9 +130,13 @@ const emailSender = new Email<{
 export const sendAdminEmail = async (
 	emailType: EmailType,
 	user: Pick<User, 'userEmail' | 'userFirstName'>,
+	data: null | string,
 ): Promise<void> => {
 	switch (emailType) {
 		//TODO: add more email types to send from admin email screen
+		case EmailType.custom:
+			await sendCustomEmail(user, data);
+			break;
 		case EmailType.interest:
 			await sendInterestEmail(user);
 			break;

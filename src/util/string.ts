@@ -14,3 +14,5 @@
  * Home: https://asitewithnoname.com/
  */
 export const base64Encode = (str: string): string => Buffer.from(str).toString('base64');
+
+export const stripHTMLTags = (html: string): string => html.replace(/(<([^>]+)>)/gi, '');
