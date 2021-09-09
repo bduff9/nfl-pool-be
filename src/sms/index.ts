@@ -18,7 +18,7 @@ import { Twilio } from 'twilio';
 import { getID } from '../dynamodb';
 import { EmailClass, EmailModel } from '../dynamodb/email';
 import EmailType from '../entity/EmailType';
-import { EMAIL_SUBJECT_PREFIX } from '../util/constants';
+import { domain, EMAIL_SUBJECT_PREFIX } from '../util/constants';
 import { log } from '../util/logging';
 
 const {
@@ -40,7 +40,7 @@ export const sendSMS = async (
 ): Promise<void> => {
 	const emailID = getID();
 	const to = sendTo.startsWith('+1') ? sendTo : `+1${sendTo}`;
-	const body = `${EMAIL_SUBJECT_PREFIX}${message}`;
+	const body = `${EMAIL_SUBJECT_PREFIX}${message}\n${domain}`;
 	let newSMS: EmailClass | null = null;
 
 	try {
