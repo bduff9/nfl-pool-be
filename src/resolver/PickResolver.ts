@@ -58,6 +58,8 @@ export class PickResolver {
 			.leftJoinAndSelect('P.team', 'T')
 			.where('G.gameWeek = :week', { week })
 			.andWhere('P.userID = :userID', { userID: user.userID })
+			.orderBy('G.gameKickoff', 'ASC')
+			.addOrderBy('G.gameNumber', 'ASC')
 			.getMany();
 	}
 

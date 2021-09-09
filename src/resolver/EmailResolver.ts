@@ -89,6 +89,7 @@ export class EmailResolver {
 		@Arg('SendTo', () => EmailSendTo) sendTo: EmailSendTo,
 		@Arg('UserEmail', () => String, { nullable: true }) userEmail: null | string,
 		@Arg('UserFirstname', () => String, { nullable: true }) userFirstName: null | string,
+		@Arg('ExtraData', () => String, { nullable: true }) data: null | string,
 		@Ctx() context: TCustomContext,
 	): Promise<true> {
 		const { user } = context;
@@ -98,12 +99,13 @@ export class EmailResolver {
 		if (sendTo === EmailSendTo.New) {
 			if (!userEmail) throw new Error('Missing user email address');
 
-			await sendAdminEmail(emailType, { userEmail, userFirstName });
+			await sendAdminEmail(emailType, { userEmail, userFirstName }, data);
 		} else {
 			const message = JSON.stringify({
 				emailType,
 				sendTo,
 				adminUserID: user.userID,
+				data,
 			});
 
 			await addToEmailQueue(message);

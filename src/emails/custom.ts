@@ -13,31 +13,40 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { registerEnumType } from 'type-graphql';
+import { User } from '../entity';
+import EmailType from '../entity/EmailType';
+import { sendEmail } from '../util/email';
+import { log } from '../util/logging';
+import { stripHTMLTags } from '../util/string';
 
-enum EmailType {
-	custom = 'custom',
-	interest = 'interest',
-	interestFinal = 'interestFinal',
-	invalidGamesFound = 'invalidGamesFound',
-	newUser = 'newUser',
-	pickReminder = 'pickReminder',
-	picksSubmitted = 'picksSubmitted',
-	prizesSet = 'prizesSet',
-	quickPick = 'quickPick',
-	quickPickConfirmation = 'quickPickConfirmation',
-	survivorReminder = 'survivorReminder',
-	untrusted = 'untrusted',
-	userTrusted = 'userTrusted',
-	verification = 'verification',
-	weekly = 'weekly',
-	weekEnded = 'weekEnded',
-	weekStarted = 'weekStarted',
-}
+type CustomData = {
+	body: string;
+	preview: string;
+	subject: string;
+};
 
-registerEnumType(EmailType, {
-	description: 'The sent message type',
-	name: 'EmailType',
-});
+const sendCustomEmail = async (
+	user: Pick<User, 'userEmail' | 'userFirstName'>,
+	data: null | string,
+): Promise<void> => {
+	const locals: CustomData = data ? JSON.parse(data) : {};
+	const textBody = stripHTMLTags(locals.body);
 
-export default EmailType;
+	try {
+		await sendEmail({
+			locals: { ...locals, textBody, user },
+			to: [user.userEmail],
+			type: EmailType.custom,
+		});
+	} catch (error) {
+		log.error('Failed to send custom email: ', {
+			error,
+			locals: { ...locals, textBody, user },
+			to: [user.userEmail],
+			type: EmailType.custom,
+		});
+	}
+};
+
+// ts-prune-ignore-next
+export default sendCustomEmail;

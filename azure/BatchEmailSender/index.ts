@@ -26,6 +26,7 @@ type EmailMessage = {
 	emailType: EmailType;
 	sendTo: EmailSendTo;
 	adminUserID: number;
+	data: null | string;
 };
 
 const queueTrigger: AzureFunction = async function (
@@ -38,7 +39,7 @@ const queueTrigger: AzureFunction = async function (
 	context.log('Email queue trigger function processed work item: ', emailMessage);
 
 	try {
-		const { emailType, sendTo } = emailMessage;
+		const { data, emailType, sendTo } = emailMessage;
 		let users: Array<User> = [];
 
 		//TODO: add more email groups
@@ -61,7 +62,7 @@ const queueTrigger: AzureFunction = async function (
 				break;
 		}
 
-		await Promise.allSettled(users.map(user => sendAdminEmail(emailType, user)));
+		await Promise.allSettled(users.map(user => sendAdminEmail(emailType, user, data)));
 
 		context.log(
 			'Email queue trigger function finished processing work item: ',
