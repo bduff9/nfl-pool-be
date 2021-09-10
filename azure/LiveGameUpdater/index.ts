@@ -76,6 +76,15 @@ const timerTrigger: AzureFunction = async (
 	let gamesLeft = games.length;
 	let needMVsUpdated = false;
 
+	if (gamesLeft === 0) {
+		context.log(
+			'No games found from API, check earlier errors in loading them.  Exiting...',
+		);
+		resetLogger();
+
+		return;
+	}
+
 	for (const game of games) {
 		const kickoff = convertEpoch(+game.kickoff);
 
