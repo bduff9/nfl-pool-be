@@ -5,15 +5,15 @@
     <mj-preview>{{{formatPreview preview }}}</mj-preview>
     {{> styles }}
     <mj-style>
-      <mj-include path="../../../node_modules/react-quill/dist/quill.core.css" />
+      <mj-include path="../../../node_modules/react-quill/dist/quill.bubble.css" />
     </mj-style>
   </mj-head>
   <mj-body>
     {{> header }}
 
     <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text css-class="ql-editor" padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
+      <mj-column background-color="#fff" border-radius="10px" css-class="ql-bubble" width="100%">
+        <mj-text align="left" css-class="ql-editor" font-size="18px" line-height="1.2" padding="10px 20px 10px 20px">
           <p>Hello {{ user.userFirstName }},</p>
 
           {{{ body }}}
