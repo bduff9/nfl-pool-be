@@ -114,7 +114,6 @@ export const updateDBGame = async (
 	game: TAPIResponseMatchup,
 	dbGame: Game,
 ): Promise<Game> => {
-	const tieTeam = await getTeamFromDB('TIE');
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
 	const homeTeamID = dbGame.homeTeamID;
 	const visitingTeamID = dbGame.visitorTeamID;
@@ -158,6 +157,8 @@ export const updateDBGame = async (
 			dbGame.winnerTeamID = visitingTeamID;
 			await markWrongSurvivorPicksAsDead(dbGame.gameWeek, homeTeamID);
 		} else {
+			const tieTeam = await getTeamFromDB('TIE');
+
 			dbGame.winnerTeamID = tieTeam.teamID;
 			await markWrongSurvivorPicksAsDead(dbGame.gameWeek, homeTeamID);
 			await markWrongSurvivorPicksAsDead(dbGame.gameWeek, visitingTeamID);

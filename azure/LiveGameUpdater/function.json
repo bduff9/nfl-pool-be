@@ -4,7 +4,7 @@
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 * * * 9-12,1 THURS,SAT,SUN-TUES"
+      "schedule": "0 */5 * * 1,9-12 *"
     }
   ],
   "scriptFile": "../dist/azure/LiveGameUpdater/index.js"

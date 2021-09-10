@@ -5,6 +5,7 @@
     <mj-preview>{{{formatPreview preview }}}</mj-preview>
     {{> styles }}
     <mj-style>
+      <mj-include path="../../../node_modules/react-quill/dist/quill.core.css" />
     </mj-style>
   </mj-head>
   <mj-body>
@@ -12,7 +13,7 @@
 
     <mj-section padding="0px" text-align="center">
       <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
+        <mj-text css-class="ql-editor" padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
           <p>Hello {{ user.userFirstName }},</p>
 
           {{{ body }}}
