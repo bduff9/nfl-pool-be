@@ -115,7 +115,7 @@ const timerTrigger: AzureFunction = async (
 
 	if (needMVsUpdated) {
 		await updateWeeklyMV(currentWeek);
-		await updateOverallMV();
+		await updateOverallMV(currentWeek);
 		await updateSurvivorMV(currentWeek);
 	}
 
