@@ -13,33 +13,78 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, User } from '../entity';
+import { Game, Team, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendQuickPickConfirmationEmail = async (
-	user: User,
+type QuickPickConfirmationTeam = Pick<Team, 'teamCity' | 'teamName' | 'teamPrimaryColor'>;
+type QuickPickConfirmationGame = Pick<Game, 'gameWeek' | 'homeTeamID'> & {
+	homeTeam: QuickPickConfirmationTeam;
+	visitorTeam: QuickPickConfirmationTeam;
+};
+type QuickPickConfirmationUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type QuickPickConfirmationData = EmailNotAllowedLocals & {
+	point: number;
+	quickPickNotSelected: QuickPickConfirmationTeam;
+	quickPickSelected: QuickPickConfirmationTeam;
+	user: QuickPickConfirmationUser;
+	week: number;
+};
+
+const getQuickPickConfirmationData = async (
+	user: QuickPickConfirmationUser,
 	teamID: number,
 	point: number,
-	game: Game,
-): Promise<void> => {
+	game: QuickPickConfirmationGame,
+): Promise<[[string], QuickPickConfirmationData]> => {
 	const [quickPickSelected, quickPickNotSelected] =
 		teamID === game.homeTeamID
 			? [game.homeTeam, game.visitorTeam]
 			: [game.visitorTeam, game.homeTeam];
 
+	return [
+		[user.userEmail],
+		{ point, quickPickNotSelected, quickPickSelected, user, week: game.gameWeek },
+	];
+};
+
+export const previewQuickPickConfirmationEmail = async (
+	user: QuickPickConfirmationUser,
+	teamID: number,
+	point: number,
+	game: QuickPickConfirmationGame,
+	emailFormat: EmailView,
+	overrides?: Partial<QuickPickConfirmationData>,
+): Promise<string> => {
+	const [, locals] = await getQuickPickConfirmationData(user, teamID, point, game);
+	const html = await previewEmail(EmailType.quickPickConfirmation, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendQuickPickConfirmationEmail = async (
+	user: QuickPickConfirmationUser,
+	teamID: number,
+	point: number,
+	game: QuickPickConfirmationGame,
+): Promise<void> => {
+	const [to, locals] = await getQuickPickConfirmationData(user, teamID, point, game);
+
 	try {
 		await sendEmail({
-			locals: { point, quickPickNotSelected, quickPickSelected, user, week: game.gameWeek },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.quickPickConfirmation,
 		});
 	} catch (error) {
-		log.error('Failed to send quick pick email:', {
+		log.error('Failed to send quick pick confirmation email: ', {
 			error,
-			locals: { point, quickPickNotSelected, quickPickSelected, user, week: game.gameWeek },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.quickPickConfirmation,
 		});
 	}

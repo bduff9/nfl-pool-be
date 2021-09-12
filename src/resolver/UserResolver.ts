@@ -123,7 +123,7 @@ export class UserResolver {
 
 		if (!user) return [];
 
-		return getUserAlerts(user);
+		return getUserAlerts(user.userID);
 	}
 
 	@Authorized<TUserType>('admin')

@@ -17,13 +17,27 @@ import { LessThan } from 'typeorm';
 
 import { SurvivorMV, User, WeeklyMV } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
+import { APINewsArticle, getArticlesForWeek } from '../util/newsArticles';
 import { addOrdinal } from '../util/numbers';
 import { getSurvivorPoolStatus } from '../util/survivor';
 import { getUserAlerts } from '../util/user';
 
-const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
+type WeeklyUser = Pick<User, 'userID' | 'userEmail' | 'userFirstName'>;
+type WeeklyData = EmailNotAllowedLocals & {
+	articles: Array<APINewsArticle>;
+	poolUpdates: Array<string>;
+	survivorUpdates: Array<string>;
+	user: WeeklyUser;
+	userMessages: Array<string>;
+	week: number;
+};
+
+const getWeeklyEmailData = async (
+	user: WeeklyUser,
+	week: number,
+): Promise<[[string], WeeklyData]> => {
 	const userMessages: Array<string> = [];
 	const poolUpdates: Array<string> = [];
 	const survivorUpdates: Array<string> = [];
@@ -37,7 +51,7 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 		relations: ['user'],
 		where: { isAliveOverall: false, weeksAlive: week },
 	});
-	const alerts = await getUserAlerts(user);
+	const alerts = await getUserAlerts(user.userID);
 
 	if (myPoolRank.rank < 3) {
 		userMessages.push(
@@ -89,17 +103,43 @@ const sendWeeklyEmail = async (user: User, week: number): Promise<void> => {
 		);
 	}
 
+	const articles = await getArticlesForWeek(week);
+
+	return [
+		[user.userEmail],
+		{ articles, poolUpdates, survivorUpdates, user, userMessages, week },
+	];
+};
+
+export const previewWeeklyEmail = async (
+	user: WeeklyUser,
+	week: number,
+	emailFormat: EmailView,
+	overrides?: Partial<WeeklyData>,
+): Promise<string> => {
+	const [, locals] = await getWeeklyEmailData(user, week);
+	const html = await previewEmail(EmailType.weekly, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendWeeklyEmail = async (user: WeeklyUser, week: number): Promise<void> => {
+	const [to, locals] = await getWeeklyEmailData(user, week);
+
 	try {
 		await sendEmail({
-			locals: { poolUpdates, survivorUpdates, user, userMessages, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekly,
 		});
 	} catch (error) {
-		log.error('Failed to send weekly email:', {
+		log.error('Failed to send weekly email: ', {
 			error,
-			locals: { poolUpdates, survivorUpdates, user, userMessages, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekly,
 		});
 	}

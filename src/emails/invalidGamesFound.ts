@@ -18,21 +18,28 @@ import { parseTeamsFromApi } from '../api/util';
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { convertEpoch } from '../util/dates';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-type TAdminMessage = { game: string; reason: string };
+type AdminMessage = { game: string; reason: string };
+type InvalidGamesFoundUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type InvalidGamesFoundData = EmailNotAllowedLocals & {
+	admin: InvalidGamesFoundUser;
+	messages: Array<AdminMessage>;
+	week: number;
+};
 
-const sendInvalidGamesFoundEmail = async (
+const getInvalidGamesFoundData = async (
+	admin: InvalidGamesFoundUser,
 	week: number,
 	invalidAPIGames: Array<TAPIResponseMatchup>,
 	invalidDBGames: Array<Game>,
-): Promise<void> => {
-	const messages: TAdminMessage[] = [];
+): Promise<[[string], InvalidGamesFoundData]> => {
+	const messages: Array<AdminMessage> = [];
 
 	invalidAPIGames.forEach(game => {
 		const [home, visitor] = parseTeamsFromApi(game.team);
-		const message: TAdminMessage = {
+		const message: AdminMessage = {
 			game: `${visitor.id} @ ${home.id} starting at ${convertEpoch(+game.kickoff)}`,
 			reason: 'Game is found in API but not in database',
 		};
@@ -41,7 +48,7 @@ const sendInvalidGamesFoundEmail = async (
 	});
 
 	invalidDBGames.forEach(game => {
-		const message: TAdminMessage = {
+		const message: AdminMessage = {
 			game: `${game.visitorTeam.teamShortName} @ ${game.homeTeam.teamShortName} starting at ${game.gameKickoff}`,
 			reason: 'Game is found in database but not in API',
 		};
@@ -49,23 +56,58 @@ const sendInvalidGamesFoundEmail = async (
 		messages.push(message);
 	});
 
+	return [[admin.userEmail], { admin, messages, week }];
+};
+
+export const previewInvalidGamesFoundEmail = async (
+	admin: InvalidGamesFoundUser,
+	week: number,
+	invalidAPIGames: Array<TAPIResponseMatchup>,
+	invalidDBGames: Array<Game>,
+	emailFormat: EmailView,
+	overrides?: Partial<InvalidGamesFoundData>,
+): Promise<string> => {
+	const [, locals] = await getInvalidGamesFoundData(
+		admin,
+		week,
+		invalidAPIGames,
+		invalidDBGames,
+	);
+	const html = await previewEmail(EmailType.invalidGamesFound, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendInvalidGamesFoundEmail = async (
+	week: number,
+	invalidAPIGames: Array<TAPIResponseMatchup>,
+	invalidDBGames: Array<Game>,
+): Promise<void> => {
 	const admins = await User.find({ where: { userIsAdmin: true } });
 
-	await Promise.all(
+	await Promise.allSettled(
 		admins.map(async admin => {
-			const { userEmail: email } = admin;
+			const [to, locals] = await getInvalidGamesFoundData(
+				admin,
+				week,
+				invalidAPIGames,
+				invalidDBGames,
+			);
 
 			try {
 				await sendEmail({
-					locals: { messages, week },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.invalidGamesFound,
 				});
 			} catch (error) {
-				log.error('Failed to send new user email:', {
+				log.error('Failed to send invalid games found email: ', {
 					error,
-					locals: { admin, messages, week },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.invalidGamesFound,
 				});
 			}

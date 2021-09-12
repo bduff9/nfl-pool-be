@@ -13,6 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { log } from './logging';
+
 export const addOrdinal = (n: number): string => {
 	const remainder10 = n % 10;
 	const remainder100 = n % 100;
@@ -27,3 +29,13 @@ export const addOrdinal = (n: number): string => {
 };
 
 export const get2DigitNumber = (value: number): string => `${value}`.padStart(2, '0');
+
+export const getRandomInteger = (from = 0, to = 10): number => {
+	if (to <= from) {
+		log.error({ text: 'Invalid to passed in: ', from, to });
+
+		return 0;
+	}
+
+	return Math.floor(Math.random() * (to - from)) + from;
+};

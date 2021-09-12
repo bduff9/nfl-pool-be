@@ -17,20 +17,29 @@ import 'reflect-metadata';
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
+import { ParsedData, previewCustomEmail } from '../../src/emails/custom';
+import { previewInterestEmail } from '../../src/emails/interest';
+import { previewInvalidGamesFoundEmail } from '../../src/emails/invalidGamesFound';
+import { previewNewUserEmail } from '../../src/emails/newUser';
+import { previewPickReminderEmail } from '../../src/emails/pickReminder';
+import { previewPicksSubmittedEmail } from '../../src/emails/picksSubmitted';
+import { previewPrizesSetEmail } from '../../src/emails/prizesSet';
+import { previewQuickPickEmail } from '../../src/emails/quickPick';
+import { previewQuickPickConfirmationEmail } from '../../src/emails/quickPickConfirmation';
+import { previewSurvivorReminderEmail } from '../../src/emails/survivorReminder';
+import { previewUntrustedEmail } from '../../src/emails/untrusted';
+import { previewUserTrustedEmail } from '../../src/emails/userTrusted';
+import { previewVerificationEmail } from '../../src/emails/verification';
+import { previewWeekEndedEmail } from '../../src/emails/weekEnded';
+import { previewWeeklyEmail } from '../../src/emails/weekly';
+import { previewWeekStartedEmail } from '../../src/emails/weekStarted';
 import EmailType from '../../src/entity/EmailType';
 import { allowCors, getUserFromContext } from '../../src/util/auth';
+import { domain } from '../../src/util/constants';
 import { waitForConnection } from '../../src/util/database';
-import { formatDueDate } from '../../src/util/dates';
-import { EmailView, previewEmail } from '../../src/util/email';
+import { EmailView } from '../../src/util/email';
 import { Sentry } from '../../src/util/error';
 import { log } from '../../src/util/logging';
-import { stripHTMLTags } from '../../src/util/string';
-import {
-	getPaymentDueDate,
-	getPoolCost,
-	getSurvivorCost,
-	getSystemYear,
-} from '../../src/util/systemValue';
 
 // ts-prune-ignore-next
 export default allowCors(
@@ -42,7 +51,12 @@ export default allowCors(
 
 		await waitForConnection();
 
-		const { emailID, emailFormat = 'html', sendTo, userFirstName = 'MISSING' } = req.body;
+		const {
+			emailFormat = 'html',
+			userEmail = '',
+			userFirstName = 'MISSING',
+			userID = 1,
+		} = req.body;
 		const { emailType } = req.query;
 		const user = await getUserFromContext(req);
 		let html = '';
@@ -61,30 +75,159 @@ export default allowCors(
 
 		try {
 			switch (emailType as EmailType) {
-				//TODO: add more email types for preview here
 				case EmailType.custom:
-					html = await previewEmail(EmailType.custom, emailFormat as EmailView, {
-						body: req.body.body,
-						textBody: stripHTMLTags(req.body.body),
-						preview: req.body.preview,
-						subject: req.body.subject,
-						user: { userFirstName },
-					});
+					html = await previewCustomEmail(
+						{ userEmail, userFirstName },
+						JSON.stringify({
+							body: req.body.body,
+							preview: req.body.preview,
+							subject: req.body.subject,
+						} as ParsedData),
+						emailFormat as EmailView,
+						{},
+					);
 					break;
 				case EmailType.interest:
 				case EmailType.interestFinal:
-					html = await previewEmail(EmailType.interest, emailFormat as EmailView, {
-						emailID,
-						isFinal: emailType === EmailType.interestFinal,
-						poolYear: await getSystemYear(),
-						payByDate: formatDueDate(await getPaymentDueDate()),
-						poolCost: await getPoolCost(),
-						sendTo,
-						survivorCost: await getSurvivorCost(),
-						user: {
+					html = await previewInterestEmail(
+						{ userEmail, userFirstName },
+						emailType === EmailType.interestFinal,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.invalidGamesFound:
+					html = await previewInvalidGamesFoundEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						JSON.parse(req.body.invalidAPIGames ?? '[]'),
+						JSON.parse(req.body.invalidDBGames ?? '[]'),
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.newUser:
+					html = await previewNewUserEmail(
+						{ userEmail, userFirstName },
+						{
+							userEmail,
 							userFirstName,
+							userID,
+							userLastName: req.body.userLastName ?? 'userLastName',
+							userReferredByRaw: req.body.userReferredByRaw ?? 'userReferredByRaw',
+							userTeamName: req.body.userTeamName ?? 'userTeamName',
 						},
-					});
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.pickReminder:
+					html = await previewPickReminderEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						req.body.hoursLeft ?? 24,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.picksSubmitted:
+					html = await previewPicksSubmittedEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						JSON.parse(req.body.picks ?? '[]'),
+						req.body.tiebreakerLastScore ?? 33,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.prizesSet:
+					html = await previewPrizesSetEmail(
+						{ userEmail, userFirstName },
+						JSON.parse(req.body.weeklyPrizes ?? '[]'),
+						JSON.parse(req.body.overallPrizes ?? '[]'),
+						JSON.parse(req.body.survivorPrizes ?? '[]'),
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.quickPick:
+					html = await previewQuickPickEmail(
+						{ userEmail, userFirstName, userID },
+						req.body.week ?? 1,
+						req.body.hoursLeft ?? 24,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.quickPickConfirmation:
+					html = await previewQuickPickConfirmationEmail(
+						{ userEmail, userFirstName },
+						req.body.teamID ?? 1,
+						req.body.point ?? 1,
+						JSON.parse(req.body.game ?? '{}'),
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.survivorReminder:
+					html = await previewSurvivorReminderEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						req.body.hoursLeft ?? 24,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.untrusted:
+					html = await previewUntrustedEmail(
+						{ userEmail, userFirstName },
+						{
+							userName: req.body.userName ?? 'userName',
+							userEmail,
+							userReferredByRaw: req.body.userReferredByRaw ?? 'userReferredByRaw',
+						},
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.userTrusted:
+					html = await previewUserTrustedEmail(
+						{ userEmail, userFirstName },
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.verification:
+					html = await previewVerificationEmail(
+						userEmail,
+						req.body.url ?? domain,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.weekEnded:
+					html = await previewWeekEndedEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.weekStarted:
+					html = await previewWeekStartedEmail(
+						{ userEmail, userFirstName },
+						req.body.week ?? 1,
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.weekly:
+					html = await previewWeeklyEmail(
+						{ userEmail, userID, userFirstName },
+						req.body.week ?? 1,
+						emailFormat as EmailView,
+						{},
+					);
 					break;
 				default:
 					log.error('Invalid query params passed:', { emailType });

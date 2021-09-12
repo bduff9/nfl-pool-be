@@ -15,32 +15,75 @@
  */
 import { User, UserHistory } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendNewUserEmail = async (newUser: User): Promise<void> => {
+type NewUserAdmin = Pick<User, 'userEmail' | 'userFirstName'>;
+type NewUser = Pick<
+	User,
+	| 'userID'
+	| 'userEmail'
+	| 'userFirstName'
+	| 'userLastName'
+	| 'userTeamName'
+	| 'userReferredByRaw'
+>;
+type NewUserData = EmailNotAllowedLocals & {
+	admin: NewUserAdmin;
+	isReturning: boolean;
+	newUser: NewUser;
+	yearsPlayed: string;
+};
+
+const getNewUserData = async (
+	admin: NewUserAdmin,
+	newUser: NewUser,
+): Promise<[[string], NewUserData]> => {
 	const yearsPlayedResult = await UserHistory.find({ where: { userID: newUser.userID } });
 	const yearsPlayed = yearsPlayedResult
 		.map(({ userHistoryYear }) => userHistoryYear)
 		.slice(0, -1);
 	const isReturning = yearsPlayed.length > 0;
+
+	return [
+		[admin.userEmail],
+		{ admin, isReturning, newUser, yearsPlayed: yearsPlayed.join(', ') },
+	];
+};
+
+export const previewNewUserEmail = async (
+	admin: NewUserAdmin,
+	newUser: NewUser,
+	emailFormat: EmailView,
+	overrides?: Partial<NewUserData>,
+): Promise<string> => {
+	const [, locals] = await getNewUserData(admin, newUser);
+	const html = await previewEmail(EmailType.newUser, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendNewUserEmail = async (newUser: NewUser): Promise<void> => {
 	const admins = await User.find({ where: { userIsAdmin: true } });
 
-	await Promise.all(
+	await Promise.allSettled(
 		admins.map(async admin => {
-			const { userEmail: email } = admin;
+			const [to, locals] = await getNewUserData(admin, newUser);
 
 			try {
 				await sendEmail({
-					locals: { admin, isReturning, newUser, yearsPlayed: yearsPlayed.join(', ') },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.newUser,
 				});
 			} catch (error) {
-				log.error('Failed to send new user email:', {
+				log.error('Failed to send new user email: ', {
 					error,
-					locals: { admin, isReturning, newUser, yearsPlayed },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.newUser,
 				});
 			}

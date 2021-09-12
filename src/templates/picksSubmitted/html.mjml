@@ -6,7 +6,7 @@
     <mj-style inline="inline">
       .pickSubmit ul {
         list-style-type: none;
-        padding-left: 0px;
+        padding-left: 0;
         margin-top: 2px;
       }
 
@@ -28,8 +28,8 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
         <mj-text css-class="pickSubmit" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
           <p>Hi {{ user.userFirstName }},</p>
           <p>This is a confirmation that your week {{ week }} picks have been submitted.</p>
@@ -39,10 +39,10 @@
               <li>{{ this.pickPoints }} - {{#if this.teamID}}{{ this.team.teamCity }} {{ this.team.teamName }}{{else}}Missed Pick{{/if}}</li>
             {{/each}}
           </ul>
-          <p>Tiebreaker Score: {{ tiebreaker.tiebreakerLastScore }}</p>
+          <p>Tiebreaker Score: {{ tiebreakerLastScore }}</p>
           <p>You can also use the link below to view everyone's submitted picks.</p>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/viewall" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/viewall" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">View All Picks</span>
         </mj-button>
       </mj-column>

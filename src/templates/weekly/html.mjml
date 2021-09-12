@@ -6,7 +6,7 @@
     <mj-style inline="inline">
       .weekly ul {
         list-style-type: none;
-        padding-left: 0px;
+        padding-left: 0;
         margin-top: 2px;
       }
 
@@ -28,8 +28,8 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
+    <mj-section background-color="#fff" border-radius="0 0 10px 10px" padding="0" text-align="center">
+      <mj-column background-color="#fff" width="100%">
         <mj-text css-class="weekly" padding="30px 5px 15px 5px" font-size="18px" align="center" line-height="1.4">
           <h3 style="margin-top: 10px;">{{ user.userFirstName }}'s Messages</h3>
           <ul class="messages">
@@ -37,14 +37,39 @@
               <li>{{ this }}</li>
             {{/each}}
           </ul>
+        </mj-text>
+      </mj-column>
 
+      <mj-column background-color="#fff" width="100%">
+        <mj-text align="center" font-size="18px" line-height="1.4">
+          <h3>NFL Updates</h3>
+        </mj-text>
+      </mj-column>
+
+      {{#each articles}}
+        <mj-column background-color="#fff" vertical-align="top" width="33%">
+          <mj-image fluid-on-mobile="true" padding="0 3px" src="{{ this.urlToImage }}" />
+          <mj-text align="center">
+            <h4>{{ this.title }}</h4>
+            <p>{{stripCharacterCount this.content}}<a href="{{ this.url }}">Read More</a></p>
+            <p style="font-size: smaller; color: #bbb;">{{relativeTime this.publishedAt}}</p>
+          </mj-text>
+        </mj-column>
+      {{/each}}
+
+      <mj-column background-color="#fff" width="100%">
+        <mj-text css-class="weekly" padding="30px 5px 15px 5px" font-size="18px" align="center" line-height="1.4">
           <h3>Confidence Pool Update</h3>
           <ul>
             {{#each poolUpdates}}
               <li>{{ this }}</li>
             {{/each}}
           </ul>
+        </mj-text>
+      </mj-column>
 
+      <mj-column background-color="#fff" width="100%">
+        <mj-text css-class="weekly" padding="30px 5px 15px 5px" font-size="18px" align="center" line-height="1.4">
           <h3>Survivor Pool Update</h3>
           <ul>
             {{#each survivorUpdates}}
@@ -52,7 +77,10 @@
             {{/each}}
           </ul>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+      </mj-column>
+
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">View Full Standings</span>
         </mj-button>
       </mj-column>

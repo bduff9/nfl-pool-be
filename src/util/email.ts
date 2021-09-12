@@ -32,9 +32,16 @@ import {
 	AWS_AK_ID,
 	AWS_R,
 	AWS_SAK_ID,
+	DAYS_IN_WEEK,
 	domain,
 	EMAIL_FROM,
 	EMAIL_SUBJECT_PREFIX,
+	HOURS_IN_DAY,
+	MILLISECONDS_IN_SECOND,
+	MINUTES_IN_HOUR,
+	MONTHS_IN_YEAR,
+	SECONDS_IN_MINUTE,
+	WEEKS_IN_MONTH,
 } from './constants';
 import { log } from './logging';
 
@@ -67,6 +74,66 @@ const formatPreview = (previewText: string): string => {
 	return formatted;
 };
 
+const loadExternalCSSFile = (cssPath: string): string => {
+	const cssFile = path.join(__dirname, '..', '..', cssPath);
+	const file = readFileSync(cssFile);
+
+	return file.toString();
+};
+
+const relativeTime = (dateStr: string): string => {
+	const date = new Date(dateStr);
+	const formatter = new Intl.RelativeTimeFormat('en', {
+		numeric: 'auto',
+		style: 'long',
+	});
+	let diff = (date.getTime() - new Date().getTime()) / MILLISECONDS_IN_SECOND;
+
+	if (Math.abs(diff) < SECONDS_IN_MINUTE) {
+		return formatter.format(diff, 'second');
+	}
+
+	diff /= SECONDS_IN_MINUTE; // minutes
+
+	if (Math.abs(diff) < MINUTES_IN_HOUR) {
+		return formatter.format(Math.round(diff), 'minute');
+	}
+
+	diff /= MINUTES_IN_HOUR; // hours
+
+	if (Math.abs(diff) < HOURS_IN_DAY) {
+		return formatter.format(Math.round(diff), 'hour');
+	}
+
+	diff /= HOURS_IN_DAY; // days
+
+	if (Math.abs(diff) < DAYS_IN_WEEK) {
+		return formatter.format(Math.round(diff), 'day');
+	}
+
+	diff /= DAYS_IN_WEEK; // weeks
+
+	if (Math.abs(diff) < WEEKS_IN_MONTH) {
+		return formatter.format(Math.round(diff), 'week');
+	}
+
+	diff /= WEEKS_IN_MONTH; // years
+
+	if (Math.abs(diff) < MONTHS_IN_YEAR) {
+		return formatter.format(Math.round(diff), 'month');
+	}
+
+	diff /= MONTHS_IN_YEAR;
+
+	return formatter.format(Math.round(diff), 'year');
+};
+
+const stripCharacterCount = (text: string): string => {
+	const index = text.search(/\[.+\]/);
+
+	return text.substring(0, index);
+};
+
 const getPartials = (): Record<
 	string,
 	HandlebarsTemplateDelegate<Record<string, unknown>>
@@ -95,7 +162,13 @@ const renderMJML = async <Data = Record<string, unknown>>(
 	const templateStr = templateBuffer.toString();
 	const template = Handlebars.compile<Data>(templateStr);
 	const mjml = template(locals, {
-		helpers: { concat, formatPreview },
+		helpers: {
+			concat,
+			formatPreview,
+			loadExternalCSSFile,
+			relativeTime,
+			stripCharacterCount,
+		},
 		partials: getPartials(),
 	});
 	const { errors, html } = view.endsWith('html')
@@ -151,10 +224,12 @@ export const sendAdminEmail = async (
 
 export type EmailView = 'html' | 'subject' | 'text';
 
-type EmailLocals = Record<string, unknown> & {
+export type EmailNotAllowedLocals = {
 	browserLink?: never;
 	domain?: never;
 };
+
+type EmailLocals = Record<string, unknown> & EmailNotAllowedLocals;
 
 export const previewEmail = async (
 	type: EmailType,

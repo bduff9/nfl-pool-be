@@ -15,25 +15,58 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
+type SurvivorReminderUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type SurvivorReminderData = EmailNotAllowedLocals & {
+	hoursLeft: number;
+	user: SurvivorReminderUser;
+	week: number;
+};
+
+const getSurvivorReminderData = async (
+	user: SurvivorReminderUser,
+	week: number,
+	hoursLeft: number,
+): Promise<[[string], SurvivorReminderData]> => {
+	return [[user.userEmail], { hoursLeft, user, week }];
+};
+
+export const previewSurvivorReminderEmail = async (
+	user: SurvivorReminderUser,
+	week: number,
+	hoursLeft: number,
+	emailFormat: EmailView,
+	overrides?: Partial<SurvivorReminderData>,
+): Promise<string> => {
+	const [, locals] = await getSurvivorReminderData(user, week, hoursLeft);
+	const html = await previewEmail(EmailType.survivorReminder, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
 const sendSurvivorReminderEmail = async (
-	user: User,
+	user: SurvivorReminderUser,
 	week: number,
 	hoursLeft: number,
 ): Promise<void> => {
+	const [to, locals] = await getSurvivorReminderData(user, week, hoursLeft);
+
 	try {
 		await sendEmail({
-			locals: { hoursLeft, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.survivorReminder,
 		});
 	} catch (error) {
-		log.error('Failed to send survivor reminder email:', {
+		log.error('Failed to send survivor reminder email: ', {
 			error,
-			locals: { hoursLeft, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.survivorReminder,
 		});
 	}

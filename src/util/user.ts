@@ -71,9 +71,9 @@ export const getAllRegisteredUsers = async (): Promise<Array<User>> => {
 	return users;
 };
 
-export const getUserAlerts = async (user: User): Promise<Array<string>> => {
+export const getUserAlerts = async (userID: number): Promise<Array<string>> => {
 	const alerts: Array<string> = [];
-	const userBalance = await getUserPayments(user.userID);
+	const userBalance = await getUserPayments(userID);
 
 	if (userBalance < 0) {
 		const paymentDueDate = await getPaymentDueDate();

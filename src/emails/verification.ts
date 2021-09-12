@@ -15,25 +15,57 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendVerificationEmail = async (email: string, url: string): Promise<void> => {
+type VerificationUser = Pick<User, 'userEmail' | 'userFirstName' | 'userLastName'>;
+type VerificationData = EmailNotAllowedLocals & {
+	hasName: boolean;
+	host: string;
+	url: string;
+	user: VerificationUser;
+};
+
+const getVerificationData = async (
+	email: string,
+	url: string,
+): Promise<[[string], VerificationData]> => {
 	const host = new URL(url).hostname;
-	const user = await User.findOne({ where: { userEmail: email } });
+	const user = await User.findOneOrFail({ where: { userEmail: email } });
 	const hasName = !!user?.userFirstName && !!user?.userLastName;
+
+	return [[user.userEmail], { hasName, host, url, user }];
+};
+
+export const previewVerificationEmail = async (
+	email: string,
+	url: string,
+	emailFormat: EmailView,
+	overrides?: Partial<VerificationData>,
+): Promise<string> => {
+	const [, locals] = await getVerificationData(email, url);
+	const html = await previewEmail(EmailType.verification, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendVerificationEmail = async (email: string, url: string): Promise<void> => {
+	const [to, locals] = await getVerificationData(email, url);
 
 	try {
 		await sendEmail({
-			locals: { email, hasName, host, url, user },
-			to: [email],
+			locals,
+			to,
 			type: EmailType.verification,
 		});
 	} catch (error) {
-		log.error('Failed to send verification email:', {
+		log.error('Failed to send verification email: ', {
 			error,
-			locals: { email, hasName, host, url, user },
-			to: [email],
+			locals,
+			to,
 			type: EmailType.verification,
 		});
 	}

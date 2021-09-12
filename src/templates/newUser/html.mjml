@@ -15,8 +15,8 @@
   </mj-head>
   <mj-body>
     {{> header }}
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
         <mj-text css-class="userInfo" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
           <p>Hello {{ admin.userFirstName }},</p>
           <p>This is just a notice that a {{#if isReturning}}returning{{else}}new{{/if}} user has just registered with the following information:</p>
@@ -32,7 +32,7 @@
           </ul>
           <p>You can maintain this user below:</p>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/admin/users" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/admin/users" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Manage Users</span>
         </mj-button>
       </mj-column>

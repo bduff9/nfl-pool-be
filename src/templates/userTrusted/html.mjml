@@ -9,8 +9,8 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
         <mj-text css-class="userTrusted" padding="30px 25px 15px 25px" font-size="17px" align="left" line-height="1.4">
           <p>Hi {{ user.userFirstName }},</p>
           <p>This is a notification that your request to register for the {{ year }} NFL Confidence Pool has just been approved by an admin.</p>
@@ -19,7 +19,7 @@
           <p>You can reply to this email if you have any questions, and the pool can be accessed at the link below.</p>
           <p>Best of luck to you!</p>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Visit the Pool</span>
         </mj-button>
       </mj-column>

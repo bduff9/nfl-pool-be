@@ -13,29 +13,64 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, User } from '../entity';
+import { Game, Team, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendWeekStartedEmail = async (user: User, week: number): Promise<void> => {
-	const game = await Game.findOneOrFail({
+type WeekStartedTeam = Pick<
+	Team,
+	'teamCity' | 'teamName' | 'teamPrimaryColor' | 'teamSecondaryColor'
+>;
+type WeekStartedUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type WeekStartedData = EmailNotAllowedLocals & {
+	homeTeam: WeekStartedTeam;
+	user: WeekStartedUser;
+	visitorTeam: WeekStartedTeam;
+	week: number;
+};
+
+const getWeekStartedData = async (
+	user: WeekStartedUser,
+	week: number,
+): Promise<[[string], WeekStartedData]> => {
+	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
 		relations: ['homeTeam', 'visitorTeam'],
 		where: { gameNumber: 1, gameWeek: week },
 	});
-	const { homeTeam, visitorTeam } = game;
+
+	return [[user.userEmail], { homeTeam, user, visitorTeam, week }];
+};
+
+export const previewWeekStartedEmail = async (
+	user: WeekStartedUser,
+	week: number,
+	emailFormat: EmailView,
+	overrides?: Partial<WeekStartedData>,
+): Promise<string> => {
+	const [, locals] = await getWeekStartedData(user, week);
+	const html = await previewEmail(EmailType.weekStarted, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendWeekStartedEmail = async (user: WeekStartedUser, week: number): Promise<void> => {
+	const [to, locals] = await getWeekStartedData(user, week);
 
 	try {
 		await sendEmail({
-			locals: { game, homeTeam, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekStarted,
 		});
 	} catch (error) {
-		log.error('Failed to send week started email:', {
+		log.error('Failed to send week started email: ', {
 			error,
-			locals: { game, homeTeam, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekStarted,
 		});
 	}

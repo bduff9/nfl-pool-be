@@ -13,28 +13,72 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Pick, Tiebreaker, User } from '../entity';
+import { Pick as PoolPick, Team, Tiebreaker, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendPicksSubmittedEmail = async (
-	user: User,
+type PicksSubmittedPick = Pick<PoolPick, 'pickPoints' | 'teamID'> & {
+	team: null | Pick<Team, 'teamCity' | 'teamName'>;
+};
+type PicksSubmittedUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type PicksSubmittedData = EmailNotAllowedLocals & {
+	picks: Array<PicksSubmittedPick>;
+	tiebreakerLastScore: number;
+	user: PicksSubmittedUser;
+	week: number;
+};
+
+const getPicksSubmittedData = async (
+	user: PicksSubmittedUser,
 	week: number,
-	picks: Array<Pick>,
+	picks: Array<PicksSubmittedPick>,
+	tiebreakerLastScore: number,
+): Promise<[[string], PicksSubmittedData]> => {
+	return [[user.userEmail], { picks, tiebreakerLastScore, user, week }];
+};
+
+export const previewPicksSubmittedEmail = async (
+	user: PicksSubmittedUser,
+	week: number,
+	picks: Array<PicksSubmittedPick>,
+	tiebreakerLastScore: number,
+	emailFormat: EmailView,
+	overrides?: Partial<PicksSubmittedData>,
+): Promise<string> => {
+	const [, locals] = await getPicksSubmittedData(user, week, picks, tiebreakerLastScore);
+	const html = await previewEmail(EmailType.picksSubmitted, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendPicksSubmittedEmail = async (
+	user: PicksSubmittedUser,
+	week: number,
+	picks: Array<PicksSubmittedPick>,
 	tiebreaker: Tiebreaker,
 ): Promise<void> => {
+	const [to, locals] = await getPicksSubmittedData(
+		user,
+		week,
+		picks,
+		tiebreaker.tiebreakerLastScore,
+	);
+
 	try {
 		await sendEmail({
-			locals: { picks, tiebreaker, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.picksSubmitted,
 		});
 	} catch (error) {
-		log.error('Failed to send picks submitted email:', {
+		log.error('Failed to send picks submitted email: ', {
 			error,
-			locals: { picks, tiebreaker, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.picksSubmitted,
 		});
 	}
