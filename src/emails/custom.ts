@@ -15,34 +15,61 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { stripHTMLTags } from '../util/string';
 
-type CustomData = {
+type CustomUser = Pick<User, 'userEmail' | 'userFirstName'>;
+export type ParsedData = {
 	body: string;
 	preview: string;
 	subject: string;
 };
+type CustomData = EmailNotAllowedLocals &
+	ParsedData & {
+		textBody: string;
+		user: CustomUser;
+	};
 
-const sendCustomEmail = async (
-	user: Pick<User, 'userEmail' | 'userFirstName'>,
+const getCustomEmailData = (
+	user: CustomUser,
 	data: null | string,
-): Promise<void> => {
-	const locals: CustomData = data ? JSON.parse(data) : {};
+): [[string], CustomData] => {
+	const locals: ParsedData = data ? JSON.parse(data) : {};
 	const textBody = stripHTMLTags(locals.body);
+
+	return [[user.userEmail], { ...locals, textBody, user }];
+};
+
+export const previewCustomEmail = async (
+	user: CustomUser,
+	data: null | string,
+	emailFormat: EmailView,
+	overrides?: Partial<CustomData>,
+): Promise<string> => {
+	const [, locals] = getCustomEmailData(user, data);
+	const html = await previewEmail(EmailType.custom, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendCustomEmail = async (user: CustomUser, data: null | string): Promise<void> => {
+	const [to, locals] = getCustomEmailData(user, data);
 
 	try {
 		await sendEmail({
-			locals: { ...locals, textBody, user },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.custom,
 		});
 	} catch (error) {
 		log.error('Failed to send custom email: ', {
 			error,
-			locals: { ...locals, textBody, user },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.custom,
 		});
 	}

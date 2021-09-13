@@ -15,27 +15,56 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
+
+type UntrustedAdmin = Pick<User, 'userEmail' | 'userFirstName'>;
+type UntrustedUser = Pick<User, 'userEmail' | 'userName' | 'userReferredByRaw'>;
+type UntrustedData = EmailNotAllowedLocals & {
+	admin: UntrustedAdmin;
+	newUser: UntrustedUser;
+};
+
+const getUntrustedData = async (
+	admin: UntrustedAdmin,
+	newUser: UntrustedUser,
+): Promise<[[string], UntrustedData]> => {
+	return [[admin.userEmail], { admin, newUser }];
+};
+
+export const previewUntrustedEmail = async (
+	admin: UntrustedAdmin,
+	newUser: UntrustedUser,
+	emailFormat: EmailView,
+	overrides?: Partial<UntrustedData>,
+): Promise<string> => {
+	const [, locals] = await getUntrustedData(admin, newUser);
+	const html = await previewEmail(EmailType.untrusted, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
 
 const sendUntrustedEmail = async (newUser: User): Promise<void> => {
 	const admins = await User.find({ where: { userIsAdmin: true } });
 
-	await Promise.all(
+	await Promise.allSettled(
 		admins.map(async admin => {
-			const { userEmail: email } = admin;
+			const [to, locals] = await getUntrustedData(admin, newUser);
 
 			try {
 				await sendEmail({
-					locals: { admin, newUser },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.untrusted,
 				});
 			} catch (error) {
-				log.error('Failed to send untrusted email:', {
+				log.error('Failed to send untrusted email: ', {
 					error,
-					locals: { admin, newUser },
-					to: [email],
+					locals,
+					to,
 					type: EmailType.untrusted,
 				});
 			}

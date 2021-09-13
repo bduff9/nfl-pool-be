@@ -14,21 +14,23 @@
  * Home: https://asitewithnoname.com/
  */
 export const {
+	API_NEWS_KEY,
 	AWS_AK_ID,
 	AWS_R,
 	AWS_SAK_ID,
 	AzureWebJobsStorage,
-	containerName,
 	EMAIL_FROM,
 	EMAIL_QUEUE_NAME,
+	// GNEWS_KEY,
 	NEXT_PUBLIC_SENTRY_DSN,
 	VERCEL_ENV,
+	containerName,
 	database,
+	dbuser,
 	domain,
 	host,
 	password,
 	port,
-	dbuser,
 } = process.env;
 
 /**
@@ -67,6 +69,16 @@ export const MILLISECONDS_IN_SECOND = 1000;
  * The total number of weeks in an NFL regular season
  */
 export const WEEKS_IN_SEASON = 18;
+
+/**
+ * The total number of weeks in an average month
+ */
+export const WEEKS_IN_MONTH = 4;
+
+/**
+ * The total number of months in a year
+ */
+export const MONTHS_IN_YEAR = 12;
 
 /**
  * The user to use for default AddedBy/UpdatedBy audit fields

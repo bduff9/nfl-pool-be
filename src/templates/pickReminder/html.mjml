@@ -7,15 +7,15 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="30px 25px 15px 25px" font-size="18px" align="center" line-height="1.4">
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
+        <mj-text padding="30px 25px 15px 25px" font-size="18px" align="left" line-height="1.4">
           <p>Hello forgetful {{ user.userFirstName }},</p>
           <p>This is your friendly reminder that you have not submitted your picks yet for week {{ week }} of the NFL confidence pool and you now have less than {{ hoursLeft }} hours.</p>
           <p>Click the button below to make your picks.</p>
           <p>Good luck!</p>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/set" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/set" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Make Picks</span>
         </mj-button>
       </mj-column>

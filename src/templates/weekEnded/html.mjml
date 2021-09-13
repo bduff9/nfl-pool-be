@@ -7,17 +7,26 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="10px 0px 10px 0px" font-size="18px" align="center">
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
+        <mj-text align="left" font-size="18px" padding="10px 0 10px 0">
           <p>Hello {{ user.userFirstName }},</p>
-          <p>Week {{ week }} has just ended with
-            {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+          <p>
+            Week {{ week }} has just ended with
+            <span style="background-color: {{ visitorTeam.teamPrimaryColor }}; color: {{ visitorTeam.teamSecondaryColor }}; padding: 0 5px;">{{ visitorTeam.teamCity }} {{ visitorTeam.teamName }}</span>
+            @
+            <span style="background-color: {{ homeTeam.teamPrimaryColor }}; color: {{ homeTeam.teamSecondaryColor }}; padding: 0 5px;">{{ homeTeam.teamCity }} {{ homeTeam.teamName }}</span>.
           </p>
-          <p>The final score was {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.</p>
+          <p>
+            {{#if isTie}}
+              The game ended in a tie, {{ winnerScore }} - {{ loserScore }}.
+            {{else}}
+              The <span style="background-color: {{ winnerTeam.teamPrimaryColor }}; color: {{ winnerTeam.teamSecondaryColor }}; padding: 0 5px;">{{ winnerTeam.teamName }}</span> won with a score of <strong>{{ winnerScore }}</strong> - {{ loserScore }}.
+            {{/if}}
+          </p>
         </mj-text>
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
-          <span style="font-size:16px;">Check Your Ranking</span>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size: 16px;">View week results</span>
         </mj-button>
       </mj-column>
     </mj-section>

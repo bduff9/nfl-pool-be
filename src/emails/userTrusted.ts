@@ -16,26 +16,55 @@
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { formatDueDate } from '../util/dates';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { getPaymentDueDate, getSystemYear } from '../util/systemValue';
 
-const sendUserTrustedEmail = async (user: User): Promise<void> => {
+type UserTrustedUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type UserTrustedData = EmailNotAllowedLocals & {
+	paymentDueDate: string;
+	user: UserTrustedUser;
+	year: number;
+};
+
+const getUserTrustedData = async (
+	user: UserTrustedUser,
+): Promise<[[string], UserTrustedData]> => {
 	const year = await getSystemYear();
 	const dueDate = await getPaymentDueDate();
 	const paymentDueDate = formatDueDate(dueDate);
 
+	return [[user.userEmail], { paymentDueDate, user, year }];
+};
+
+export const previewUserTrustedEmail = async (
+	user: UserTrustedUser,
+	emailFormat: EmailView,
+	overrides?: Partial<UserTrustedData>,
+): Promise<string> => {
+	const [, locals] = await getUserTrustedData(user);
+	const html = await previewEmail(EmailType.userTrusted, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendUserTrustedEmail = async (user: UserTrustedUser): Promise<void> => {
+	const [to, locals] = await getUserTrustedData(user);
+
 	try {
 		await sendEmail({
-			locals: { paymentDueDate, user, year },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.userTrusted,
 		});
 	} catch (error) {
 		log.error('Failed to send user trusted email: ', {
 			error,
-			locals: { paymentDueDate, user, year },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.userTrusted,
 		});
 	}

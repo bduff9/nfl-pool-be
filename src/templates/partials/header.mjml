@@ -1,7 +1,7 @@
-<mj-section padding="0px 0px 15px 0px">
+<mj-section padding="0 0 15px 0">
   <mj-column vertical-align="middle">
-    <mj-text align="left" font-size="15px" padding="0px">
-      <p style="text-align: center; margin: 10px 0px;">
+    <mj-text align="left" font-size="15px" padding="0">
+      <p style="text-align: center; margin: 10px 0;">
         <span>Email not displaying correctly? </span>
         <a style="font-size: 15px;" href="{{ browserLink }}" class="link">View it in your browser</a>
       </p>

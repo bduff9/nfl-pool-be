@@ -7,18 +7,18 @@
   <mj-body>
     {{> header }}
 
-    <mj-section padding="0px" text-align="center">
-      <mj-column width="100%" background-color="#fff" border-radius="10px">
-        <mj-text padding="30px 25px 15px 25px" font-size="18px" align="center" line-height="1.4">
-          <h2>Phew {{ user.userFirstName }},</h2>
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
+        <mj-text align="left" font-size="18px" line-height="1.4" padding="30px 25px 15px 25px">
+          <h2 style="text-align: center">Phew {{ user.userFirstName }}!</h2>
           <p>That was a close one! Your week {{ week }} game 1 pick has been saved for {{ point }} points.</p>
           <p style="font-size: smaller;">You picked the:</p>
-          <p style="font-size: 30px; color: {{ quickPickSelected.teamPrimaryColor }}; font-weight: bold; margin-bottom: 5px;">{{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }}</p>
-          <p style="font-size: smaller;">to beat the</p>
-          <p style="font-size: 20px; color: {{ quickPickNotSelected.teamPrimaryColor }}; font-weight: bolder; margin-top: 5px;">{{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}</p>
+          <p style="font-size: 30px; color: {{ quickPickSelected.teamPrimaryColor }}; font-weight: bold; margin-bottom: 5px; text-align: center;">{{ quickPickSelected.teamCity }} {{ quickPickSelected.teamName }}</p>
+          <p style="font-size: smaller; text-align: center;">to beat the</p>
+          <p style="font-size: 20px; color: {{ quickPickNotSelected.teamPrimaryColor }}; font-weight: bolder; margin-top: 5px; text-align: center;">{{ quickPickNotSelected.teamCity }} {{ quickPickNotSelected.teamName }}</p>
         </mj-text>
 
-        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/set" border-radius="3px" border="0px solid #ffffff" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/picks/set" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">Finish Your Picks</span>
         </mj-button>
       </mj-column>

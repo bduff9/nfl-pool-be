@@ -13,30 +13,83 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, User } from '../entity';
+import { Game, Team, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendWeekEndedEmail = async (user: User, week: number): Promise<void> => {
-	const game = await Game.findOneOrFail({
+type WeekEndedTeam = Pick<
+	Team,
+	'teamCity' | 'teamName' | 'teamPrimaryColor' | 'teamSecondaryColor'
+>;
+type WeekEndedUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type WeekEndedData = EmailNotAllowedLocals & {
+	homeTeam: WeekEndedTeam;
+	isTie: boolean;
+	loserScore: number;
+	user: WeekEndedUser;
+	visitorTeam: WeekEndedTeam;
+	week: number;
+	winnerScore: number;
+	winnerTeam: null | WeekEndedTeam;
+};
+
+const getWeekEndedData = async (
+	user: WeekEndedUser,
+	week: number,
+): Promise<[[string], WeekEndedData]> => {
+	const {
+		gameHomeScore,
+		gameVisitorScore,
+		homeTeam,
+		visitorTeam,
+		winnerTeam,
+	} = await Game.findOneOrFail({
 		order: { gameKickoff: 'DESC' },
-		relations: ['homeTeam', 'visitorTeam'],
+		relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
 		where: { gameWeek: week },
 	});
-	const { homeTeam, visitorTeam } = game;
+	const isTie = gameHomeScore === gameVisitorScore;
+	const [winnerScore, loserScore] =
+		gameHomeScore > gameVisitorScore
+			? [gameHomeScore, gameVisitorScore]
+			: [gameVisitorScore, gameHomeScore];
+
+	return [
+		[user.userEmail],
+		{ homeTeam, isTie, loserScore, user, visitorTeam, week, winnerScore, winnerTeam },
+	];
+};
+
+export const previewWeekEndedEmail = async (
+	user: WeekEndedUser,
+	week: number,
+	emailFormat: EmailView,
+	overrides?: Partial<WeekEndedData>,
+): Promise<string> => {
+	const [, locals] = await getWeekEndedData(user, week);
+	const html = await previewEmail(EmailType.weekEnded, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendWeekEndedEmail = async (user: WeekEndedUser, week: number): Promise<void> => {
+	const [to, locals] = await getWeekEndedData(user, week);
 
 	try {
 		await sendEmail({
-			locals: { game, homeTeam, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekEnded,
 		});
 	} catch (error) {
-		log.error('Failed to send week ended email:', {
+		log.error('Failed to send week ended email: ', {
 			error,
-			locals: { game, homeTeam, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.weekEnded,
 		});
 	}

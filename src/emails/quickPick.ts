@@ -13,32 +13,71 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, User } from '../entity';
+import { Game, Team, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
-const sendQuickPickEmail = async (
-	user: User,
+type QuickPickTeam = Pick<
+	Team,
+	'teamID' | 'teamCity' | 'teamName' | 'teamPrimaryColor' | 'teamSecondaryColor'
+>;
+type QuickPickUser = Pick<User, 'userEmail' | 'userFirstName' | 'userID'>;
+type QuickPickData = EmailNotAllowedLocals & {
+	homeTeam: QuickPickTeam;
+	hoursLeft: number;
+	user: QuickPickUser;
+	visitorTeam: QuickPickTeam;
+	week: number;
+};
+
+const getQuickPickData = async (
+	user: QuickPickUser,
 	week: number,
 	hoursLeft: number,
-): Promise<void> => {
+): Promise<[[string], QuickPickData]> => {
 	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
 		relations: ['homeTeam', 'visitorTeam'],
 		where: { gameNumber: 1, gameWeek: week },
 	});
 
+	return [[user.userEmail], { homeTeam, hoursLeft, user, visitorTeam, week }];
+};
+
+export const previewQuickPickEmail = async (
+	user: QuickPickUser,
+	week: number,
+	hoursLeft: number,
+	emailFormat: EmailView,
+	overrides?: Partial<QuickPickData>,
+): Promise<string> => {
+	const [, locals] = await getQuickPickData(user, week, hoursLeft);
+	const html = await previewEmail(EmailType.quickPick, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendQuickPickEmail = async (
+	user: QuickPickUser,
+	week: number,
+	hoursLeft: number,
+): Promise<void> => {
+	const [to, locals] = await getQuickPickData(user, week, hoursLeft);
+
 	try {
 		await sendEmail({
-			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.quickPick,
 		});
 	} catch (error) {
-		log.error('Failed to send quick pick email:', {
+		log.error('Failed to send quick pick email: ', {
 			error,
-			locals: { homeTeam, hoursLeft, user, visitorTeam, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.quickPick,
 		});
 	}

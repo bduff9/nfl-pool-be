@@ -15,25 +15,58 @@
  */
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
+type PickReminderUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type PickReminderData = EmailNotAllowedLocals & {
+	hoursLeft: number;
+	user: PickReminderUser;
+	week: number;
+};
+
+const getPickReminderData = (
+	user: PickReminderUser,
+	week: number,
+	hoursLeft: number,
+): [[string], PickReminderData] => {
+	return [[user.userEmail], { hoursLeft, user, week }];
+};
+
+export const previewPickReminderEmail = async (
+	user: PickReminderUser,
+	week: number,
+	hoursLeft: number,
+	emailFormat: EmailView,
+	overrides?: Partial<PickReminderData>,
+): Promise<string> => {
+	const [, locals] = getPickReminderData(user, week, hoursLeft);
+	const html = await previewEmail(EmailType.pickReminder, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
 const sendPickReminderEmail = async (
-	user: User,
+	user: PickReminderUser,
 	week: number,
 	hoursLeft: number,
 ): Promise<void> => {
+	const [to, locals] = getPickReminderData(user, week, hoursLeft);
+
 	try {
 		await sendEmail({
-			locals: { hoursLeft, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.pickReminder,
 		});
 	} catch (error) {
-		log.error('Failed to send pick reminder email:', {
+		log.error('Failed to send pick reminder email: ', {
 			error,
-			locals: { hoursLeft, user, week },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.pickReminder,
 		});
 	}

@@ -16,7 +16,7 @@
 import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { formatDueDate } from '../util/dates';
-import { sendEmail } from '../util/email';
+import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import {
 	getPaymentDueDate,
@@ -25,27 +25,58 @@ import {
 	getSystemYear,
 } from '../util/systemValue';
 
-const sendInterestEmail = async (
-	user: Pick<User, 'userEmail' | 'userFirstName'>,
-	isFinal = false,
-): Promise<void> => {
+type InterestUser = Pick<User, 'userEmail' | 'userFirstName'>;
+type InterestData = EmailNotAllowedLocals & {
+	isFinal: boolean;
+	payByDate: string;
+	poolCost: number;
+	poolYear: number;
+	survivorCost: number;
+	user: InterestUser;
+};
+
+const getInterestEmailData = async (
+	user: InterestUser,
+	isFinal: boolean,
+): Promise<[[string], InterestData]> => {
 	const poolYear = await getSystemYear();
 	const payByDateRaw = await getPaymentDueDate();
 	const payByDate = formatDueDate(payByDateRaw);
 	const poolCost = await getPoolCost();
 	const survivorCost = await getSurvivorCost();
 
+	return [[user.userEmail], { isFinal, payByDate, poolCost, poolYear, survivorCost, user }];
+};
+
+export const previewInterestEmail = async (
+	user: InterestUser,
+	isFinal = false,
+	emailFormat: EmailView,
+	overrides?: Partial<InterestData>,
+): Promise<string> => {
+	const [, locals] = await getInterestEmailData(user, isFinal);
+	const html = await previewEmail(EmailType.interest, emailFormat, {
+		...locals,
+		...overrides,
+	});
+
+	return html;
+};
+
+const sendInterestEmail = async (user: InterestUser, isFinal = false): Promise<void> => {
+	const [to, locals] = await getInterestEmailData(user, isFinal);
+
 	try {
 		await sendEmail({
-			locals: { isFinal, payByDate, poolCost, poolYear, survivorCost, user },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.interest,
 		});
 	} catch (error) {
-		log.error('Failed to send interest email:', {
+		log.error('Failed to send interest email: ', {
 			error,
-			locals: { isFinal, payByDate, poolCost, poolYear, survivorCost, user },
-			to: [user.userEmail],
+			locals,
+			to,
 			type: EmailType.interest,
 		});
 	}
