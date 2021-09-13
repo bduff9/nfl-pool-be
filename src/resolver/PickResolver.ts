@@ -55,6 +55,7 @@ export class PickResolver {
 			.innerJoinAndSelect('P.game', 'G')
 			.innerJoinAndSelect('G.homeTeam', 'HT')
 			.innerJoinAndSelect('G.visitorTeam', 'VT')
+			.leftJoinAndSelect('G.winnerTeam', 'WT')
 			.leftJoinAndSelect('P.team', 'T')
 			.where('G.gameWeek = :week', { week })
 			.andWhere('P.userID = :userID', { userID: user.userID })
