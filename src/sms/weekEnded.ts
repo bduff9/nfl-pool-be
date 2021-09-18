@@ -21,12 +21,29 @@ import { log } from '../util/logging';
 import { sendSMS } from '.';
 
 const sendWeekEndedSMS = async (user: User, week: number): Promise<void> => {
-	const game = await Game.findOneOrFail({
+	const {
+		gameHomeScore,
+		gameVisitorScore,
+		homeTeam,
+		visitorTeam,
+		winnerTeam,
+	} = await Game.findOneOrFail({
 		order: { gameKickoff: 'DESC' },
-		relations: ['homeTeam', 'visitorTeam'],
+		relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
 		where: { gameWeek: week },
 	});
-	const message = `${user.userFirstName}, week ${week} has just ended with ${game.visitorTeam.teamShortName} @ ${game.homeTeam.teamShortName}, final score ${game.gameVisitorScore}-${game.gameHomeScore}`;
+	const isTie = gameHomeScore === gameVisitorScore;
+	const [winnerScore, loserScore] =
+		gameHomeScore > gameVisitorScore
+			? [gameHomeScore, gameVisitorScore]
+			: [gameVisitorScore, gameHomeScore];
+	let message = `${user.userFirstName}, week ${week} has just ended with ${visitorTeam.teamCity} ${visitorTeam.teamName} @ ${homeTeam.teamCity} ${homeTeam.teamName}. `;
+
+	if (isTie) {
+		message += `The game ended in a tie, {{ winnerScore }} - {{ loserScore }}.`;
+	} else {
+		message += `The ${winnerTeam?.teamName} won with a score of ${winnerScore} - ${loserScore}.`;
+	}
 
 	try {
 		if (!user.userPhone) {
@@ -37,10 +54,18 @@ const sendWeekEndedSMS = async (user: User, week: number): Promise<void> => {
 	} catch (error) {
 		log.error('Failed to send week ended sms:', {
 			error,
-			game,
+			gameHomeScore,
+			gameVisitorScore,
+			homeTeam,
+			isTie,
+			loserScore,
+			message,
 			type: EmailType.weekEnded,
 			user,
+			visitorTeam,
 			week,
+			winnerScore,
+			winnerTeam,
 		});
 	}
 };
