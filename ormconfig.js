@@ -37,7 +37,7 @@ const config = {
 		subscribersDir: 'src/subscriber',
 	},
 	extra: {
-		connectionLimit: 10,
+		connectionLimit: 5,
 	},
 };
 
