@@ -21,11 +21,11 @@ import { log } from '../util/logging';
 import { sendSMS } from '.';
 
 const sendWeekStartedSMS = async (user: User, week: number): Promise<void> => {
-	const game = await Game.findOneOrFail({
+	const { homeTeam, visitorTeam } = await Game.findOneOrFail({
 		relations: ['homeTeam', 'visitorTeam'],
 		where: { gameWeek: week, gameNumber: 1 },
 	});
-	const message = `${user.userFirstName}, week ${week} has just started with ${game.visitorTeam.teamShortName} @ ${game.homeTeam.teamShortName}`;
+	const message = `${user.userFirstName}, week ${week} has just started with ${visitorTeam.teamCity} ${visitorTeam.teamName} @ ${homeTeam.teamCity} ${homeTeam.teamName}`;
 
 	try {
 		if (!user.userPhone) {
@@ -34,11 +34,13 @@ const sendWeekStartedSMS = async (user: User, week: number): Promise<void> => {
 
 		await sendSMS(user.userPhone, message, EmailType.weekStarted);
 	} catch (error) {
-		log.error('Failed to send week started sms:', {
+		log.error('Failed to send week started sms: ', {
 			error,
-			game,
+			homeTeam,
+			message,
 			type: EmailType.weekStarted,
 			user,
+			visitorTeam,
 			week,
 		});
 	}

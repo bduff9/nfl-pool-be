@@ -1,6 +1,6 @@
 Hello {{ user.userFirstName }},
 
-Week {{ week }} has just started with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+Week {{ week }} has just started with {{ visitorTeam.teamCity }} {{ visitorTeam.teamName }} @ {{ homeTeam.teamCity }} {{ homeTeam.teamName }}.
 
 Go to the Pool here: {{ domain }}
 

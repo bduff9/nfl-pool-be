@@ -1,8 +1,12 @@
 Hello {{ user.userFirstName }},
 
-Week {{ week }} has just ended with {{ visitorTeam.teamShortName }} @ {{ homeTeam.teamShortName }}.
+Week {{ week }} has just ended with {{ visitorTeam.teamCity }} {{ visitorTeam.teamName }} @ {{ homeTeam.teamCity }} {{ homeTeam.teamName }}.
 
-The final score was {{ game.gameVisitorScore }}-{{ game.gameHomeScore }}.
+{{#if isTie}}
+  The game ended in a tie, {{ winnerScore }} - {{ loserScore }}.
+{{else}}
+  The {{ winnerTeam.teamName }} won with a score of {{ winnerScore }} - {{ loserScore }}.
+{{/if}}
 
 Check your rankings here: {{ domain }}
 
