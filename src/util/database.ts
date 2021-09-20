@@ -46,13 +46,15 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				subscribers: [],
 				timezone: 'Z',
 				extra: {
-					connectionLimit: 5,
+					connectionLimit: 8,
 				},
 			});
 
 			connection = conn;
 		} catch (error) {
 			log.error('Failed to create MySQL/TypeORM connection: ', error);
+
+			connection = null;
 		}
 	}
 
@@ -79,7 +81,7 @@ const getConnectionForFiles = (): mysql.Connection =>
 		timezone: 'local',
 		user: dbuser,
 		multipleStatements: true,
-		connectionLimit: 5,
+		connectionLimit: 8,
 	});
 
 export const executeSqlFile = (fileContents: string): Promise<unknown> =>
