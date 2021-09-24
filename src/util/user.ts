@@ -174,3 +174,7 @@ export const isValidPaymentMethod = (type: PaymentMethod, account: string): bool
 
 	return isEmail(account) || isPhoneNumber(account, 'US') || isUsername(account);
 };
+
+export const unregisterUser = async (userID: number): Promise<void> => {
+	await User.update({ userID }, { userDoneRegistering: false });
+};

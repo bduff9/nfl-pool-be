@@ -13,32 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-const { database, host, password, port, dbuser } = process.env;
+import { Session } from '../entity';
 
-/**
- * @type import("typeorm").ConnectionOptions c
- */
-const config = {
-	name: 'default',
-	type: 'mysql',
-	database,
-	host,
-	password,
-	port: port !== undefined ? +port : port,
-	username: dbuser,
-	synchronize: false,
-	logging: true,
-	entities: ['.build/src/entity/**/*.js'],
-	migrations: ['.build/src/migration/**/*.js'],
-	subscribers: ['.build/src/subscriber/**/*.js'],
-	cli: {
-		entitiesDir: 'src/entity',
-		migrationsDir: 'src/migration',
-		subscribersDir: 'src/subscriber',
-	},
-	extra: {
-		connectionLimit: 9,
-	},
+export const signOutUserFromAllDevices = async (userID: number): Promise<void> => {
+	await Session.delete({ userID });
 };
-
-module.exports = config;

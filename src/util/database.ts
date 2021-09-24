@@ -46,7 +46,7 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				subscribers: [],
 				timezone: 'Z',
 				extra: {
-					connectionLimit: 8,
+					connectionLimit: 9,
 				},
 			});
 
@@ -81,7 +81,7 @@ const getConnectionForFiles = (): mysql.Connection =>
 		timezone: 'local',
 		user: dbuser,
 		multipleStatements: true,
-		connectionLimit: 8,
+		connectionLimit: 9,
 	});
 
 export const executeSqlFile = (fileContents: string): Promise<unknown> =>
