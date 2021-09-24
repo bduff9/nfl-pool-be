@@ -80,11 +80,15 @@ export const getUserPayments = async (
 	return type ? Math.abs(amount) : amount;
 };
 
-const getUsersWhoOwe = async (): Promise<Array<Payment>> =>
+type UserOweResults = { balance: number; userID: number };
+
+const getUsersWhoOwe = async (): Promise<Array<UserOweResults>> =>
 	Payment.createQueryBuilder('P')
+		.select('P.UserID', 'userID')
+		.addSelect('sum(P.PaymentAmount)', 'balance')
 		.groupBy('P.UserID')
 		.having('sum(P.PaymentAmount) < 0')
-		.getMany();
+		.getRawMany<UserOweResults>();
 
 // ts-prune-ignore-next
 export const lockLatePaymentUsers = async (week: number): Promise<void> => {
