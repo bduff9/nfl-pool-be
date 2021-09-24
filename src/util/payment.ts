@@ -20,13 +20,16 @@ import PaymentType from '../entity/PaymentType';
 
 import { ADMIN_USER } from './constants';
 import { addOrdinal } from './numbers';
+import { signOutUserFromAllDevices } from './session';
 import { getSurvivorPoolStatus } from './survivor';
 import {
 	getOverallPrizeAmounts,
 	getOverallPrizeForLastPlace,
+	getPaymentDueWeek,
 	getSurvivorPrizeAmounts,
 	getWeeklyPrizeAmounts,
 } from './systemValue';
+import { unregisterUser } from './user';
 
 const getPrizeAmounts = <T extends Array<number>>(
 	winners: Array<{ rank: number }>,
@@ -75,6 +78,26 @@ export const getUserPayments = async (
 	const amount = result?.PaymentAmount ?? 0;
 
 	return type ? Math.abs(amount) : amount;
+};
+
+const getUsersWhoOwe = async (): Promise<Array<Payment>> =>
+	Payment.createQueryBuilder('P')
+		.groupBy('P.UserID')
+		.having('sum(P.PaymentAmount) < 0')
+		.getMany();
+
+// ts-prune-ignore-next
+export const lockLatePaymentUsers = async (week: number): Promise<void> => {
+	const dueWeek = await getPaymentDueWeek();
+
+	if (week < dueWeek) return;
+
+	const payments = await getUsersWhoOwe();
+
+	for (const payment of payments) {
+		await unregisterUser(payment.userID);
+		await signOutUserFromAllDevices(payment.userID);
+	}
 };
 
 // ts-prune-ignore-next

@@ -37,11 +37,17 @@ export const getOverallPrizeForLastPlace = async (): Promise<number> => {
 	return +(systemValue.systemValueValue ?? '0');
 };
 
-export const getPaymentDueDate = async (): Promise<Date> => {
+export const getPaymentDueWeek = async (): Promise<number> => {
 	const systemValue = await SystemValue.findOneOrFail({
 		where: { systemValueName: 'PaymentDueWeek' },
 	});
 	const dueWeek = +(systemValue.systemValueValue ?? '0');
+
+	return dueWeek;
+};
+
+export const getPaymentDueDate = async (): Promise<Date> => {
+	const dueWeek = await getPaymentDueWeek();
 	const lastGame = await Game.findOneOrFail({
 		order: { gameKickoff: 'DESC' },
 		where: { gameWeek: dueWeek },
