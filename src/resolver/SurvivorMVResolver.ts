@@ -117,6 +117,7 @@ export class SurvivorMVResolver {
 		return SurvivorPick.createQueryBuilder('SP')
 			.innerJoinAndSelect('SP.user', 'U')
 			.innerJoinAndSelect('SP.game', 'G')
+			.leftJoinAndSelect('G.winnerTeam', 'WT')
 			.leftJoinAndSelect('SP.team', 'T')
 			.where('SP.SurvivorPickWeek <= :week', { week })
 			.andWhere('SP.UserID = :userID', { userID: survivorMV.userID })
