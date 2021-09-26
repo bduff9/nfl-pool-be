@@ -49,6 +49,16 @@ export class PaymentResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
+		const owed = await Payment.createQueryBuilder('P')
+			.select('sum(P.PaymentAmount)', 'balance')
+			.where('P.UserID = :userID', { userID })
+			.getRawOne<{ balance: string }>();
+		const newOwed = +(owed?.balance ?? '0') + amountPaid;
+
+		if (newOwed > 0) {
+			throw new Error('Amount paid is greater than owed, cancelling...');
+		}
+
 		const payment = new Payment();
 
 		payment.userID = userID;
@@ -61,6 +71,12 @@ export class PaymentResolver {
 		await payment.save();
 
 		const userToUpdate = await User.findOneOrFail({ where: { userID } });
+
+		if (newOwed === 0 && !userToUpdate.userDoneRegistering) {
+			userToUpdate.userDoneRegistering = true;
+			await userToUpdate.save();
+		}
+
 		const log = new Log();
 
 		log.logAction = LogAction.Paid;
