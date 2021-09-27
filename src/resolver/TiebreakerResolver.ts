@@ -16,8 +16,9 @@
 import { Arg, Authorized, Ctx, Int, Mutation, Query, Resolver } from 'type-graphql';
 
 import sendPicksSubmittedEmail from '../emails/picksSubmitted';
-import { Game, Log, Pick, Tiebreaker } from '../entity';
+import { Game, Log, Notification, Pick, Tiebreaker } from '../entity';
 import LogAction from '../entity/LogAction';
+import sendPicksSubmittedSMS from '../sms/picksSubmitted';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
@@ -121,7 +122,23 @@ export class TiebreakerResolver {
 		myTiebreaker.tiebreakerHasSubmitted = true;
 		myTiebreaker.tiebreakerUpdatedBy = user.userEmail;
 		await myTiebreaker.save();
-		await sendPicksSubmittedEmail(user, week, picks, myTiebreaker);
+
+		const notification = await Notification.createQueryBuilder('N')
+			.innerJoinAndSelect('N.user', 'U')
+			.where('U.UserCommunicationsOptedOut is false')
+			.andWhere('N.UserID = :userID', { userID: user.userID })
+			.andWhere(`N.NotificationType = 'PicksSubmitted'`)
+			.getOne();
+
+		if (notification) {
+			if (notification.notificationEmail) {
+				await sendPicksSubmittedEmail(user, week, picks, myTiebreaker);
+			}
+
+			if (notification.notificationSMS) {
+				await sendPicksSubmittedSMS(user, week, picks, myTiebreaker);
+			}
+		}
 
 		const log = new Log();
 
