@@ -1,0 +1,16 @@
+Hello {{ user.userFirstName }},
+
+Your payment of ${{ balance }} was due by the end of {{ payByDate }} and is now late. As such, your account has been temporarily disabled. Please either pay ASAP using the payment info at the bottom of this email or let us know if you would like to drop out this season so we can update the data accordingly.
+
+Week {{ nextWeek }} begins {{relativeTime nextGame.gameKickoff}} so don't delay in sending your payment to avoid missing out on any points! Once your payment has been sent, please allow for up to 24 hours for us to receive it and enable your account.
+
+Note: If you are receiving this email in error, please reach out to an admin immediately to ensure your account gets re-enabled.
+
+Payment Info
+
+Paypal: Pay using link https://www.paypal.me/brianduffey/{{ balance }}
+Venmo: Pay ${{ balance }} to account @brianduffey
+Zelle: Pay ${{ balance }} using your bank's Zelle service to account bduff9@gmail.com
+
+Please do not hesitate to let us know if there are any questions or concerns,
+Brian and Billy

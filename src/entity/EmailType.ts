@@ -20,6 +20,7 @@ enum EmailType {
 	interest = 'interest',
 	interestFinal = 'interestFinal',
 	invalidGamesFound = 'invalidGamesFound',
+	lockedOut = 'lockedOut',
 	newUser = 'newUser',
 	pickReminder = 'pickReminder',
 	picksSubmitted = 'picksSubmitted',

@@ -15,6 +15,7 @@
  */
 import { LessThan, Not } from 'typeorm';
 
+import sendLockedOutEmail from '../emails/lockedOut';
 import { Game, OverallMV, Payment, SurvivorMV, WeeklyMV } from '../entity';
 import PaymentType from '../entity/PaymentType';
 
@@ -101,6 +102,7 @@ export const lockLatePaymentUsers = async (week: number): Promise<void> => {
 	for (const payment of payments) {
 		await unregisterUser(payment.userID);
 		await signOutUserFromAllDevices(payment.userID);
+		await sendLockedOutEmail(payment.userID, Math.abs(payment.balance), week);
 	}
 };
 
