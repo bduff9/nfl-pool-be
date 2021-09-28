@@ -20,6 +20,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { ParsedData, previewCustomEmail } from '../../src/emails/custom';
 import { previewInterestEmail } from '../../src/emails/interest';
 import { previewInvalidGamesFoundEmail } from '../../src/emails/invalidGamesFound';
+import { previewLockedOutEmail } from '../../src/emails/lockedOut';
 import { previewNewUserEmail } from '../../src/emails/newUser';
 import { previewPickReminderEmail } from '../../src/emails/pickReminder';
 import { previewPicksSubmittedEmail } from '../../src/emails/picksSubmitted';
@@ -102,6 +103,15 @@ export default allowCors(
 						req.body.week ?? 1,
 						JSON.parse(req.body.invalidAPIGames ?? '[]'),
 						JSON.parse(req.body.invalidDBGames ?? '[]'),
+						emailFormat as EmailView,
+						{},
+					);
+					break;
+				case EmailType.lockedOut:
+					html = await previewLockedOutEmail(
+						userID,
+						req.body.balance ?? 3,
+						req.body.week ?? 1,
 						emailFormat as EmailView,
 						{},
 					);

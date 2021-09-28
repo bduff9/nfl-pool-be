@@ -1,0 +1,60 @@
+<mjml owa="desktop" version="4.6.3">
+  <mj-head>
+    <mj-title>Your payment is now past due!</mj-title>
+    <mj-preview>{{{formatPreview 'Please pay your fees ASAP to avoid missing out on any points'}}}</mj-preview>
+    {{> styles }}
+    <mj-style>
+      .subtitle {
+        font-weight: bold;
+        font-size: 19px;
+        margin-bottom: 0;
+        margin-top: 25px;
+      }
+
+      dt {
+        font-weight: bolder;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    {{> header }}
+
+    <mj-section padding="0" text-align="center">
+      <mj-column background-color="#fff" border-radius="0 0 10px 10px" width="100%">
+        <mj-text padding="10px 20px 10px 20px" font-size="18px" align="left" line-height="1.2">
+          <p>Hello {{ user.userFirstName }},</p>
+
+          <p>Your payment of ${{ balance }} was due by the end of {{ payByDate }} and is now late. As such, your account has been temporarily disabled. Please either pay ASAP using the payment info at the bottom of this email or let us know if you would like to drop out this season so we can update the data accordingly.</p>
+
+          <p>Week {{ nextWeek }} begins {{relativeTime nextGame.gameKickoff}} so don't delay in sending your payment to avoid missing out on any points! Once your payment has been sent, please allow for up to 24 hours for us to receive it and enable your account.</p>
+
+          <small>Note: If you are receiving this email in error, please reach out to an admin immediately to ensure your account gets re-enabled.</small>
+
+          <p class="subtitle">Payment Info</p>
+
+          <dl>
+            <dt>Paypal:</dt>
+            <dd>
+              Pay using link <a href="https://www.paypal.me/brianduffey/{{ balance }}" rel="noopener noreferrer" target="_blank">
+                paypal.me/brianduffey/{{ balance }}
+              </a>
+            </dd>
+            <dt>Venmo:</dt>
+            <dd>Pay ${{ balance }} to account @brianduffey</dd>
+            <dt>Zelle:</dt>
+            <dd>Pay ${{ balance }} using your bank&apos;s Zelle service to account bduff9@gmail.com</dd>
+          </dl>
+
+          <br />
+
+          <p>Please do not hesitate to let us know if there are any questions or concerns,</p>
+          <p>Brian and Billy</p>
+        </mj-text>
+        <mj-button align="center" background-color="#15803d" href="{{ domain }}/support" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
+          <span style="font-size:16px;">View Help section for more information</span </mj-button>
+      </mj-column>
+    </mj-section>
+
+    {{> footer }}
+  </mj-body>
+</mjml>
