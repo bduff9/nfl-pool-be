@@ -181,14 +181,16 @@ export class UserResolver {
 				.having('sum(P.PaymentAmount) < 0')
 				.getQuery();
 
-			return qb
-				.leftJoinAndSelect('U.notifications', 'N')
-				.leftJoinAndSelect('N.notificationDefinition', 'ND')
-				.leftJoinAndSelect('U.userReferredByUser', 'UR')
-				.where('U.UserDoneRegistering = true')
-				.andWhere(`U.UserID in ${userIDSubquery}`)
-				.orderBy('U.UserLastName', 'ASC')
-				.getMany();
+			return (
+				qb
+					.leftJoinAndSelect('U.notifications', 'N')
+					.leftJoinAndSelect('N.notificationDefinition', 'ND')
+					.leftJoinAndSelect('U.userReferredByUser', 'UR')
+					// .where('U.UserDoneRegistering = true')
+					.where(`U.UserID in ${userIDSubquery}`)
+					.orderBy('U.UserLastName', 'ASC')
+					.getMany()
+			);
 		}
 
 		if (userType === AdminUserType.Registered) {
