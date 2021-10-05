@@ -17,6 +17,8 @@ import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
 import sendPrizesSetEmail from '../emails/prizesSet';
 import { SystemValue, User } from '../entity';
+import { getCurrentWeekInProgress } from '../util/game';
+import { updatePayouts } from '../util/payment';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SystemValue)
@@ -107,6 +109,10 @@ export class SystemValueResolver {
 		const users = await User.find({
 			where: { userCommunicationsOptedOut: false, userDoneRegistering: true },
 		});
+
+		const currentWeek = await getCurrentWeekInProgress();
+
+		await updatePayouts(currentWeek ?? 1);
 
 		for (const user of users) {
 			await sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor);

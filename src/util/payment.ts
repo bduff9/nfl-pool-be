@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { LessThan, Not } from 'typeorm';
+import { IsNull, LessThan, Like, Not } from 'typeorm';
 
 import sendLockedOutEmail from '../emails/lockedOut';
 import { Game, OverallMV, Payment, SurvivorMV, WeeklyMV } from '../entity';
@@ -106,19 +106,18 @@ export const lockLatePaymentUsers = async (week: number): Promise<void> => {
 	}
 };
 
-// ts-prune-ignore-next
 export const updatePayouts = async (week: number): Promise<void> => {
 	const weeklyPrizes = await getWeeklyPrizeAmounts();
 
-	await Payment.delete({ paymentWeek: Not(null) });
+	await Payment.delete({ paymentWeek: Not(IsNull()) });
 
 	for (let i = 1; i <= week; i++) {
 		const winners = await WeeklyMV.find({
-			where: { rank: LessThan(weeklyPrizes.length), week },
+			where: { rank: LessThan(weeklyPrizes.length), week: i },
 		});
 		const adjustedPrizes = getPrizeAmounts(winners, weeklyPrizes);
 
-		winners.forEach(async winner => {
+		for (const winner of winners) {
 			const payment = new Payment();
 
 			payment.paymentAddedBy = ADMIN_USER;
@@ -129,20 +128,22 @@ export const updatePayouts = async (week: number): Promise<void> => {
 			payment.paymentWeek = i;
 			payment.userID = winner.userID;
 			await payment.save();
-		});
+		}
 	}
 
 	const gamesLeft = await Game.count({ where: { gameStatus: Not('Final') } });
 	const seasonIsOver = gamesLeft === 0;
 
 	if (seasonIsOver) {
+		await Payment.delete({ paymentDescription: Like('% Overall') });
+
 		const overallPrizes = await getOverallPrizeAmounts();
 		const winners = await OverallMV.find({
 			where: { rank: LessThan(overallPrizes.length) },
 		});
 		const adjustedPrizes = getPrizeAmounts(winners, overallPrizes);
 
-		winners.forEach(async winner => {
+		for (const winner of winners) {
 			const payment = new Payment();
 
 			payment.paymentAddedBy = ADMIN_USER;
@@ -153,7 +154,7 @@ export const updatePayouts = async (week: number): Promise<void> => {
 			payment.paymentWeek = null;
 			payment.userID = winner.userID;
 			await payment.save();
-		});
+		}
 
 		const lastPlacePrize = await getOverallPrizeForLastPlace();
 		const lastPlacePrizes = [0];
@@ -170,7 +171,7 @@ export const updatePayouts = async (week: number): Promise<void> => {
 				.getMany();
 			const adjustedPrizes = getPrizeAmounts(lastPlaceWinners, lastPlacePrizes);
 
-			lastPlaceWinners.forEach(async winner => {
+			for (const winner of lastPlaceWinners) {
 				const payment = new Payment();
 
 				payment.paymentAddedBy = ADMIN_USER;
@@ -181,20 +182,22 @@ export const updatePayouts = async (week: number): Promise<void> => {
 				payment.paymentWeek = null;
 				payment.userID = winner.userID;
 				await payment.save();
-			});
+			}
 		}
 	}
 
 	const { justEnded } = await getSurvivorPoolStatus(week);
 
 	if (justEnded) {
+		await Payment.delete({ paymentDescription: Like('% Survivor Pool') });
+
 		const survivorPrizes = await getSurvivorPrizeAmounts();
 		const winners = await SurvivorMV.find({
 			where: { rank: LessThan(survivorPrizes.length) },
 		});
 		const adjustedPrizes = getPrizeAmounts(winners, survivorPrizes);
 
-		winners.forEach(async winner => {
+		for (const winner of winners) {
 			const payment = new Payment();
 
 			payment.paymentAddedBy = ADMIN_USER;
@@ -205,6 +208,6 @@ export const updatePayouts = async (week: number): Promise<void> => {
 			payment.paymentWeek = null;
 			payment.userID = winner.userID;
 			await payment.save();
-		});
+		}
 	}
 };
