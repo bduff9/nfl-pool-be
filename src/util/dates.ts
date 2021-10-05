@@ -13,6 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
+import { MILLISECONDS_IN_SECOND, MINUTES_IN_HOUR, SECONDS_IN_MINUTE } from './constants';
 import { get2DigitNumber } from './numbers';
 import { getSystemYear } from './systemValue';
 
@@ -41,6 +42,12 @@ const getCurrentSeasonYear = (): number => {
 
 	return currYear;
 };
+
+export const getHoursBetweenDates = (date1: Date, date2 = new Date()): number =>
+	Math.floor(
+		(date2.getTime() - date1.getTime()) /
+			(MILLISECONDS_IN_SECOND * SECONDS_IN_MINUTE * MINUTES_IN_HOUR),
+	);
 
 export const getOffsetString = (): string => {
 	const date = new Date();

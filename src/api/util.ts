@@ -13,7 +13,21 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPITeamResponse } from './types';
+import GameStatus from '../entity/GameStatus';
+
+import { TAPIResponseMatchup, TAPITeamResponse } from './types';
+
+export const getGameStatusFromAPI = (
+	game: Pick<TAPIResponseMatchup, 'quarter' | 'status'>,
+): GameStatus => {
+	if (game.status === 'SCHED') return GameStatus.Pregame;
+
+	if (game.status === 'FINAL') return GameStatus.Final;
+
+	if (game.quarter) return game.quarter as GameStatus;
+
+	return GameStatus.Invalid;
+};
 
 /**
  * Get home and visitor teams from API matchup

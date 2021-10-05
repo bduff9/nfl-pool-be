@@ -16,13 +16,14 @@
 import { MoreThan, Not, Raw } from 'typeorm';
 
 import { TAPIResponseMatchup } from '../api/types';
-import { parseTeamsFromApi } from '../api/util';
+import { getGameStatusFromAPI, parseTeamsFromApi } from '../api/util';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 import SeasonStatus from '../entity/SeasonStatus';
 
 import { ADMIN_USER, WEEKS_IN_SEASON } from './constants';
-import { convertDateToEpoch, convertEpoch } from './dates';
+import { convertDateToEpoch, convertEpoch, getHoursBetweenDates } from './dates';
+import { log } from './logging';
 import { markWrongSurvivorPicksAsDead } from './survivor';
 import { getTeamFromDB } from './team';
 
@@ -109,6 +110,135 @@ export const getHoursToWeekStart = async (week: number): Promise<number> => {
 	return +(result?.hours ?? '0');
 };
 
+const validateAPIData = (game: TAPIResponseMatchup, dbGame: Game): boolean => {
+	const QUARTER_ORDER = [
+		GameStatus.Pregame,
+		GameStatus.FirstQuarter,
+		GameStatus.SecondQuarter,
+		GameStatus.HalfTime,
+		GameStatus.ThirdQuarter,
+		GameStatus.FourthQuarter,
+		GameStatus.Overtime,
+		GameStatus.Final,
+		GameStatus.Invalid,
+	];
+	const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
+	const homeScoreDB = dbGame.gameHomeScore;
+	const homeScoreAPI = +homeTeam.score;
+
+	if (homeScoreAPI < homeScoreDB) {
+		log.error('Home score is less than what we had previously: ', {
+			homeScoreAPI,
+			homeScoreDB,
+			homeTeam,
+		});
+
+		return false;
+	}
+
+	log.info('Home score from API seems valid: ', {
+		homeScoreAPI,
+		homeScoreDB,
+		homeTeam,
+	});
+
+	const visitorScoreDB = dbGame.gameVisitorScore;
+	const visitorScoreAPI = +visitingTeam.score;
+
+	if (visitorScoreAPI < visitorScoreDB) {
+		log.error('Visitor score is less than what we had previously: ', {
+			visitorScoreAPI,
+			visitorScoreDB,
+			visitingTeam,
+		});
+
+		return false;
+	}
+
+	log.info('Visitor score from API seems valid: ', {
+		visitorScoreAPI,
+		visitorScoreDB,
+		visitingTeam,
+	});
+
+	const quarterDB = dbGame.gameStatus;
+	const quarterAPI = getGameStatusFromAPI(game);
+
+	if (quarterAPI === GameStatus.Final && homeScoreAPI === 0 && visitorScoreAPI === 0) {
+		const kickoff = convertEpoch(+game.kickoff);
+		const hoursSinceKickoff = getHoursBetweenDates(kickoff);
+		const HOURS_TO_WAIT = 10;
+
+		if (hoursSinceKickoff < HOURS_TO_WAIT) {
+			log.error('End score is 0-0, mistake? ', {
+				homeScoreAPI,
+				hoursSinceKickoff,
+				HOURS_TO_WAIT,
+				kickoff,
+				quarterAPI,
+				visitorScoreAPI,
+			});
+
+			return false;
+		}
+
+		log.info('Looks like end score was actually 0-0 after waiting cooldown period: ', {
+			homeScoreAPI,
+			hoursSinceKickoff,
+			HOURS_TO_WAIT,
+			kickoff,
+			quarterAPI,
+			visitorScoreAPI,
+		});
+	}
+
+	const quarterIndexDB = QUARTER_ORDER.indexOf(quarterDB);
+	const quarterIndexAPI = QUARTER_ORDER.indexOf(quarterAPI);
+
+	if (quarterIndexAPI === quarterIndexDB) {
+		const timeLeftDB = dbGame.gameTimeLeftInSeconds;
+		const timeLeftAPI = +game.gameSecondsRemaining;
+
+		if (timeLeftAPI > timeLeftDB) {
+			log.error('Time left is greater in API than what we had in DB: ', {
+				quarterAPI,
+				quarterDB,
+				timeLeftAPI,
+				timeLeftDB,
+			});
+
+			return false;
+		}
+
+		log.info('Time left from API seems valid: ', {
+			quarterAPI,
+			quarterDB,
+			timeLeftAPI,
+			timeLeftDB,
+		});
+	} else if (quarterIndexAPI < quarterIndexDB) {
+		log.error('Quarter from API is earlier than what we have in DB: ', {
+			quarterAPI,
+			quarterDB,
+			quarterIndexAPI,
+			quarterIndexDB,
+			QUARTER_ORDER,
+		});
+
+		return false;
+	}
+
+	log.info('Quarter from API seems valid: ', {
+		quarterAPI,
+		quarterDB,
+		quarterIndexAPI,
+		quarterIndexDB,
+		QUARTER_ORDER,
+	});
+
+	return true;
+};
+
 // ts-prune-ignore-next
 export const updateDBGame = async (
 	game: TAPIResponseMatchup,
@@ -117,17 +247,15 @@ export const updateDBGame = async (
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
 	const homeTeamID = dbGame.homeTeamID;
 	const visitingTeamID = dbGame.visitorTeamID;
+	const apiUpdateIsValid = validateAPIData(game, dbGame);
 
-	if (game.status === 'SCHED') {
-		dbGame.gameStatus = GameStatus.Pregame;
-	} else if (game.status === 'FINAL') {
-		dbGame.gameStatus = GameStatus.Final;
-	} else if (game.quarter) {
-		dbGame.gameStatus = game.quarter as GameStatus;
-	} else {
-		dbGame.gameStatus = GameStatus.Invalid;
+	if (!apiUpdateIsValid) {
+		log.error('Invalid API data found, skipping all DB updates...');
+
+		return dbGame;
 	}
 
+	dbGame.gameStatus = getGameStatusFromAPI(game);
 	dbGame.gameTimeLeftInQuarter = game.quarterTimeRemaining ?? '';
 	dbGame.gameTimeLeftInSeconds = +game.gameSecondsRemaining;
 	dbGame.gameHomeScore = +homeTeam.score;
