@@ -48,10 +48,10 @@ export const findFutureGame = async (
 	Game.findOneOrFail({ where: { homeTeamID, visitorTeamID, gameWeek: MoreThan(week) } });
 
 /**
- * Returns current week, with the method of a week is not current until its first game has started
+ * Returns current week, with the method of a week is not current until its first game has started.
+ * Will return null before the season has started
  * @returns number
  */
-// ts-prune-ignore-next
 export const getCurrentWeekInProgress = async (): Promise<null | number> => {
 	const game = await Game.createQueryBuilder('G')
 		.select()
@@ -69,7 +69,6 @@ export const getCurrentWeekInProgress = async (): Promise<null | number> => {
  * Returns current week, with the method of a week is not current once its final game has completed
  * @returns number
  */
-// ts-prune-ignore-next
 export const getCurrentWeek = async (): Promise<number> => {
 	const game = await Game.createQueryBuilder()
 		.select()
