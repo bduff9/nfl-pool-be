@@ -75,7 +75,7 @@ const formatPreview = (previewText: string): string => {
 };
 
 const loadExternalCSSFile = (cssPath: string): string => {
-	const cssFile = path.join(__dirname, '..', cssPath);
+	const cssFile = path.join(__dirname, '..', '..', cssPath);
 	const file = readFileSync(cssFile);
 
 	return file.toString();

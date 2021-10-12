@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/preview/[emailType].ts": {
+      "includeFiles": "node_modules/react-quill/dist/**"
+    }
+  }
+}
