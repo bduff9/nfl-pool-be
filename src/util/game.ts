@@ -121,7 +121,23 @@ const validateAPIData = (game: TAPIResponseMatchup, dbGame: Game): boolean => {
 		GameStatus.Final,
 		GameStatus.Invalid,
 	];
+	const HOURS_TO_WAIT = 10;
+	const kickoff = convertEpoch(+game.kickoff);
+	const hoursSinceKickoff = getHoursBetweenDates(kickoff);
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
+
+	if (hoursSinceKickoff >= HOURS_TO_WAIT) {
+		log.info('Game is outside of waiting period, skip validation...', {
+			homeTeam,
+			HOURS_TO_WAIT,
+			kickoff,
+			hoursSinceKickoff,
+			visitingTeam,
+		});
+
+		return true;
+	}
+
 	const homeScoreDB = dbGame.gameHomeScore;
 	const homeScoreAPI = +homeTeam.score;
 
@@ -163,25 +179,8 @@ const validateAPIData = (game: TAPIResponseMatchup, dbGame: Game): boolean => {
 	const quarterDB = dbGame.gameStatus;
 	const quarterAPI = getGameStatusFromAPI(game);
 
-	if (quarterAPI === GameStatus.Final && homeScoreAPI === 0 && visitorScoreAPI === 0) {
-		const kickoff = convertEpoch(+game.kickoff);
-		const hoursSinceKickoff = getHoursBetweenDates(kickoff);
-		const HOURS_TO_WAIT = 10;
-
-		if (hoursSinceKickoff < HOURS_TO_WAIT) {
-			log.error('End score is 0-0, mistake? ', {
-				homeScoreAPI,
-				hoursSinceKickoff,
-				HOURS_TO_WAIT,
-				kickoff,
-				quarterAPI,
-				visitorScoreAPI,
-			});
-
-			return false;
-		}
-
-		log.info('Looks like end score was actually 0-0 after waiting cooldown period: ', {
+	if (quarterAPI === GameStatus.Final && homeScoreAPI === visitorScoreAPI) {
+		log.error(`End score is tied at ${homeScoreAPI}-${visitorScoreAPI}, mistake? `, {
 			homeScoreAPI,
 			hoursSinceKickoff,
 			HOURS_TO_WAIT,
@@ -189,6 +188,8 @@ const validateAPIData = (game: TAPIResponseMatchup, dbGame: Game): boolean => {
 			quarterAPI,
 			visitorScoreAPI,
 		});
+
+		return false;
 	}
 
 	const quarterIndexDB = QUARTER_ORDER.indexOf(quarterDB);

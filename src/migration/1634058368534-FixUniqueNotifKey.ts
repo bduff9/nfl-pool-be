@@ -13,32 +13,21 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-const { database, host, password, port, dbuser } = process.env;
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-/**
- * @type import("typeorm").ConnectionOptions c
- */
-const config = {
-	name: 'default',
-	type: 'mysql',
-	database,
-	host,
-	password,
-	port: port !== undefined ? +port : port,
-	username: dbuser,
-	synchronize: false,
-	logging: true,
-	entities: ['.build/src/entity/**/*.js'],
-	migrations: ['.build/src/migration/**/*.js'],
-	subscribers: ['.build/src/subscriber/**/*.js'],
-	cli: {
-		entitiesDir: 'src/entity',
-		migrationsDir: 'src/migration',
-		subscribersDir: 'src/subscriber',
-	},
-	extra: {
-		connectionLimit: 15,
-	},
-};
+// ts-prune-ignore-next
+export class FixUniqueNotifKey1634058368534 implements MigrationInterface {
+	public async up (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
+		await queryRunner.query(
+			`alter table Notifications add constraint uk_UserNotification unique (UserID, NotificationType)`,
+		);
+	}
 
-module.exports = config;
+	public async down (queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
+		await queryRunner.query(
+			`alter table Notifications add constraint uk_Notifications unique (UserID, NotificationType, NotificationEmail)`,
+		);
+	}
+}
