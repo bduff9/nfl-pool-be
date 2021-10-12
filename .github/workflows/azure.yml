@@ -22,7 +22,7 @@ jobs:
         run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       - name: "Use working version of Azure CLI"
-        run: sudo apt-get install azure-cli=2.28.0-1~focal
+        run: sudo apt-get install -y --allow-downgrades azure-cli=2.28.0-1~focal
 
       - name: "Login via Azure CLI"
         env:
