@@ -33,7 +33,7 @@ jobs:
 
       - name: Analyze the code
         id: scc
-        uses: iryanbell/scc-docker-action@v1.0.2
+        uses: iryanbell/scc-docker-action@v1.0.1
         with:
           args: ${{ github.workspace }} -i ts,js,mjml
 
