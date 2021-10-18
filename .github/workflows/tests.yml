@@ -33,13 +33,13 @@ jobs:
 
       - name: Analyze the code
         id: scc
-        uses: iryanbell/scc-docker-action@v1.0.2
+        uses: iryanbell/scc-docker-action@v1.0.1
         with:
-          args: ${{ env.workspace }}
+          args: ${{ github.workspace }} -i ts,js,mjml
+
       - uses: returntocorp/semgrep-action@v1
         with:
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
-          publishDeployment: 600
 
       - name: Set environment variables
         run: |

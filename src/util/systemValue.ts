@@ -16,6 +16,7 @@
 import { Game, SystemValue } from '../entity';
 
 import { ADMIN_USER } from './constants';
+import { log } from './logging';
 
 export const getOverallPrizeAmounts = async (): Promise<
 	[number, number, number, number]
@@ -104,17 +105,21 @@ export const getWeeklyPrizeAmounts = async (): Promise<[number, number, number]>
 	return JSON.parse(systemValue.systemValueValue);
 };
 
+export const setPrizeAmounts = async (
+	systemValueName: 'OverallPrizes' | 'SurvivorPrizes' | 'WeeklyPrizes',
+	systemValueValue: null | string,
+	systemValueUpdatedBy = ADMIN_USER,
+): Promise<void> => {
+	await SystemValue.update({ systemValueName }, { systemValueUpdatedBy, systemValueValue });
+};
+
 // ts-prune-ignore-next
 export const resetPrizeAmounts = async (): Promise<void> => {
-	await SystemValue.update({ systemValueName: 'weeklyPrizes' }, { systemValueValue: null });
-	await SystemValue.update(
-		{ systemValueName: 'overallPrizes' },
-		{ systemValueValue: null },
-	);
-	await SystemValue.update(
-		{ systemValueName: 'SurvivorPrizes' },
-		{ systemValueValue: null },
-	);
+	await Promise.allSettled([
+		setPrizeAmounts('OverallPrizes', null),
+		setPrizeAmounts('SurvivorPrizes', null),
+		setPrizeAmounts('WeeklyPrizes', null),
+	]);
 };
 
 // ts-prune-ignore-next
@@ -123,4 +128,100 @@ export const updateSystemYear = async (year: number): Promise<void> => {
 		{ systemValueName: 'YearUpdated' },
 		{ systemValueValue: `${year}`, systemValueUpdatedBy: ADMIN_USER },
 	);
+};
+
+export const validatePrizes = (
+	weeklyPrizes: string,
+	overallPrizes: string,
+	survivorPrizes: string,
+): {
+	errors: Array<string>;
+	parsedOverall: Array<number>;
+	parsedSurvivor: Array<number>;
+	parsedWeekly: Array<number>;
+} => {
+	const response = {
+		errors: [] as Array<string>,
+		parsedOverall: [] as Array<number>,
+		parsedSurvivor: [] as Array<number>,
+		parsedWeekly: [] as Array<number>,
+	};
+	let isWeeklyValid = false;
+
+	try {
+		response.parsedWeekly = JSON.parse(weeklyPrizes);
+
+		isWeeklyValid =
+			response.parsedWeekly.length === 3 &&
+			response.parsedWeekly.every((prize, i) => {
+				if (i === 0 && prize === 0) return true;
+
+				if (typeof prize === 'number') return true;
+
+				return false;
+			});
+	} catch (error) {
+		log.error('Error when parsing weekly prizes: ', {
+			error,
+			weeklyPrizes,
+		});
+		isWeeklyValid = false;
+	}
+
+	if (!isWeeklyValid) {
+		response.errors.push(`Weekly prizes value is invalid: ${weeklyPrizes}`);
+	}
+
+	let isOverallValid = false;
+
+	try {
+		response.parsedOverall = JSON.parse(overallPrizes);
+
+		isOverallValid =
+			response.parsedOverall.length === 4 &&
+			response.parsedOverall.every((prize, i) => {
+				if (i === 0 && prize === 0) return true;
+
+				if (typeof prize === 'number') return true;
+
+				return false;
+			});
+	} catch (error) {
+		log.error('Error when parsing overall prizes: ', {
+			error,
+			overallPrizes,
+		});
+		isOverallValid = false;
+	}
+
+	if (!isOverallValid) {
+		response.errors.push(`Overall prizes value is invalid: ${overallPrizes}`);
+	}
+
+	let isSurvivorValid = false;
+
+	try {
+		response.parsedSurvivor = JSON.parse(survivorPrizes);
+
+		isSurvivorValid =
+			response.parsedSurvivor.length === 3 &&
+			response.parsedSurvivor.every((prize, i) => {
+				if (i === 0 && prize === 0) return true;
+
+				if (typeof prize === 'number') return true;
+
+				return false;
+			});
+	} catch (error) {
+		log.error('Error when parsing survivor prizes: ', {
+			error,
+			survivorPrizes,
+		});
+	}
+
+	if (!isSurvivorValid) {
+		response.errors.push(`Survivor prizes value is invalid: ${survivorPrizes}`);
+	}
+
+	return response;
 };

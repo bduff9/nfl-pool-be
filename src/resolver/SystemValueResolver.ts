@@ -19,6 +19,7 @@ import sendPrizesSetEmail from '../emails/prizesSet';
 import { SystemValue, User } from '../entity';
 import { getCurrentWeekInProgress } from '../util/game';
 import { updatePayouts } from '../util/payment';
+import { setPrizeAmounts, validatePrizes } from '../util/systemValue';
 import { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SystemValue)
@@ -43,80 +44,37 @@ export class SystemValueResolver {
 
 		if (!user) throw new Error('Missing user from context');
 
-		const parsedWeekly: Array<number> = JSON.parse(weeklyPrizes);
-		const isWeeklyValid =
-			parsedWeekly.length === 3 &&
-			parsedWeekly.every((prize, i) => {
-				if (i === 0 && prize === 0) return true;
+		const { errors, parsedOverall, parsedSurvivor, parsedWeekly } = validatePrizes(
+			weeklyPrizes,
+			overallPrizes,
+			survivorPrizes,
+		);
 
-				if (typeof prize === 'number') return true;
+		if (errors.length) {
+			throw new Error(`Validation errors during prize parsing: ${errors.join(', ')}`);
+		}
 
-				return false;
-			});
+		await Promise.allSettled([
+			setPrizeAmounts('WeeklyPrizes', weeklyPrizes),
+			setPrizeAmounts('OverallPrizes', overallPrizes),
+			setPrizeAmounts('SurvivorPrizes', survivorPrizes),
+		]);
 
-		if (!isWeeklyValid) throw new Error(`Invalid weekly value sent: ${weeklyPrizes}`);
+		const promises = [];
 
-		const weekly = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'WeeklyPrizes' },
-		});
-
-		weekly.systemValueValue = weeklyPrizes;
-		weekly.systemValueUpdatedBy = user.userEmail;
-		await weekly.save();
-
-		const parsedOverall: Array<number> = JSON.parse(overallPrizes);
-		const isOverallValid =
-			parsedOverall.length === 4 &&
-			parsedOverall.every((prize, i) => {
-				if (i === 0 && prize === 0) return true;
-
-				if (typeof prize === 'number') return true;
-
-				return false;
-			});
-
-		if (!isOverallValid) throw new Error(`Invalid overall value sent: ${overallPrizes}`);
-
-		const overall = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'OverallPrizes' },
-		});
-
-		overall.systemValueValue = overallPrizes;
-		overall.systemValueUpdatedBy = user.userEmail;
-		await overall.save();
-
-		const parsedSurvivor: Array<number> = JSON.parse(survivorPrizes);
-		const isSurvivorValid =
-			parsedSurvivor.length === 3 &&
-			parsedSurvivor.every((prize, i) => {
-				if (i === 0 && prize === 0) return true;
-
-				if (typeof prize === 'number') return true;
-
-				return false;
-			});
-
-		if (!isSurvivorValid) throw new Error(`Invalid survivor value sent: ${survivorPrizes}`);
-
-		const survivor = await SystemValue.findOneOrFail({
-			where: { systemValueName: 'SurvivorPrizes' },
-		});
-
-		survivor.systemValueValue = survivorPrizes;
-		survivor.systemValueUpdatedBy = user.userEmail;
-		await survivor.save();
+		promises.push(
+			getCurrentWeekInProgress().then(currentWeek => updatePayouts(currentWeek ?? 1)),
+		);
 
 		const users = await User.find({
 			where: { userCommunicationsOptedOut: false, userDoneRegistering: true },
 		});
 
-		const currentWeek = await getCurrentWeekInProgress();
-
-		await updatePayouts(currentWeek ?? 1);
-
 		for (const user of users) {
-			await sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor);
+			promises.push(sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor));
 		}
+
+		await Promise.allSettled(promises);
 
 		return true;
 	}
