@@ -46,7 +46,7 @@ export const waitForConnection = async (): Promise<Connection | null> => {
 				subscribers: [],
 				timezone: 'Z',
 				extra: {
-					connectionLimit: 25,
+					connectionLimit: 15,
 				},
 			});
 
