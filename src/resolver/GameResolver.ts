@@ -33,7 +33,7 @@ export class GameResolver {
 	@Query(() => [Game])
 	async getGamesForWeek (@Arg('Week', () => Int) gameWeek: number): Promise<Array<Game>> {
 		return Game.find({
-			order: { gameNumber: 'ASC' },
+			order: { gameKickoff: 'ASC' },
 			relations: [
 				'homeTeam',
 				'visitorTeam',
