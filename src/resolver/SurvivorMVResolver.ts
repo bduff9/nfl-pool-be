@@ -94,9 +94,9 @@ export class SurvivorMVResolver {
 
 		if (count === 0) return SeasonStatus.NotStarted;
 
-		const leaders = await SurvivorMV.find({ where: { rank: 1 } });
+		const alive = await SurvivorMV.find({ where: { isAliveOverall: true } });
 
-		if (leaders.length === 1 || leaders[0].weeksAlive === WEEKS_IN_SEASON) {
+		if (alive.length < 2 || alive[0].weeksAlive === WEEKS_IN_SEASON) {
 			return SeasonStatus.Complete;
 		}
 
