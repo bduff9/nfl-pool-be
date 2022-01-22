@@ -241,7 +241,9 @@ export class UserResolver {
 		return qb
 			.leftJoinAndSelect('U.payments', 'P')
 			.where(`U.UserID in ${userIDSubquery}`)
-			.orderBy('U.UserLastName', 'ASC')
+			.orderBy('U.UserPaymentType', 'ASC')
+			.addOrderBy('U.UserFirstName', 'ASC')
+			.addOrderBy('U.UserLastName', 'ASC')
 			.getMany();
 	}
 
