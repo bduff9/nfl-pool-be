@@ -48,7 +48,7 @@
             <li>2nd place - ${{ secondPlaceSurvivor }}</li>
           </ul>
 
-          <p>Reminder that all payouts will be done after the season has completed. Any questions or concerns please let us know!</p>
+          <p>Reminder that all payouts will be done after the season has completed. Any questions or concerns please let me know!</p>
           <p>You can view all current prizes you've won at the link below.</p>
         </mj-text>
         <mj-button align="center" background-color="#15803d" href="{{ domain }}/users/payments" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">

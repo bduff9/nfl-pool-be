@@ -17,7 +17,7 @@ Survivor Payouts
 - 1st place - ${{ firstPlaceSurvivor }}
 - 2nd place - ${{ secondPlaceSurvivor }}
 
-Reminder that all payouts will be done after the season has completed. Any questions or concerns please let us know!
+Reminder that all payouts will be done after the season has completed. Any questions or concerns please let me know!
 
 You can view all current prizes you've won at the link below:
 {{ domain }}/users/payments
