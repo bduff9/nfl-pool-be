@@ -48,7 +48,7 @@
           <br />
 
           <p>Please do not hesitate to let us know if there are any questions or concerns,</p>
-          <p>Brian and Billy</p>
+          <p>Brian</p>
         </mj-text>
         <mj-button align="center" background-color="#15803d" href="{{ domain }}/support" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
           <span style="font-size:16px;">View Help section for more information</span </mj-button>

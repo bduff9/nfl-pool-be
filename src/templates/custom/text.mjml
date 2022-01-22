@@ -3,6 +3,6 @@ Hello {{ user.userFirstName }},
 {{ textBody }}
 
 Please do not hesitate to let us know if there are any questions or concerns,
-Brian and Billy
+Brian
 
 {{ domain }}
