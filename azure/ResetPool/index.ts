@@ -40,6 +40,7 @@ import { verifySeasonYearForReset } from '../../src/util/dates';
 import { populateWinnerHistory } from '../../src/util/history';
 import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { resetPrizeAmounts, updateSystemYear } from '../../src/util/systemValue';
+import { resetTeams } from '../../src/util/team';
 import { MyTimer } from '../../src/util/types';
 import { clearOldUserData, resetUsers } from '../../src/util/user';
 
@@ -91,20 +92,23 @@ const timerTrigger: AzureFunction = async (
 
 	await populateWinnerHistory();
 	await entityManager.query('SET FOREIGN_KEY_CHECKS = 0');
-	await Log.clear();
-	await Pick.clear();
-	await Tiebreaker.clear();
-	await OverallMV.clear();
-	await WeeklyMV.clear();
-	await SurvivorPick.clear();
-	await SurvivorMV.clear();
-	await Game.clear();
-	await clearOldUserData();
-	await resetUsers();
-	await VerificationRequest.clear();
-	await Session.clear();
-	await Payment.clear();
-	await resetPrizeAmounts();
+	await Promise.all([
+		Log.clear(),
+		Pick.clear(),
+		Tiebreaker.clear(),
+		OverallMV.clear(),
+		WeeklyMV.clear(),
+		SurvivorPick.clear(),
+		SurvivorMV.clear(),
+		Game.clear(),
+		resetTeams(),
+		clearOldUserData(),
+		resetUsers(),
+		VerificationRequest.clear(),
+		Session.clear(),
+		Payment.clear(),
+		resetPrizeAmounts(),
+	]);
 	await entityManager.query('SET FOREIGN_KEY_CHECKS = 1');
 
 	// Populate new season data

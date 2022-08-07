@@ -31,9 +31,25 @@ export const getTeamFromDB = async (teamShortName: string): Promise<Team> =>
 	Team.findOneOrFail({ where: { teamShortName } });
 
 export const updateTeamByeWeeks = async (week: number): Promise<void> => {
+	//TODO: cannot move this to querybuilder until UNION is supported
+	// https://github.com/typeorm/typeorm/issues/8584
 	await Team.query(
 		`update Teams set TeamByeWeek = ${week}, TeamUpdatedBy = '${ADMIN_USER}' where TeamID not in (select HomeTeamID from Games where GameWeek = ${week} union select VisitorTeamID from Games where GameWeek = ${week}) and TeamCity <> 'Tie'`,
 	);
+};
+
+// ts-prune-ignore-next
+export const resetTeams = async (): Promise<void> => {
+	Team.createQueryBuilder()
+		.update()
+		.set({
+			teamByeWeek: 0,
+			teamPassDefenseRank: null,
+			teamPassOffenseRank: null,
+			teamRushDefenseRank: null,
+			teamRushOffenseRank: null,
+		})
+		.execute();
 };
 
 export const updateTeamData = async (
