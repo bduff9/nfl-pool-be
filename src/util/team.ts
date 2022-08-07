@@ -13,8 +13,6 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
-
 import { TAPITeamResponse } from '../api/types';
 import { Team } from '../entity';
 
@@ -41,7 +39,7 @@ export const updateTeamByeWeeks = async (week: number): Promise<void> => {
 };
 
 // ts-prune-ignore-next
-export const resetTeams = async (): Promise<UpdateResult> =>
+export const resetTeams = async (): Promise<void> => {
 	Team.createQueryBuilder()
 		.update()
 		.set({
@@ -52,6 +50,7 @@ export const resetTeams = async (): Promise<UpdateResult> =>
 			teamRushOffenseRank: null,
 		})
 		.execute();
+};
 
 export const updateTeamData = async (
 	teamID: number,
