@@ -1,4 +1,4 @@
-<mj-section padding="0 0 15px 0">
+<mj-section padding="0 0 15px 0" css-class="hide-for-browser">
   <mj-column vertical-align="middle">
     <mj-text align="left" font-size="15px" padding="0">
       <p style="text-align: center; margin: 10px 0;">
