@@ -40,8 +40,10 @@ const getNewUserData = async (
 	newUser: NewUser,
 ): Promise<[[string], NewUserData]> => {
 	const yearsPlayedResult = await UserHistory.find({ where: { userID: newUser.userID } });
+	//TODO: get current year
 	const yearsPlayed = yearsPlayedResult
 		.map(({ userHistoryYear }) => userHistoryYear)
+		//TODO: use filter to filter out current year instead of just taking off the end
 		.slice(0, -1);
 	const isReturning = yearsPlayed.length > 0;
 
