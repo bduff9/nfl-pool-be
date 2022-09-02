@@ -17,6 +17,7 @@ import { User, UserHistory } from '../entity';
 import EmailType from '../entity/EmailType';
 import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
+import { getSystemYear } from '../util/systemValue';
 
 type NewUserAdmin = Pick<User, 'userEmail' | 'userFirstName'>;
 type NewUser = Pick<
@@ -40,9 +41,10 @@ const getNewUserData = async (
 	newUser: NewUser,
 ): Promise<[[string], NewUserData]> => {
 	const yearsPlayedResult = await UserHistory.find({ where: { userID: newUser.userID } });
+	const currentYear = await getSystemYear();
 	const yearsPlayed = yearsPlayedResult
 		.map(({ userHistoryYear }) => userHistoryYear)
-		.slice(0, -1);
+		.filter(year => year !== currentYear);
 	const isReturning = yearsPlayed.length > 0;
 
 	return [
