@@ -19,7 +19,7 @@
             </div>
           {{/if}}
           <div style="text-decoration: none;">
-            <strong>{{ user.userEmail }}</strong>
+            <strong>{{ email }}</strong>
           </div>
         </mj-text>
         <mj-button align="center" background-color="#15803d" href="{{ url }}" border-radius="3px" border="none" color="#ffffff" font-weight="normal" inner-padding="13px 25px 13px 25px" padding="10px 50px 10px 50px" text-decoration="none" text-transform="none" vertical-align="middle" width="100%">
