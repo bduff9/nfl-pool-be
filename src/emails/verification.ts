@@ -31,7 +31,7 @@ const getVerificationData = async (
 	url: string,
 ): Promise<[[string], VerificationData]> => {
 	const host = new URL(url).hostname;
-	const user = await User.findOneOrFail({ where: { userEmail: email } });
+	const user = await User.findOne({ where: { userEmail: email } });
 	const hasName = !!user?.userFirstName && !!user?.userLastName;
 
 	return [[user.userEmail], { hasName, host, url, user }];
