@@ -118,7 +118,7 @@ export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> 
 
 			if (userBalance > survivorCost * -1) continue;
 
-			await unregisterForSurvivor(user.userID, ADMIN_USER);
+			await unregisterForSurvivor(user.userID, ADMIN_USER, true);
 			log.info('Unregistered user from survivor pool', user);
 		}
 	}
@@ -190,6 +190,7 @@ export const registerForSurvivor = async (
 export const unregisterForSurvivor = async (
 	userID: number,
 	updatedBy?: string,
+	override = false,
 ): Promise<void> => {
 	const result = await Game.createQueryBuilder('G')
 		.where('G.GameNumber = 1')
@@ -197,7 +198,7 @@ export const unregisterForSurvivor = async (
 		.andWhere('G.GameKickoff > CURRENT_TIMESTAMP')
 		.getCount();
 
-	if (result === 0) throw new Error('Season has already started!');
+	if (result === 0 && !override) throw new Error('Season has already started!');
 
 	const user = await User.findOneOrFail({ where: { userID } });
 
@@ -206,6 +207,5 @@ export const unregisterForSurvivor = async (
 		{ userID },
 		{ userPlaysSurvivor: false, userUpdatedBy: updatedBy ?? user.userEmail },
 	);
-
 	await Payment.delete({ userID, paymentDescription: 'Survivor Pool Entry Fee' });
 };
