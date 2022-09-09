@@ -20,10 +20,11 @@ import { log } from '../util/logging';
 
 type VerificationUser = Pick<User, 'userEmail' | 'userFirstName' | 'userLastName'>;
 type VerificationData = EmailNotAllowedLocals & {
+	email: string;
 	hasName: boolean;
 	host: string;
 	url: string;
-	user: VerificationUser;
+	user?: VerificationUser;
 };
 
 const getVerificationData = async (
@@ -31,10 +32,10 @@ const getVerificationData = async (
 	url: string,
 ): Promise<[[string], VerificationData]> => {
 	const host = new URL(url).hostname;
-	const user = await User.findOneOrFail({ where: { userEmail: email } });
+	const user = await User.findOne({ where: { userEmail: email } });
 	const hasName = !!user?.userFirstName && !!user?.userLastName;
 
-	return [[user.userEmail], { hasName, host, url, user }];
+	return [[email], { email, hasName, host, url, user }];
 };
 
 export const previewVerificationEmail = async (
