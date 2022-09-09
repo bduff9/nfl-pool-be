@@ -34,6 +34,20 @@ import { hasUserPickedFirstGameForWeek } from './pick';
 import { hasUserSubmittedSurvivorPickForWeek } from './survivor';
 import { hasUserSubmittedPicksForWeek } from './tiebreaker';
 
+export const disableAllSMSForUser = async (userID: number): Promise<void> => {
+	await Notification.createQueryBuilder('N')
+		.update()
+		.set({
+			notificationSMS: false,
+			notificationSMSHoursBefore: null,
+		})
+		.where({
+			userID: userID,
+			notificationSMS: true,
+		})
+		.execute();
+};
+
 // ts-prune-ignore-next
 export const sendReminderEmails = async (
 	hoursLeft: number,
