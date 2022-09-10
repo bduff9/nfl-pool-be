@@ -14,12 +14,16 @@
  * Home: https://asitewithnoname.com/
  */
 import { Twilio } from 'twilio';
+import { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
 
 import { getID } from '../dynamodb';
 import { EmailClass, EmailModel } from '../dynamodb/email';
+import { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { domain, EMAIL_SUBJECT_PREFIX } from '../util/constants';
+import { isTwilioError } from '../util/guards';
 import { log } from '../util/logging';
+import { disableAllSMSForUser } from '../util/notification';
 
 const {
 	TWILIO_ACCOUNT_SID: accountSID,
@@ -42,6 +46,7 @@ export const sendSMS = async (
 	const to = sendTo.startsWith('+1') ? sendTo : `+1${sendTo}`;
 	const body = `${EMAIL_SUBJECT_PREFIX}${message}\n${domain}`;
 	let newSMS: EmailClass | null = null;
+	let sentMessage: MessageInstance | null = null;
 
 	try {
 		newSMS = await EmailModel.create({
@@ -58,16 +63,29 @@ export const sendSMS = async (
 		});
 	}
 
-	const sentMessage = await twilioClient.messages.create({
-		from: twilioNumber,
-		to,
-		body,
-	});
+	try {
+		sentMessage = await twilioClient.messages.create({
+			from: twilioNumber,
+			to,
+			body,
+		});
+	} catch (error) {
+		if (isTwilioError(error) && error.code === 21610) {
+			const user = await User.findOneOrFail({ userPhone: sendTo });
+
+			log.info('User has opted out of SMS, turning all their SMS notifications off', user);
+			await disableAllSMSForUser(user);
+
+			return;
+		}
+
+		throw error;
+	}
 
 	try {
 		await EmailModel.update(
 			{ emailID, createdAt: newSMS?.createdAt },
-			{ sms: sentMessage.body },
+			{ sms: sentMessage?.body },
 		);
 	} catch (error) {
 		log.error('Failed to update SMS record in DynamoDB:', { emailID, error });

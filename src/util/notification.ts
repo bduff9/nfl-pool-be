@@ -21,7 +21,7 @@ import sendSurvivorReminderEmail from '../emails/survivorReminder';
 import sendWeekEndedEmail from '../emails/weekEnded';
 import sendWeeklyEmail from '../emails/weekly';
 import sendWeekStartedEmail from '../emails/weekStarted';
-import { Notification } from '../entity';
+import { Notification, User } from '../entity';
 import sendPickReminderPushNotification from '../pushNotifications/pickReminder';
 import sendSurvivorReminderPushNotification from '../pushNotifications/survivorReminder';
 import sendPickReminderSMS from '../sms/pickReminder';
@@ -34,7 +34,7 @@ import { hasUserPickedFirstGameForWeek } from './pick';
 import { hasUserSubmittedSurvivorPickForWeek } from './survivor';
 import { hasUserSubmittedPicksForWeek } from './tiebreaker';
 
-export const disableAllSMSForUser = async (userID: number): Promise<void> => {
+export const disableAllSMSForUser = async (user: User): Promise<void> => {
 	await Notification.createQueryBuilder('N')
 		.update()
 		.set({
@@ -42,10 +42,13 @@ export const disableAllSMSForUser = async (userID: number): Promise<void> => {
 			notificationSMSHoursBefore: null,
 		})
 		.where({
-			userID: userID,
+			userID: user.userID,
 			notificationSMS: true,
 		})
 		.execute();
+
+	user.userPhone = null;
+	await user.save();
 };
 
 // ts-prune-ignore-next
