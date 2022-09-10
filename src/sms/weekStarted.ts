@@ -16,9 +16,7 @@
 
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { isTwilioError } from '../util/guards';
 import { log } from '../util/logging';
-import { disableAllSMSForUser } from '../util/notification';
 
 import { sendSMS } from '.';
 
@@ -36,13 +34,6 @@ const sendWeekStartedSMS = async (user: User, week: number): Promise<void> => {
 
 		await sendSMS(user.userPhone, message, EmailType.weekStarted);
 	} catch (error) {
-		if (isTwilioError(error) && error.code === 21610) {
-			log.info('User has opted out of SMS, turning all their SMS notifications off', user);
-			await disableAllSMSForUser(user.userID);
-
-			return;
-		}
-
 		log.error('Failed to send week started sms: ', {
 			error,
 			homeTeam,
