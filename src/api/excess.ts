@@ -100,7 +100,7 @@ export const excess = <C extends t.HasProps>(
 };
 
 class ExcessType<C extends t.Any, A = C['_A'], O = A, I = unknown> extends t.Type<A, O, I> {
-	public readonly _tag: 'ExcessType' = 'ExcessType';
+	public readonly _tag = 'ExcessType' as const;
 	public constructor (
 		name: string,
 		is: ExcessType<C, A, O, I>['is'],
