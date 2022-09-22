@@ -13,8 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPIResponseMatchup } from '../api/types';
 import { parseTeamsFromApi } from '../api/util';
+import { TAPIResponseMatchup } from '../api/zod';
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { convertEpoch } from '../util/dates';

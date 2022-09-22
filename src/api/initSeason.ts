@@ -13,11 +13,10 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPIAllWeeksResponse } from '../api/types';
+import { TAPIAllWeeksResponse } from '../api/zod';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 import { ADMIN_USER } from '../util/constants';
-import { convertEpoch } from '../util/dates';
 import { log } from '../util/logging';
 import { getTeamsFromDB, updateTeamData } from '../util/team';
 
@@ -30,40 +29,38 @@ export const populateGames = async (newSeason: TAPIAllWeeksResponse): Promise<vo
 	for (const { matchup: games, week } of newSeason) {
 		if (!games) continue;
 
-		const w = parseInt(week, 10);
-
-		log.info(`Week ${w}: ${games.length} games`);
+		log.info(`Week ${week}: ${games.length} games`);
 
 		for (let i = 0; i < games.length; i++) {
 			const gameObj = games[i];
 
 			// Create and save this game
 			const gameNumber = i + 1;
-			const gameID = w * 100 + gameNumber;
+			const gameID = week * 100 + gameNumber;
 			const [hTeamData, vTeamData] = parseTeamsFromApi(gameObj.team);
 			const homeTeamID = teams[hTeamData.id];
 			const visitorTeamID = teams[vTeamData.id];
 
 			await Game.create({
 				gameID,
-				gameWeek: w,
+				gameWeek: week,
 				gameNumber,
 				homeTeamID,
 				gameHomeScore: 0,
 				visitorTeamID,
 				gameVisitorScore: 0,
 				gameStatus: GameStatus.Pregame,
-				gameKickoff: convertEpoch(parseInt(gameObj.kickoff, 10)),
-				gameTimeLeftInSeconds: parseInt(gameObj.gameSecondsRemaining || '0', 10),
+				gameKickoff: gameObj.kickoff,
+				gameTimeLeftInSeconds: gameObj.gameSecondsRemaining,
 				gameAddedBy: ADMIN_USER,
 				gameUpdatedBy: ADMIN_USER,
 			}).save();
 
 			// Update home team data
-			await updateTeamData(homeTeamID, hTeamData, w);
+			await updateTeamData(homeTeamID, hTeamData, week);
 
 			// Update visiting team data
-			await updateTeamData(visitorTeamID, vTeamData, w);
+			await updateTeamData(visitorTeamID, vTeamData, week);
 		}
 	}
 };

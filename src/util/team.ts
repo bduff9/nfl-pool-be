@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPITeamResponse } from '../api/types';
+import { TAPITeamResponse } from '../api/zod';
 import { Team } from '../entity';
 
 import { ADMIN_USER } from './constants';
@@ -60,19 +60,19 @@ export const updateTeamData = async (
 	const team = await Team.findOneOrFail(teamID);
 
 	if (data.passDefenseRank) {
-		team.teamPassDefenseRank = parseInt(data.passDefenseRank, 10);
+		team.teamPassDefenseRank = data.passDefenseRank;
 	}
 
 	if (data.passOffenseRank) {
-		team.teamPassOffenseRank = parseInt(data.passOffenseRank, 10);
+		team.teamPassOffenseRank = data.passOffenseRank;
 	}
 
 	if (data.rushDefenseRank) {
-		team.teamRushDefenseRank = parseInt(data.rushDefenseRank, 10);
+		team.teamRushDefenseRank = data.rushDefenseRank;
 	}
 
 	if (data.rushOffenseRank) {
-		team.teamRushOffenseRank = parseInt(data.rushOffenseRank, 10);
+		team.teamRushOffenseRank = data.rushOffenseRank;
 	}
 
 	if (!team.teamByeWeek || team.teamByeWeek === week) {
