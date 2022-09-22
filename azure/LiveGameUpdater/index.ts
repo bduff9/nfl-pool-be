@@ -25,6 +25,7 @@ import {
 	getCurrentWeek,
 	getDBGameFromAPI,
 	updateDBGame,
+	updateSpreads,
 } from '../../src/util/game';
 import { resetLogger, updateLoggerForAzure } from '../../src/util/logging';
 import { updateOverallMV, updateSurvivorMV, updateWeeklyMV } from '../../src/util/mv';
@@ -36,6 +37,7 @@ import {
 import { lockLatePaymentUsers, updatePayouts } from '../../src/util/payment';
 import { updateMissedPicks } from '../../src/util/pick';
 import { markEmptySurvivorPicksAsDead } from '../../src/util/survivor';
+import { getTeamFromDB, updateTeamData } from '../../src/util/team';
 import { MyTimer } from '../../src/util/types';
 
 const { database, host, password, port, dbuser } = process.env;
@@ -88,7 +90,17 @@ const timerTrigger: AzureFunction = async (
 	for (const game of games) {
 		const kickoff = convertEpoch(+game.kickoff);
 
-		if (now < kickoff || game.status === 'SCHED') continue;
+		for (const team of game.team) {
+			const dbTeam = await getTeamFromDB(team.id);
+
+			await updateTeamData(dbTeam.teamID, team, currentWeek);
+		}
+
+		if (now < kickoff || game.status === 'SCHED') {
+			await updateSpreads(currentWeek, game);
+
+			continue;
+		}
 
 		const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
 		let dbGame = await getDBGameFromAPI(currentWeek, homeTeam.id, visitingTeam.id);
