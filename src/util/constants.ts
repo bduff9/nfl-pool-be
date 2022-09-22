@@ -71,6 +71,11 @@ export const MILLISECONDS_IN_SECOND = 1000;
 export const WEEKS_IN_SEASON = 18;
 
 /**
+ * The number of weeks in the postseason
+ */
+export const PLAYOFF_WEEKS = 4;
+
+/**
  * The total number of weeks in an average month
  */
 export const WEEKS_IN_MONTH = 4;

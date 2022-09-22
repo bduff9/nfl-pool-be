@@ -15,7 +15,7 @@
  */
 import GameStatus from '../entity/GameStatus';
 
-import { TAPIResponseMatchup, TAPITeamResponse } from './types';
+import { TAPIResponseMatchup, TAPITeamResponse } from './zod';
 
 export const getGameStatusFromAPI = (
 	game: Pick<TAPIResponseMatchup, 'quarter' | 'status'>,

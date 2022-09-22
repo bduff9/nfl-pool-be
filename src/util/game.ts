@@ -15,8 +15,8 @@
  */
 import { MoreThan, Not, Raw } from 'typeorm';
 
-import { TAPIResponseMatchup } from '../api/types';
 import { getGameStatusFromAPI, parseTeamsFromApi } from '../api/util';
+import { TAPIResponseMatchup } from '../api/zod';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 import SeasonStatus from '../entity/SeasonStatus';

@@ -23,8 +23,8 @@ import { getUserPicksForWeek } from '../util/pick';
 import { getTeamsFromDB, updateTeamByeWeeks } from '../util/team';
 import { getAllRegisteredUsers } from '../util/user';
 
-import { TAPIAllWeeksResponse, TAPIResponseMatchup } from './types';
 import { parseTeamsFromApi } from './util';
+import { TAPIAllWeeksResponse, TAPIResponseMatchup } from './zod';
 
 const movePointDown = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 	if (pick.pickPoints === null) return;
