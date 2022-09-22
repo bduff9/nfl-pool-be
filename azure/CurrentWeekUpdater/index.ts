@@ -21,6 +21,7 @@ import { waitForConnection } from '../../src/util/database';
 import { getCurrentWeek, getHoursToWeekStart, updateSpreads } from '../../src/util/game';
 import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { sendReminderEmails, sendReminderTexts } from '../../src/util/notification';
+import { getTeamFromDB, updateTeamData } from '../../src/util/team';
 import { MyTimer } from '../../src/util/types';
 
 const { database, host, password, port, dbuser } = process.env;
@@ -50,7 +51,15 @@ const timerTrigger: AzureFunction = async (
 	const currentWeek = await getCurrentWeek();
 	const games = await getGamesForWeek(currentWeek);
 
-	for (const game of games) await updateSpreads(currentWeek, game);
+	for (const game of games) {
+		await updateSpreads(currentWeek, game);
+
+		for (const team of game.team) {
+			const dbTeam = await getTeamFromDB(team.id);
+
+			await updateTeamData(dbTeam.teamID, team, currentWeek);
+		}
+	}
 
 	const hours = await getHoursToWeekStart(currentWeek);
 
