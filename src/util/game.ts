@@ -328,11 +328,9 @@ export const updateSpreads = async (
 	const { kickoff, team } = apiGame;
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(team);
 	const game = await getDBGameFromAPI(week, homeTeam.id, visitingTeam.id);
-	const apiKickoff = +kickoff;
-	const dbKickoff = convertDateToEpoch(game.gameKickoff);
 
-	if (dbKickoff !== apiKickoff) {
-		game.gameKickoff = convertEpoch(apiKickoff);
+	if (game.gameKickoff.toISOString() !== kickoff.toISOString()) {
+		game.gameKickoff = kickoff;
 	}
 
 	game.gameHomeSpread = +homeTeam.spread;
