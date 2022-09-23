@@ -19,7 +19,6 @@ import 'reflect-metadata';
 import { getGamesForWeek } from '../../src/api';
 import { parseTeamsFromApi } from '../../src/api/util';
 import { waitForConnection } from '../../src/util/database';
-import { convertEpoch } from '../../src/util/dates';
 import {
 	checkDBIfUpdatesNeeded,
 	getCurrentWeek,
@@ -88,7 +87,7 @@ const timerTrigger: AzureFunction = async (
 	}
 
 	for (const game of games) {
-		const kickoff = convertEpoch(+game.kickoff);
+		const kickoff = game.kickoff;
 
 		for (const team of game.team) {
 			const dbTeam = await getTeamFromDB(team.id);

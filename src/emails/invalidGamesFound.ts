@@ -17,7 +17,6 @@ import { parseTeamsFromApi } from '../api/util';
 import { TAPIResponseMatchup } from '../api/zod';
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { convertEpoch } from '../util/dates';
 import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
@@ -40,7 +39,7 @@ const getInvalidGamesFoundData = async (
 	invalidAPIGames.forEach(game => {
 		const [home, visitor] = parseTeamsFromApi(game.team);
 		const message: AdminMessage = {
-			game: `${visitor.id} @ ${home.id} starting at ${convertEpoch(+game.kickoff)}`,
+			game: `${visitor.id} @ ${home.id} starting at ${game.kickoff}`,
 			reason: 'Game is found in API but not in database',
 		};
 

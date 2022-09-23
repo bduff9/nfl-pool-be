@@ -17,16 +17,6 @@ import { MILLISECONDS_IN_SECOND, MINUTES_IN_HOUR, SECONDS_IN_MINUTE } from './co
 import { get2DigitNumber } from './numbers';
 import { getSystemYear } from './systemValue';
 
-export const convertDateToEpoch = (date: Date): number => Math.floor(date.getTime() / 1000);
-
-export const convertEpoch = (epoch: number): Date => {
-	const d = new Date(0);
-
-	d.setUTCSeconds(epoch);
-
-	return d;
-};
-
 export const formatDueDate = (date: Date): string => {
 	const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' });
 

@@ -22,7 +22,7 @@ import GameStatus from '../entity/GameStatus';
 import SeasonStatus from '../entity/SeasonStatus';
 
 import { ADMIN_USER, WEEKS_IN_SEASON } from './constants';
-import { convertEpoch, getHoursBetweenDates } from './dates';
+import { getHoursBetweenDates } from './dates';
 import { log } from './logging';
 import { markWrongSurvivorPicksAsDead } from './survivor';
 import { getTeamFromDB } from './team';
@@ -122,7 +122,7 @@ const validateAPIData = (game: TAPIResponseMatchup, dbGame: Game): boolean => {
 		GameStatus.Invalid,
 	];
 	const HOURS_TO_WAIT = 10;
-	const kickoff = convertEpoch(+game.kickoff);
+	const kickoff = game.kickoff;
 	const hoursSinceKickoff = getHoursBetweenDates(kickoff);
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
 
