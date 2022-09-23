@@ -22,7 +22,7 @@ import GameStatus from '../entity/GameStatus';
 import SeasonStatus from '../entity/SeasonStatus';
 
 import { ADMIN_USER, WEEKS_IN_SEASON } from './constants';
-import { convertDateToEpoch, convertEpoch, getHoursBetweenDates } from './dates';
+import { convertEpoch, getHoursBetweenDates } from './dates';
 import { log } from './logging';
 import { markWrongSurvivorPicksAsDead } from './survivor';
 import { getTeamFromDB } from './team';
@@ -328,11 +328,9 @@ export const updateSpreads = async (
 	const { kickoff, team } = apiGame;
 	const [homeTeam, visitingTeam] = parseTeamsFromApi(team);
 	const game = await getDBGameFromAPI(week, homeTeam.id, visitingTeam.id);
-	const apiKickoff = +kickoff;
-	const dbKickoff = convertDateToEpoch(game.gameKickoff);
 
-	if (dbKickoff !== apiKickoff) {
-		game.gameKickoff = convertEpoch(apiKickoff);
+	if (game.gameKickoff.toISOString() !== kickoff.toISOString()) {
+		game.gameKickoff = kickoff;
 	}
 
 	game.gameHomeSpread = +homeTeam.spread;
