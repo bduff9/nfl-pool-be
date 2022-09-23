@@ -16,7 +16,6 @@
 import sendInvalidGamesEmail from '../emails/invalidGamesFound';
 import { Game, Pick } from '../entity';
 import { ADMIN_USER, WEEKS_IN_SEASON } from '../util/constants';
-import { convertDateToEpoch, convertEpoch } from '../util/dates';
 import { findFutureGame, getAllGamesForWeek } from '../util/game';
 import { log } from '../util/logging';
 import { getUserPicksForWeek } from '../util/pick';
@@ -233,7 +232,6 @@ export const healWeek = async (
 	for (let i = apiGames.length; i--; ) {
 		const game = apiGames[i];
 		const [homeTeam, visitingTeam] = parseTeamsFromApi(game.team);
-		const kickoffEpoch = +game.kickoff;
 		const apiHomeTeamID = teams[homeTeam.id];
 		const apiVisitorTeamID = teams[visitingTeam.id];
 		const gameIndex = currentDBWeek.findIndex(
@@ -244,8 +242,8 @@ export const healWeek = async (
 		if (gameIndex > -1) {
 			const dbGame = currentDBWeek[gameIndex];
 
-			if (kickoffEpoch !== convertDateToEpoch(dbGame.gameKickoff)) {
-				await updateGameMeta(dbGame, week, convertEpoch(kickoffEpoch));
+			if (game.kickoff.toISOString() !== dbGame.gameKickoff.toISOString()) {
+				await updateGameMeta(dbGame, week, game.kickoff);
 			}
 
 			validAPIGames.push(game);
@@ -257,7 +255,7 @@ export const healWeek = async (
 				const futureGame = await findFutureGame(apiHomeTeamID, apiVisitorTeamID, week);
 				const futureWeek = futureGame.gameWeek;
 
-				await updateGameMeta(futureGame, week, convertEpoch(kickoffEpoch));
+				await updateGameMeta(futureGame, week, game.kickoff);
 				await healPicks(futureWeek);
 				await healPicks(week);
 			} catch (error) {
@@ -273,7 +271,7 @@ export const healWeek = async (
 		const [foundWeek, foundAPIGame] = findFutureAPIGame(allAPIWeeks, game);
 
 		if (foundAPIGame) {
-			await updateGameMeta(game, foundWeek, convertEpoch(+foundAPIGame.kickoff));
+			await updateGameMeta(game, foundWeek, foundAPIGame.kickoff);
 			await healPicks(week);
 			await healPicks(foundWeek);
 		} else {
