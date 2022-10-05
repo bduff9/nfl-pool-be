@@ -21,6 +21,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryColumn,
+	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
 
@@ -29,6 +30,10 @@ import { User } from '.';
 @Entity('OverallMV', { schema: 'NFL' })
 @ObjectType()
 export class OverallMV extends BaseEntity {
+	@Field(() => Int, { nullable: false })
+	@PrimaryGeneratedColumn({ type: 'integer', name: 'OverallMVID', unsigned: false })
+	public overallMVID!: number;
+
 	@Field(() => Int, { nullable: false })
 	@PrimaryColumn({ default: 0, name: 'Rank', type: 'integer' })
 	public rank!: number;

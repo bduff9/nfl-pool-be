@@ -22,6 +22,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryColumn,
+	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
 
@@ -31,6 +32,10 @@ import { User } from '.';
 @Entity('WeeklyMV', { schema: 'NFL' })
 @ObjectType()
 export class WeeklyMV extends BaseEntity {
+	@Field(() => Int, { nullable: false })
+	@PrimaryGeneratedColumn({ type: 'integer', name: 'WeeklyMVID', unsigned: false })
+	public weeklyMVID!: number;
+
 	@Field(() => Int, { nullable: false })
 	@PrimaryColumn({ type: 'integer', name: 'Week' })
 	public week!: number;
