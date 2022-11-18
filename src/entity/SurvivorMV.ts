@@ -21,6 +21,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryColumn,
+	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
 
@@ -31,6 +32,10 @@ import { SurvivorPick, Team, User } from '.';
 @Entity('SurvivorMV', { schema: 'NFL' })
 @ObjectType()
 export class SurvivorMV extends BaseEntity {
+	@Field(() => Int, { nullable: false })
+	@PrimaryGeneratedColumn({ type: 'integer', name: 'SurvivorMVID', unsigned: false })
+	public survivorMVID!: number;
+
 	@Field(() => Int, { nullable: false })
 	@PrimaryColumn({ default: 0, name: 'Rank', type: 'integer' })
 	public rank!: number;
