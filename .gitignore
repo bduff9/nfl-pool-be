@@ -29,6 +29,7 @@ ormconfig.json
 .vscode/
 tmp/
 temp/
+.embold/
 
 # Vercel
 .now
