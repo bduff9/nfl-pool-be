@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import EmailType from '../entity/EmailType';
+import type EmailType from '../entity/EmailType';
 import { log } from '../util/logging';
 
 export const sendPushNotification = async (

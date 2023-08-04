@@ -13,15 +13,15 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class ChangeWSHName1668730820418 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`UPDATE Teams SET TeamName = 'Commanders' WHERE TeamID = 33`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`UPDATE Teams SET TeamName = 'Football Team' WHERE TeamID = 33`,
 		);

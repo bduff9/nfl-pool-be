@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class ModifyNotificationsToBeOneRowPer1621205461577 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Notifications change NotificationEnabled NotificationEmail boolean not null default false`,
 		);
@@ -50,13 +50,15 @@ export class ModifyNotificationsToBeOneRowPer1621205461577 implements MigrationI
 		await queryRunner.query(
 			`update Notifications set NotificationType = replace(NotificationType, 'Email', '') where NotificationType like '%Email'`,
 		);
-		await queryRunner.query(`delete from Notifications where NotificationType like '%SMS'`);
+		await queryRunner.query(
+			`delete from Notifications where NotificationType like '%SMS'`,
+		);
 		await queryRunner.query(
 			`update NotificationTypes set NotificationTypeHasEmail = true, NotificationTypeHasSMS = (case when NotificationType in ('Essentials', 'QuickPick', 'PicksSubmitted') then false else true end), NotificationTypeHasPushNotification = false`,
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`insert into NotificationTypes (NotificationType, NotificationTypeDescription, NotificationTypeHasEmail, NotificationTypeHasSMS, NotificationTypeHasPushNotification, NotificationTypeHasHours, NotificationTypeTooltip, NotificationTypeAddedBy, NotificationTypeUpdatedBy)  select 'PickReminderSMS', NotificationTypeDescription, NotificationTypeHasEmail, NotificationTypeHasSMS, NotificationTypeHasPushNotification, NotificationTypeHasHours, NotificationTypeTooltip, NotificationTypeAddedBy, NotificationTypeUpdatedBy from NotificationTypes where NotificationType = 'PickReminder'`,
 		);

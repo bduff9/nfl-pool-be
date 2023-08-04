@@ -77,9 +77,13 @@ const emailSchema = new dynamoose.Schema(
 	},
 );
 
-export const EmailModel = dynamoose.model<EmailClass>(`Emails-${VERCEL_ENV}`, emailSchema, {
-	create: false,
-	waitForActive: {
-		enabled: false,
+export const EmailModel = dynamoose.model<EmailClass>(
+	`Emails-${VERCEL_ENV}`,
+	emailSchema,
+	{
+		create: false,
+		waitForActive: {
+			enabled: false,
+		},
 	},
-});
+);

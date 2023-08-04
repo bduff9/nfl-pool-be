@@ -28,7 +28,7 @@ import {
 
 import { Notification } from '../entity';
 import { log } from '../util/logging';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @InputType({ description: 'Notification data' })
 class NotificationInput implements Partial<Notification> {
@@ -64,7 +64,7 @@ class NotificationInput implements Partial<Notification> {
 export class NotificationResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Notification])
-	async getMyNotifications (@Ctx() context: TCustomContext): Promise<Array<Notification>> {
+	async getMyNotifications(@Ctx() context: TCustomContext): Promise<Array<Notification>> {
 		const { user } = context;
 
 		if (!user) {
@@ -89,7 +89,7 @@ export class NotificationResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => [Notification])
-	async updateMyNotifications (
+	async updateMyNotifications(
 		@Arg('data', () => [NotificationInput]) notifications: NotificationInput[],
 		@Ctx() context: TCustomContext,
 	): Promise<Array<Notification>> {

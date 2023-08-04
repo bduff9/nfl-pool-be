@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class AddNotificationEnabledCol1621037143779 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
 		await queryRunner.query(
 			`alter table Notifications add column NotificationEnabled boolean not null default false after NotificationHoursBefore`,
@@ -31,7 +31,7 @@ export class AddNotificationEnabledCol1621037143779 implements MigrationInterfac
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
 		await queryRunner.query(`alter table Notifications drop column NotificationEnabled`);
 		await queryRunner.query(

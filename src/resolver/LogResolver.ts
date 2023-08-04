@@ -24,12 +24,12 @@ import {
 	Query,
 	Resolver,
 } from 'type-graphql';
-import { FindConditions } from 'typeorm';
+import type { FindConditions } from 'typeorm';
 
 import { Log, LogResult } from '../entity';
 import LogAction from '../entity/LogAction';
 import { log } from '../util/logging';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @InputType({ description: 'New log data' })
 class WriteLogInput implements Partial<Log> {
@@ -53,7 +53,7 @@ class WriteLogInput implements Partial<Log> {
 export class LogResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => LogResult)
-	async getLogs (
+	async getLogs(
 		@Arg('Sort') orderBy: string,
 		@Arg('SortDir', () => String) orderByDir: 'ASC' | 'DESC',
 		@Arg('PerPage', () => Int) limit: number,
@@ -81,7 +81,7 @@ export class LogResolver {
 		logResults.page = page ?? 1;
 		logResults.results = logs.map(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(log): Log => ({ ...log, logData: JSON.stringify(log.logData) as any } as Log),
+			(log): Log => ({ ...log, logData: JSON.stringify(log.logData) as any }) as Log,
 		);
 		logResults.totalCount = totalCount;
 
@@ -90,7 +90,7 @@ export class LogResolver {
 
 	@Authorized<TUserType>('anonymous')
 	@Mutation(() => Log)
-	async writeLog (
+	async writeLog(
 		@Arg('data') newLogData: WriteLogInput,
 		@Ctx() ctx: TCustomContext,
 	): Promise<Log> {
@@ -98,8 +98,8 @@ export class LogResolver {
 		const userID = user?.userID
 			? user.userID
 			: newLogData.sub
-				? parseInt(newLogData.sub, 10)
-				: null;
+			? parseInt(newLogData.sub, 10)
+			: null;
 		const auditUser = userID || 'unknown';
 		let logData: null | Record<string, string> = null;
 

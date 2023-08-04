@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class InsertSupportContent1630265327824 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`truncate table SupportContent`);
 		await queryRunner.query(` INSERT INTO SupportContent (SupportContentType,SupportContentOrder,SupportContentDescription,SupportContentDescription2,SupportContentCategory,SupportContentKeywords,SupportContentAddedBy,SupportContentUpdatedBy) VALUES
         ('Rule',10,'Each pick must be submitted prior to the kickoff of the game. Any picks that were saved but not submitted will count, but all other empty picks count as zero points.','','',NULL,'BILLY','BILLY'),
@@ -90,7 +90,7 @@ export class InsertSupportContent1630265327824 implements MigrationInterface {
         ('FAQ',120,'What happens if a game ends in a tie?','If a game ends in a tie, everyone loses that game regardless of which team was picked.','Make Picks',NULL,'BRIAN','BRIAN')`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`truncate table SupportContent`);
 	}
 }

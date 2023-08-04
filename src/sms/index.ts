@@ -14,12 +14,13 @@
  * Home: https://asitewithnoname.com/
  */
 import { Twilio } from 'twilio';
-import { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
+import type { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
 
 import { getID } from '../dynamodb';
-import { EmailClass, EmailModel } from '../dynamodb/email';
+import type { EmailClass } from '../dynamodb/email';
+import { EmailModel } from '../dynamodb/email';
 import { User } from '../entity';
-import EmailType from '../entity/EmailType';
+import type EmailType from '../entity/EmailType';
 import { domain, EMAIL_SUBJECT_PREFIX } from '../util/constants';
 import { isTwilioError } from '../util/guards';
 import { log } from '../util/logging';
@@ -73,7 +74,10 @@ export const sendSMS = async (
 		if (isTwilioError(error) && error.code === 21610) {
 			const user = await User.findOneOrFail({ userPhone: sendTo });
 
-			log.info('User has opted out of SMS, turning all their SMS notifications off', user);
+			log.info(
+				'User has opted out of SMS, turning all their SMS notifications off',
+				user,
+			);
 			await disableAllSMSForUser(user);
 
 			return;

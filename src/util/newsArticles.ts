@@ -42,8 +42,12 @@ type APINewsResults = {
 const getAPINewsURL = (week: number, from: string): string =>
 	`https://newsapi.org/v2/everything?q=+nfl week ${week} -fantasy -college -roundup&excludeDomains=engadget.com,androidcentral.com&from=${from}&apiKey=${API_NEWS_KEY}`;
 
-export const getArticlesForWeek = async (week: number): Promise<Array<APINewsArticle>> => {
-	const firstGame = await Game.findOneOrFail({ where: { gameNumber: 1, gameWeek: week } });
+export const getArticlesForWeek = async (
+	week: number,
+): Promise<Array<APINewsArticle>> => {
+	const firstGame = await Game.findOneOrFail({
+		where: { gameNumber: 1, gameWeek: week },
+	});
 	const firstGameDate = firstGame.gameKickoff.toISOString().substring(0, 10);
 	const url = getAPINewsURL(week, firstGameDate);
 	const apiResults = await axios.get<APINewsResults>(url);

@@ -14,7 +14,8 @@
  * Home: https://asitewithnoname.com/
  */
 import sendInvalidGamesEmail from '../emails/invalidGamesFound';
-import { Game, Pick } from '../entity';
+import type { Pick } from '../entity';
+import { Game } from '../entity';
 import { ADMIN_USER, WEEKS_IN_SEASON } from '../util/constants';
 import { findFutureGame, getAllGamesForWeek } from '../util/game';
 import { log } from '../util/logging';
@@ -23,7 +24,7 @@ import { getTeamsFromDB, updateTeamByeWeeks } from '../util/team';
 import { getAllRegisteredUsers } from '../util/user';
 
 import { parseTeamsFromApi } from './util';
-import { TAPIAllWeeksResponse, TAPIResponseMatchup } from './zod';
+import type { TAPIAllWeeksResponse, TAPIResponseMatchup } from './zod';
 
 const movePointDown = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 	if (pick.pickPoints === null) return;
@@ -39,15 +40,18 @@ const movePointDown = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 };
 
 const fixTooHighPoints = async (picks: Array<Pick>): Promise<void> => {
-	const highest = picks.reduce((acc, pick) => {
-		if (pick.pickPoints === null) return acc;
+	const highest = picks.reduce(
+		(acc, pick) => {
+			if (pick.pickPoints === null) return acc;
 
-		if (acc === null || acc.pickPoints === null || acc.pickPoints < pick.pickPoints) {
-			return pick;
-		}
+			if (acc === null || acc.pickPoints === null || acc.pickPoints < pick.pickPoints) {
+				return pick;
+			}
 
-		return acc;
-	}, null as null | Pick);
+			return acc;
+		},
+		null as null | Pick,
+	);
 
 	if (!highest) return;
 
@@ -70,15 +74,18 @@ const movePointUp = async (pick: Pick, picks: Array<Pick>): Promise<void> => {
 };
 
 const fixTooLowPoints = async (picks: Array<Pick>): Promise<void> => {
-	const lowest = picks.reduce((acc, pick) => {
-		if (pick.pickPoints === null) return acc;
+	const lowest = picks.reduce(
+		(acc, pick) => {
+			if (pick.pickPoints === null) return acc;
 
-		if (acc === null || acc.pickPoints === null || acc.pickPoints > pick.pickPoints) {
-			return pick;
-		}
+			if (acc === null || acc.pickPoints === null || acc.pickPoints > pick.pickPoints) {
+				return pick;
+			}
 
-		return acc;
-	}, null as null | Pick);
+			return acc;
+		},
+		null as null | Pick,
+	);
 
 	if (!lowest) return;
 
@@ -163,7 +170,11 @@ const redoGameNumbers = async (gameWeek: number): Promise<void> => {
 	}
 };
 
-const updateKickoff = async (game: Game, week: number, newKickoff: Date): Promise<void> => {
+const updateKickoff = async (
+	game: Game,
+	week: number,
+	newKickoff: Date,
+): Promise<void> => {
 	const gameNumber =
 		game.gameWeek === week ? game.gameNumber : await getNextGameNumber(week);
 

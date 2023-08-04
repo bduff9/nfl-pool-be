@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class AddGameAPICols1624843461289 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Games
         add GameStatusNew enum('Pregame', '1st Quarter', '2nd Quarter', 'Half Time', '3rd Quarter', '4th Quarter', 'Overtime', 'Final', 'Invalid') default null null after GameStatus,
         add GameTimeLeftInQuarter varchar(10) default '' not null after GameTimeLeftInSeconds`);
@@ -30,7 +30,7 @@ export class AddGameAPICols1624843461289 implements MigrationInterface {
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Games
         add GameStatusOld enum('P', '1', '2', 'H', '3', '4', 'C', 'I') default null null after GameStatus,
         drop column GameTimeLeftInQuarter`);

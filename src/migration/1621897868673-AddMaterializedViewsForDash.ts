@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class AddMaterializedViewsForDash1621897868673 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Games alter GameKickoff drop default`);
 		await queryRunner.query(
 			`alter table Games add column GameHomeScore integer not null default 0 after GameHomeSpread`,
@@ -76,7 +76,7 @@ export class AddMaterializedViewsForDash1621897868673 implements MigrationInterf
           charset=utf8mb4`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table OverallMV`);
 		await queryRunner.query(`drop table WeeklyMV`);
 		await queryRunner.query(`alter table Games drop column GameVisitorScore`);

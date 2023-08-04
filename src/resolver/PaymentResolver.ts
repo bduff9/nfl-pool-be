@@ -19,13 +19,13 @@ import { Log, Payment, User } from '../entity';
 import LogAction from '../entity/LogAction';
 import PaymentType from '../entity/PaymentType';
 import { getUserPayments } from '../util/payment';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Payment)
 export class PaymentResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Payment])
-	async getMyPayments (@Ctx() context: TCustomContext): Promise<Array<Payment>> {
+	async getMyPayments(@Ctx() context: TCustomContext): Promise<Array<Payment>> {
 		const { user } = context;
 
 		if (!user) {
@@ -40,7 +40,7 @@ export class PaymentResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Int)
-	async updateUserPaid (
+	async updateUserPaid(
 		@Arg('UserID', () => Int) userID: number,
 		@Arg('AmountPaid') amountPaid: number,
 		@Ctx() context: TCustomContext,
@@ -91,7 +91,7 @@ export class PaymentResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Int)
-	async updateUserPayout (
+	async updateUserPayout(
 		@Arg('UserID', () => Int) userID: number,
 		@Arg('AmountPaid') amountPaidOut: number,
 		@Ctx() context: TCustomContext,

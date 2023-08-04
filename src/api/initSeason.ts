@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPIAllWeeksResponse } from '../api/zod';
+import type { TAPIAllWeeksResponse } from '../api/zod';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 import { ADMIN_USER } from '../util/constants';

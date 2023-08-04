@@ -110,7 +110,10 @@ export const setPrizeAmounts = async (
 	systemValueValue: null | string,
 	systemValueUpdatedBy = ADMIN_USER,
 ): Promise<void> => {
-	await SystemValue.update({ systemValueName }, { systemValueUpdatedBy, systemValueValue });
+	await SystemValue.update(
+		{ systemValueName },
+		{ systemValueUpdatedBy, systemValueValue },
+	);
 };
 
 // ts-prune-ignore-next

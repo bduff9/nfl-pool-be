@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`update Users set UserReferredByRaw = 'Not Applicable' where UserReferredByRaw = 'RETURNING PLAYER'`,
 		);
@@ -30,11 +30,13 @@ export class RemoveOldLoggingFields1627961365173 implements MigrationInterface {
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`update Users set UserReferredByRaw = 'RETURNING PLAYER' where UserReferredByRaw = 'Not Applicable'`,
 		);
-		await queryRunner.query(`alter table Logs add column LogIsRead boolean after LeagueID`);
+		await queryRunner.query(
+			`alter table Logs add column LogIsRead boolean after LeagueID`,
+		);
 		await queryRunner.query(
 			`alter table Logs add column LogIsDeleted boolean after LogIsRead`,
 		);

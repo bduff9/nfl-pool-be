@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Context } from '@azure/functions/Interfaces.d';
+import type { Context } from '@azure/functions';
 import { Logger } from 'tslog';
 
 export let log: Logger = new Logger({});

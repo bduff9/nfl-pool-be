@@ -13,18 +13,18 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class AlterGameKickoffColumn1622675724209 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Games change column GameKickoff GameKickoff timestamp not null default current_timestamp`,
 		);
 		await queryRunner.query(`alter table Games alter column GameKickoff drop default`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Games change column GameKickoff GameKickoff timestamp not null default current_timestamp`,
 		);

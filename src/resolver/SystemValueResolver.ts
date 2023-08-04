@@ -20,13 +20,13 @@ import { SystemValue, User } from '../entity';
 import { getCurrentWeekInProgress } from '../util/game';
 import { updatePayouts } from '../util/payment';
 import { setPrizeAmounts, validatePrizes } from '../util/systemValue';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SystemValue)
 export class SystemValueResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => SystemValue)
-	async getSystemValue (@Arg('Name', () => String) name: string): Promise<SystemValue> {
+	async getSystemValue(@Arg('Name', () => String) name: string): Promise<SystemValue> {
 		return SystemValue.findOneOrFail({
 			where: { systemValueName: name },
 		});
@@ -34,7 +34,7 @@ export class SystemValueResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async setPrizeAmounts (
+	async setPrizeAmounts(
 		@Arg('WeeklyPrizes', () => String) weeklyPrizes: string,
 		@Arg('OverallPrizes', () => String) overallPrizes: string,
 		@Arg('SurvivorPrizes', () => String) survivorPrizes: string,
@@ -71,7 +71,9 @@ export class SystemValueResolver {
 		});
 
 		for (const user of users) {
-			promises.push(sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor));
+			promises.push(
+				sendPrizesSetEmail(user, parsedWeekly, parsedOverall, parsedSurvivor),
+			);
 		}
 
 		await Promise.allSettled(promises);

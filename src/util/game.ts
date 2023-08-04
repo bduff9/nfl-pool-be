@@ -16,7 +16,7 @@
 import { MoreThan, Not, Raw } from 'typeorm';
 
 import { getGameStatusFromAPI, parseTeamsFromApi } from '../api/util';
-import { TAPIResponseMatchup } from '../api/zod';
+import type { TAPIResponseMatchup } from '../api/zod';
 import { Game } from '../entity';
 import GameStatus from '../entity/GameStatus';
 import SeasonStatus from '../entity/SeasonStatus';
@@ -82,7 +82,10 @@ export const getCurrentWeek = async (): Promise<number> => {
 };
 
 export const getAllGamesForWeek = async (gameWeek: number): Promise<Array<Game>> =>
-	Game.find({ relations: ['homeTeam', 'visitorTeam', 'winnerTeam'], where: { gameWeek } });
+	Game.find({
+		relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
+		where: { gameWeek },
+	});
 
 // ts-prune-ignore-next
 export const getDBGameFromAPI = async (

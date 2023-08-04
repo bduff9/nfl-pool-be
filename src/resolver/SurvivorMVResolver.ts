@@ -31,19 +31,19 @@ import SurvivorStatus from '../entity/SurvivorStatus';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { getCurrentWeekInProgress } from '../util/game';
 import { isAliveInSurvivor } from '../util/survivor';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(SurvivorMV)
 export class SurvivorMVResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [SurvivorMV])
-	async getSurvivorRankings (): Promise<Array<SurvivorMV>> {
+	async getSurvivorRankings(): Promise<Array<SurvivorMV>> {
 		return SurvivorMV.find({ order: { rank: 'ASC' } });
 	}
 
 	@Authorized<TUserType>('registered')
 	@Query(() => SurvivorMV, { nullable: true })
-	async getMySurvivorDashboard (
+	async getMySurvivorDashboard(
 		@Ctx() context: TCustomContext,
 	): Promise<undefined | SurvivorMV> {
 		const { user } = context;
@@ -55,7 +55,7 @@ export class SurvivorMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Boolean)
-	async isAliveInSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+	async isAliveInSurvivor(@Ctx() context: TCustomContext): Promise<boolean> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
@@ -65,7 +65,7 @@ export class SurvivorMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getSurvivorWeekCount (
+	async getSurvivorWeekCount(
 		@Arg('Type', () => SurvivorStatus, { nullable: true }) type: null | SurvivorStatus,
 	): Promise<number> {
 		if (type) {
@@ -77,7 +77,7 @@ export class SurvivorMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getSurvivorOverallCount (
+	async getSurvivorOverallCount(
 		@Arg('Type', () => Boolean, { nullable: true }) type: boolean | null,
 	): Promise<number> {
 		if (typeof type === 'boolean') {
@@ -89,7 +89,7 @@ export class SurvivorMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => SeasonStatus)
-	async getSurvivorStatus (): Promise<SeasonStatus> {
+	async getSurvivorStatus(): Promise<SeasonStatus> {
 		const count = await SurvivorMV.count();
 
 		if (count === 0) return SeasonStatus.NotStarted;
@@ -104,12 +104,12 @@ export class SurvivorMVResolver {
 	}
 
 	@FieldResolver()
-	async lastPickTeam (@Root() survivorMV: SurvivorMV): Promise<Team | undefined> {
+	async lastPickTeam(@Root() survivorMV: SurvivorMV): Promise<Team | undefined> {
 		return Team.findOne({ where: { teamID: survivorMV.lastPick } });
 	}
 
 	@FieldResolver()
-	async allPicks (@Root() survivorMV: SurvivorMV): Promise<Array<SurvivorPick>> {
+	async allPicks(@Root() survivorMV: SurvivorMV): Promise<Array<SurvivorPick>> {
 		const week = await getCurrentWeekInProgress();
 
 		if (!week) return [];

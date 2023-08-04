@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { AzureFunction, Context } from '@azure/functions/Interfaces';
+import type { AzureFunction, Context } from '@azure/functions';
 
 import { User } from '../../src/entity';
 import EmailSendTo from '../../src/entity/EmailSendTo';
-import EmailType from '../../src/entity/EmailType';
+import type EmailType from '../../src/entity/EmailType';
 import { waitForConnection } from '../../src/util/database';
 import { sendAdminEmail } from '../../src/util/email';
 import { log, resetLogger, updateLoggerForAzure } from '../../src/util/logging';

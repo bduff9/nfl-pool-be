@@ -14,24 +14,20 @@
  * Home: https://asitewithnoname.com/
  */
 
-import { Game, User } from '../entity';
+import type { User } from '../entity';
+import { Game } from '../entity';
 import EmailType from '../entity/EmailType';
 import { log } from '../util/logging';
 
 import { sendSMS } from '.';
 
 const sendWeekEndedSMS = async (user: User, week: number): Promise<void> => {
-	const {
-		gameHomeScore,
-		gameVisitorScore,
-		homeTeam,
-		visitorTeam,
-		winnerTeam,
-	} = await Game.findOneOrFail({
-		order: { gameKickoff: 'DESC' },
-		relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
-		where: { gameWeek: week },
-	});
+	const { gameHomeScore, gameVisitorScore, homeTeam, visitorTeam, winnerTeam } =
+		await Game.findOneOrFail({
+			order: { gameKickoff: 'DESC' },
+			relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
+			where: { gameWeek: week },
+		});
 	const isTie = gameHomeScore === gameVisitorScore;
 	const [winnerScore, loserScore] =
 		gameHomeScore > gameVisitorScore

@@ -14,7 +14,8 @@
  * Home: https://asitewithnoname.com/
  */
 import mysql from 'mysql2';
-import { Connection, createConnection } from 'typeorm';
+import type { Connection } from 'typeorm';
+import { createConnection } from 'typeorm';
 
 import * as entities from '../entity';
 

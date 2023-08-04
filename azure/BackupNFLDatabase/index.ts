@@ -15,14 +15,14 @@
  */
 import { promises } from 'fs';
 
-import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import type { AzureFunction, Context } from '@azure/functions';
 import { BlobServiceClient } from '@azure/storage-blob';
 import mysqldump from 'mysqldump';
 import 'reflect-metadata';
 
 import { waitForConnection, getBackupName } from '../../src/util/database';
 import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
-import { MyTimer } from '../../src/util/types';
+import type { MyTimer } from '../../src/util/types';
 
 const {
 	AzureWebJobsStorage,
@@ -122,7 +122,10 @@ const timerTrigger: AzureFunction = async (
 
 	const uploadBlobResponse = await blockBlobClient.uploadFile(dumpFile, {});
 
-	context.log('Blob was uploaded successfully. requestId: ', uploadBlobResponse.requestId);
+	context.log(
+		'Blob was uploaded successfully. requestId: ',
+		uploadBlobResponse.requestId,
+	);
 
 	context.log('\nDeleting temp file...');
 	context.log('\t', dumpFile);

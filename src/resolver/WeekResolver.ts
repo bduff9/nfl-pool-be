@@ -17,7 +17,7 @@ import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type
 import { Not } from 'typeorm';
 
 import { Game, Week } from '../entity';
-import SeasonStatus from '../entity/SeasonStatus';
+import type SeasonStatus from '../entity/SeasonStatus';
 import {
 	MILLISECONDS_IN_SECOND,
 	MINUTES_IN_HOUR,
@@ -25,13 +25,13 @@ import {
 } from '../util/constants';
 import { getCurrentWeekInProgress, getSeasonStatus } from '../util/game';
 import { log } from '../util/logging';
-import { TUserType } from '../util/types';
+import type { TUserType } from '../util/types';
 
 @Resolver(Week)
 export class WeekResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => Week)
-	async getWeek (@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
+	async getWeek(@Arg('Week', () => Int, { nullable: true }) week: number): Promise<Week> {
 		if (!week) {
 			try {
 				/**
@@ -111,12 +111,12 @@ export class WeekResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int, { nullable: true })
-	async getWeekInProgress (): Promise<null | number> {
+	async getWeekInProgress(): Promise<null | number> {
 		return getCurrentWeekInProgress();
 	}
 
 	@FieldResolver()
-	async seasonStatus (@Root() _: Week): Promise<SeasonStatus> {
+	async seasonStatus(@Root() _: Week): Promise<SeasonStatus> {
 		return getSeasonStatus();
 	}
 }

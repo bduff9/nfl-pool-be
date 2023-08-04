@@ -17,13 +17,13 @@ import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
 import { APICallModel } from '../dynamodb/apiCall';
 import { APICall, APICallResult } from '../entity';
-import { TUserType } from '../util/types';
+import type { TUserType } from '../util/types';
 
 @Resolver(APICall)
 export class APICallResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => APICallResult)
-	async loadAPICalls (
+	async loadAPICalls(
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<APICallResult> {

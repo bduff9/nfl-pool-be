@@ -17,20 +17,20 @@ import { Arg, Authorized, FieldResolver, Int, Query, Resolver, Root } from 'type
 import { Brackets } from 'typeorm';
 
 import { Game, Team } from '../entity';
-import { TUserType } from '../util/types';
+import type { TUserType } from '../util/types';
 
 @Resolver(Team)
 export class TeamResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Team])
-	async getTeamsOnBye (@Arg('Week', () => Int) week: number): Promise<Array<Team>> {
+	async getTeamsOnBye(@Arg('Week', () => Int) week: number): Promise<Array<Team>> {
 		return Team.find({
 			where: { teamByeWeek: week },
 		});
 	}
 
 	@FieldResolver()
-	async teamRecord (@Root() team: Team): Promise<string> {
+	async teamRecord(@Root() team: Team): Promise<string> {
 		const { teamID } = team;
 		const [result]: Array<{
 			losses: number;
@@ -44,7 +44,7 @@ export class TeamResolver {
 	}
 
 	@FieldResolver()
-	async teamHistory (@Root() team: Team): Promise<Array<Game>> {
+	async teamHistory(@Root() team: Team): Promise<Array<Game>> {
 		const { teamID } = team;
 
 		return Game.createQueryBuilder('G')

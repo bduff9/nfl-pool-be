@@ -19,13 +19,13 @@ import sendPicksSubmittedEmail from '../emails/picksSubmitted';
 import { Game, Log, Notification, Pick, Tiebreaker } from '../entity';
 import LogAction from '../entity/LogAction';
 import sendPicksSubmittedSMS from '../sms/picksSubmitted';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Tiebreaker)
 export class TiebreakerResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => Tiebreaker, { nullable: true })
-	async getMyTiebreakerForWeek (
+	async getMyTiebreakerForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<Tiebreaker | undefined> {
@@ -42,7 +42,7 @@ export class TiebreakerResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => Tiebreaker)
-	async updateMyTiebreakerScore (
+	async updateMyTiebreakerScore(
 		@Arg('Week', () => Int) week: number,
 		@Arg('Score', () => Int) score: number,
 		@Ctx() context: TCustomContext,
@@ -77,7 +77,7 @@ export class TiebreakerResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => Tiebreaker)
-	async submitPicksForWeek (
+	async submitPicksForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<Tiebreaker> {

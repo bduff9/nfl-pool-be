@@ -16,19 +16,21 @@
 import { Arg, Authorized, Ctx, Int, Query, Resolver } from 'type-graphql';
 
 import { WeeklyMV } from '../entity';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(WeeklyMV)
 export class WeeklyMVResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [WeeklyMV])
-	async getWeeklyRankings (@Arg('Week', () => Int) week: number): Promise<Array<WeeklyMV>> {
+	async getWeeklyRankings(
+		@Arg('Week', () => Int) week: number,
+	): Promise<Array<WeeklyMV>> {
 		return WeeklyMV.find({ where: { week }, order: { rank: 'ASC' } });
 	}
 
 	@Authorized<TUserType>('registered')
 	@Query(() => WeeklyMV, { nullable: true })
-	async getMyWeeklyDashboard (
+	async getMyWeeklyDashboard(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<undefined | WeeklyMV> {
@@ -41,7 +43,7 @@ export class WeeklyMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getWeeklyTiedWithMeCount (
+	async getWeeklyTiedWithMeCount(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<number> {
@@ -66,7 +68,7 @@ export class WeeklyMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getWeeklyRankingsTotalCount (
+	async getWeeklyRankingsTotalCount(
 		@Arg('Week', () => Int) week: number,
 	): Promise<number> {
 		return WeeklyMV.count({ where: { week } });

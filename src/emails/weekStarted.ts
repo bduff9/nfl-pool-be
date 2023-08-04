@@ -13,9 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, Team, User } from '../entity';
+import type { Team, User } from '../entity';
+import { Game } from '../entity';
 import EmailType from '../entity/EmailType';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 type WeekStartedTeam = Pick<
@@ -57,7 +59,10 @@ export const previewWeekStartedEmail = async (
 	return html;
 };
 
-const sendWeekStartedEmail = async (user: WeekStartedUser, week: number): Promise<void> => {
+const sendWeekStartedEmail = async (
+	user: WeekStartedUser,
+	week: number,
+): Promise<void> => {
 	const [to, locals] = await getWeekStartedData(user, week);
 
 	try {

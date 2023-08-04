@@ -15,4 +15,4 @@
  */
 export const base64Encode = (str: string): string => Buffer.from(str).toString('base64');
 
-export const stripHTMLTags = (html: string): string => html.replace(/(<([^>]+)>)/gi, '');
+export const stripHTMLTags = (html: string): string => html.replace(/(<([^>]+)>)/g, '');

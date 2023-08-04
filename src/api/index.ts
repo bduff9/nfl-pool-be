@@ -22,14 +22,13 @@ import { log } from '../util/logging';
 import { getSystemYear } from '../util/systemValue';
 
 import { apiClient } from './client';
-import {
-	APIResponse,
-	APIResponseFull,
+import type {
 	TAPIAllWeeksResponse,
 	TAPIFullResponse,
 	TAPIResponse,
 	TAPIResponseMatchup,
 } from './zod';
+import { APIResponse, APIResponseFull } from './zod';
 
 const getAPIUrl = (year: number, week?: number): string => {
 	if (week) {

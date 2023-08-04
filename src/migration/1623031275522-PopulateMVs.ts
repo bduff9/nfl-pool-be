@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class PopulateMVs1623031275522 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		for (let week = 1; week <= 17; week++) {
 			await queryRunner.query(`set @week := ${week}`);
 			await queryRunner.query(`lock tables
@@ -123,7 +123,7 @@ export class PopulateMVs1623031275522 implements MigrationInterface {
 		await queryRunner.query(`unlock tables`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`delete from WeeklyMV`);
 		await queryRunner.query(`delete from OverallMV`);
 	}

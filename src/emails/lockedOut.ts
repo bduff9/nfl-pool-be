@@ -16,7 +16,8 @@
 import { Game, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { formatDueDate } from '../util/dates';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { getPaymentDueDate } from '../util/systemValue';
 

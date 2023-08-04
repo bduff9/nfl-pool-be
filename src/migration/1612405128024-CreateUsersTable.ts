@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class CreateUsersTable1612405128024 implements MigrationInterface {
-	async up (queryRunner: QueryRunner): Promise<void> {
+	async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Users
         (
             UserID int auto_increment
@@ -55,7 +55,7 @@ export class CreateUsersTable1612405128024 implements MigrationInterface {
         charset=utf8mb4`);
 	}
 
-	async down (queryRunner: QueryRunner): Promise<void> {
+	async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table Users`);
 	}
 }

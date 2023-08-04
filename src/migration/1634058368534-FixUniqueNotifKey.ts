@@ -13,18 +13,18 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class FixUniqueNotifKey1634058368534 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
 		await queryRunner.query(
 			`alter table Notifications add constraint uk_UserNotification unique (UserID, NotificationType)`,
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Notifications drop key uk_UserNotification`);
 		await queryRunner.query(
 			`alter table Notifications add constraint uk_Notifications unique (UserID, NotificationType, NotificationEmail)`,
