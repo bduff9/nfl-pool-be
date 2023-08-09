@@ -33,13 +33,13 @@ import EmailType from '../entity/EmailType';
 import LogAction from '../entity/LogAction';
 import { sendAdminEmail } from '../util/email';
 import { addToEmailQueue } from '../util/queue';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Email)
 export class EmailResolver {
 	@Authorized<TUserType>('anonymous')
 	@Query(() => Email)
-	async getEmail (
+	async getEmail(
 		@Arg('EmailID', () => String) emailID: string,
 		@Ctx() context: TCustomContext,
 	): Promise<Email> {
@@ -64,7 +64,7 @@ export class EmailResolver {
 
 	@Authorized<TUserType>('admin')
 	@Query(() => EmailResult)
-	async loadEmails (
+	async loadEmails(
 		@Arg('Count', () => Int) count: number,
 		@Arg('LastKey', { nullable: true }) lastKey: string,
 	): Promise<EmailResult> {
@@ -84,7 +84,7 @@ export class EmailResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async sendAdminEmail (
+	async sendAdminEmail(
 		@Arg('EmailType', () => EmailType) emailType: EmailType,
 		@Arg('SendTo', () => EmailSendTo) sendTo: EmailSendTo,
 		@Arg('UserEmail', () => String, { nullable: true }) userEmail: null | string,
@@ -115,7 +115,7 @@ export class EmailResolver {
 	}
 
 	@FieldResolver()
-	async toUsers (@Root() email: Email): Promise<Array<User>> {
+	async toUsers(@Root() email: Email): Promise<Array<User>> {
 		return User.find({
 			where: [
 				{ userEmail: In([...email.to]) },

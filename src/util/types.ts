@@ -13,9 +13,9 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Connection } from 'typeorm';
+import type { Connection } from 'typeorm';
 
-import { User } from '../entity';
+import type { User } from '../entity';
 
 export type TCustomContext = {
 	dbConnection: Connection;

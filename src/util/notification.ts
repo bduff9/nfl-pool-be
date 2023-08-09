@@ -21,7 +21,8 @@ import sendSurvivorReminderEmail from '../emails/survivorReminder';
 import sendWeekEndedEmail from '../emails/weekEnded';
 import sendWeeklyEmail from '../emails/weekly';
 import sendWeekStartedEmail from '../emails/weekStarted';
-import { Notification, User } from '../entity';
+import type { User } from '../entity';
+import { Notification } from '../entity';
 import sendPickReminderPushNotification from '../pushNotifications/pickReminder';
 import sendSurvivorReminderPushNotification from '../pushNotifications/survivorReminder';
 import sendPickReminderSMS from '../sms/pickReminder';
@@ -148,7 +149,10 @@ export const sendReminderPushNotifications = async (
 };
 
 // ts-prune-ignore-next
-export const sendReminderTexts = async (hoursLeft: number, week: number): Promise<void> => {
+export const sendReminderTexts = async (
+	hoursLeft: number,
+	week: number,
+): Promise<void> => {
 	const notifications = await Notification.createQueryBuilder('N')
 		.innerJoinAndSelect('N.user', 'U')
 		.where('U.UserCommunicationsOptedOut is false')
@@ -157,7 +161,11 @@ export const sendReminderTexts = async (hoursLeft: number, week: number): Promis
 		.andWhere('N.NotificationSMSHoursBefore = :hoursLeft', { hoursLeft })
 		.getMany();
 
-	log.info('Found reminder SMS to send', { count: notifications.length, hoursLeft, week });
+	log.info('Found reminder SMS to send', {
+		count: notifications.length,
+		hoursLeft,
+		week,
+	});
 
 	for (const { notificationType, user } of notifications) {
 		let hasUserSubmittedForWeek: boolean;
@@ -204,7 +212,10 @@ export const sendWeekEndedNotifications = async (week: number): Promise<void> =>
 		)
 		.getMany();
 
-	log.info('Found week ended notifications to send', { count: notifications.length, week });
+	log.info('Found week ended notifications to send', {
+		count: notifications.length,
+		week,
+	});
 
 	for (const { notificationEmail, notificationSMS, user } of notifications) {
 		if (notificationEmail) await sendWeekEndedEmail(user, week);

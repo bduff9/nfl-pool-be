@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class CreatePaymentsTable1628456504849 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table Payments (
             PaymentID int not null primary key auto_increment,
             UserID int not null,
@@ -54,7 +54,7 @@ export class CreatePaymentsTable1628456504849 implements MigrationInterface {
 		await queryRunner.query(`alter table Users drop column UserPaid`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Users add column UserPaid decimal(5,2) not null default 0 after UserPaymentAccount`,
 		);

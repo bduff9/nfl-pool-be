@@ -17,7 +17,7 @@ import { ObjectType } from 'type-graphql';
 import { Entity } from 'typeorm';
 
 import { ISupportContent } from './SupportContent';
-import SupportContentType from './SupportContentType';
+import type SupportContentType from './SupportContentType';
 
 @Entity('SupportContent', { schema: 'NFL' })
 @ObjectType({ implements: ISupportContent })

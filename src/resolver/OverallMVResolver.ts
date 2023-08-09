@@ -16,19 +16,19 @@
 import { Authorized, Ctx, Int, Query, Resolver } from 'type-graphql';
 
 import { OverallMV } from '../entity';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(OverallMV)
 export class OverallMVResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [OverallMV])
-	async getOverallRankings (): Promise<Array<OverallMV>> {
+	async getOverallRankings(): Promise<Array<OverallMV>> {
 		return OverallMV.find({ order: { rank: 'ASC' } });
 	}
 
 	@Authorized<TUserType>('registered')
 	@Query(() => OverallMV, { nullable: true })
-	async getMyOverallDashboard (
+	async getMyOverallDashboard(
 		@Ctx() context: TCustomContext,
 	): Promise<undefined | OverallMV> {
 		const { user } = context;
@@ -40,7 +40,7 @@ export class OverallMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getOverallTiedWithMeCount (@Ctx() context: TCustomContext): Promise<number> {
+	async getOverallTiedWithMeCount(@Ctx() context: TCustomContext): Promise<number> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
@@ -58,7 +58,7 @@ export class OverallMVResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Int)
-	async getOverallRankingsTotalCount (): Promise<number> {
+	async getOverallRankingsTotalCount(): Promise<number> {
 		return OverallMV.count();
 	}
 }

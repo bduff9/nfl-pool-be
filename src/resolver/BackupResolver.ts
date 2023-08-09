@@ -22,7 +22,7 @@ import LogAction from '../entity/LogAction';
 import { AzureWebJobsStorage, containerName } from '../util/constants';
 import { executeSqlFile } from '../util/database';
 import { log } from '../util/logging';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 export const streamToBuffer = async (
 	readableStream: NodeJS.ReadableStream | undefined,
@@ -49,7 +49,7 @@ export const streamToBuffer = async (
 export class BackupResolver {
 	@Authorized<TUserType>('admin')
 	@Query(() => [Backup])
-	async getBackups (): Promise<Array<Backup>> {
+	async getBackups(): Promise<Array<Backup>> {
 		if (!AzureWebJobsStorage) throw new Error('Missing AzureWebJobsStorage from env');
 
 		if (!containerName) throw new Error('Missing containerName from env');
@@ -79,7 +79,7 @@ export class BackupResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async restoreBackup (
+	async restoreBackup(
 		@Arg('BackupName', () => String) backupName: string,
 		@Ctx() context: TCustomContext,
 	): Promise<boolean> {
@@ -92,7 +92,8 @@ export class BackupResolver {
 		if (!containerName) throw new Error('Missing containerName from env');
 
 		try {
-			const blobServiceClient = BlobServiceClient.fromConnectionString(AzureWebJobsStorage);
+			const blobServiceClient =
+				BlobServiceClient.fromConnectionString(AzureWebJobsStorage);
 			const containerClient = blobServiceClient.getContainerClient(containerName);
 			const blobClient = containerClient.getBlobClient(backupName);
 			const downloadBlockBlobResponse = await blobClient.download();

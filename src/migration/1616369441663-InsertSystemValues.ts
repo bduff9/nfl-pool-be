@@ -13,13 +13,13 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { ADMIN_USER } from '../util/constants';
 
 // ts-prune-ignore-next
 export class InsertSystemValues1616369441663 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`insert into SystemValues (SystemValueName, SystemValueValue, SystemValueAddedBy, SystemValueUpdatedBy) values ('PaymentDueWeek', '3', '${ADMIN_USER}', '${ADMIN_USER}')`,
 		);
@@ -43,11 +43,13 @@ export class InsertSystemValues1616369441663 implements MigrationInterface {
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'PaymentDueWeek'`,
 		);
-		await queryRunner.query(`delete from SystemValues where SystemValueName = 'PoolCost'`);
+		await queryRunner.query(
+			`delete from SystemValues where SystemValueName = 'PoolCost'`,
+		);
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'SurvivorCost'`,
 		);

@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import type { AzureFunction, Context } from '@azure/functions';
 import 'reflect-metadata';
 
 import { getGamesForWeek } from '../../src/api';
@@ -22,7 +22,7 @@ import { getCurrentWeek, getHoursToWeekStart, updateSpreads } from '../../src/ut
 import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { sendReminderEmails, sendReminderTexts } from '../../src/util/notification';
 import { getTeamFromDB, updateTeamData } from '../../src/util/team';
-import { MyTimer } from '../../src/util/types';
+import type { MyTimer } from '../../src/util/types';
 
 const { database, host, password, port, dbuser } = process.env;
 

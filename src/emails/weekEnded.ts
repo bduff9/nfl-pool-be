@@ -13,9 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { Game, Team, User } from '../entity';
+import type { Team, User } from '../entity';
+import { Game } from '../entity';
 import EmailType from '../entity/EmailType';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 type WeekEndedTeam = Pick<
@@ -38,17 +40,12 @@ const getWeekEndedData = async (
 	user: WeekEndedUser,
 	week: number,
 ): Promise<[[string], WeekEndedData]> => {
-	const {
-		gameHomeScore,
-		gameVisitorScore,
-		homeTeam,
-		visitorTeam,
-		winnerTeam,
-	} = await Game.findOneOrFail({
-		order: { gameKickoff: 'DESC' },
-		relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
-		where: { gameWeek: week },
-	});
+	const { gameHomeScore, gameVisitorScore, homeTeam, visitorTeam, winnerTeam } =
+		await Game.findOneOrFail({
+			order: { gameKickoff: 'DESC' },
+			relations: ['homeTeam', 'visitorTeam', 'winnerTeam'],
+			where: { gameWeek: week },
+		});
 	const isTie = gameHomeScore === gameVisitorScore;
 	const [winnerScore, loserScore] =
 		gameHomeScore > gameVisitorScore

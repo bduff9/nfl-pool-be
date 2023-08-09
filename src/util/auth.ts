@@ -13,33 +13,33 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthChecker } from 'type-graphql';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { AuthChecker } from 'type-graphql';
 
 import { User } from '../entity';
 
 import { domain } from './constants';
-import { TCustomContext, TUserType } from './types';
+import type { TCustomContext, TUserType } from './types';
 
-export const allowCors = (
-	fn: (req: VercelRequest, res: VercelResponse) => Promise<void>,
-) => async (req: VercelRequest, res: VercelResponse): Promise<void> => {
-	res.setHeader('Access-Control-Allow-Credentials', 'true');
-	res.setHeader('Access-Control-Allow-Origin', domain || '');
-	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
-	res.setHeader(
-		'Access-Control-Allow-Headers',
-		'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, authorization, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
-	);
+export const allowCors =
+	(fn: (req: VercelRequest, res: VercelResponse) => Promise<void>) =>
+	async (req: VercelRequest, res: VercelResponse): Promise<void> => {
+		res.setHeader('Access-Control-Allow-Credentials', 'true');
+		res.setHeader('Access-Control-Allow-Origin', domain || '');
+		res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
+		res.setHeader(
+			'Access-Control-Allow-Headers',
+			'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, authorization, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+		);
 
-	if (req.method === 'OPTIONS') {
-		res.status(200).end();
+		if (req.method === 'OPTIONS') {
+			res.status(200).end();
 
-		return;
-	}
+			return;
+		}
 
-	return await fn(req, res);
-};
+		return await fn(req, res);
+	};
 
 export const getUserFromContext = async (req: VercelRequest): Promise<null | User> => {
 	const token = req.headers.authorization?.replace('Bearer ', '');

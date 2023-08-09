@@ -27,7 +27,9 @@ type SurvivorPoolStatus =
 	| { ended: false; justEnded: false; stillAlive: Array<SurvivorMV> }
 	| { ended: true; justEnded: boolean; winners: Array<SurvivorMV> };
 
-export const getSurvivorPoolStatus = async (week: number): Promise<SurvivorPoolStatus> => {
+export const getSurvivorPoolStatus = async (
+	week: number,
+): Promise<SurvivorPoolStatus> => {
 	const winners = await SurvivorMV.find({
 		relations: ['user'],
 		where: { rank: 1 },
@@ -123,7 +125,9 @@ export const markEmptySurvivorPicksAsDead = async (week: number): Promise<void> 
 		}
 	}
 
-	const dead = await SurvivorPick.find({ where: { survivorPickWeek: week, teamID: null } });
+	const dead = await SurvivorPick.find({
+		where: { survivorPickWeek: week, teamID: null },
+	});
 
 	for (const user of dead) await markUserDead(user.userID, week);
 };

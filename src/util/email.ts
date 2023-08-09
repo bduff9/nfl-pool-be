@@ -22,10 +22,11 @@ import Handlebars from 'handlebars';
 import mjml2html from 'mjml';
 
 import { getID } from '../dynamodb';
-import { EmailClass, EmailModel } from '../dynamodb/email';
+import type { EmailClass } from '../dynamodb/email';
+import { EmailModel } from '../dynamodb/email';
 import sendCustomEmail from '../emails/custom';
 import sendInterestEmail from '../emails/interest';
-import { User } from '../entity';
+import type { User } from '../entity';
 import EmailType from '../entity/EmailType';
 
 import {
@@ -140,7 +141,10 @@ const getPartials = (): Record<
 > => {
 	const partialsDir = path.join(__dirname, '..', 'templates', 'partials');
 	const files = readdirSync(partialsDir);
-	const partials: Record<string, HandlebarsTemplateDelegate<Record<string, unknown>>> = {};
+	const partials: Record<
+		string,
+		HandlebarsTemplateDelegate<Record<string, unknown>>
+	> = {};
 
 	for (const file of files) {
 		const fileStr = readFileSync(path.join(partialsDir, file)).toString();
@@ -241,7 +245,9 @@ export const previewEmail = async (
 		browserLink: `${domain}/api/email/${locals.emailID}`,
 		domain,
 		unsubscribeLink: `${domain}/api/email/unsubscribe${
-			typeof locals.sendTo === 'string' ? `?email=${encodeURIComponent(locals.sendTo)}` : ''
+			typeof locals.sendTo === 'string'
+				? `?email=${encodeURIComponent(locals.sendTo)}`
+				: ''
 		}`,
 	});
 

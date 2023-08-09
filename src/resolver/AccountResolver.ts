@@ -16,13 +16,13 @@
 import { Arg, Authorized, Ctx, Query, Resolver } from 'type-graphql';
 
 import { Account } from '../entity';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Account)
 export class AccountResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => Boolean)
-	async hasSocialLinked (
+	async hasSocialLinked(
 		@Arg('Type') type: string,
 		@Ctx() context: TCustomContext,
 	): Promise<boolean> {

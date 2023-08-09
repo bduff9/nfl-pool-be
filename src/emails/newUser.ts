@@ -15,7 +15,8 @@
  */
 import { User, UserHistory } from '../entity';
 import EmailType from '../entity/EmailType';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 import { getSystemYear } from '../util/systemValue';
 

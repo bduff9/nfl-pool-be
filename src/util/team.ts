@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { TAPITeamResponse } from '../api/zod';
+import type { TAPITeamResponse } from '../api/zod';
 import { Team } from '../entity';
 
 import { ADMIN_USER } from './constants';

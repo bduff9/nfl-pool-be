@@ -13,10 +13,10 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { CreateTableInput } from 'aws-sdk/clients/dynamodb';
+import type { CreateTableInput } from 'aws-sdk/clients/dynamodb';
 import dynamoose from 'dynamoose';
-import { Document } from 'dynamoose/dist/Document';
-import { ModelType } from 'dynamoose/dist/General';
+import type { Document } from 'dynamoose/dist/Document';
+import type { ModelType } from 'dynamoose/dist/General';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AWS_AK_ID, AWS_R, AWS_SAK_ID } from '../util/constants';

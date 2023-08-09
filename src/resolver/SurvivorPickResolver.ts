@@ -31,7 +31,7 @@ import LogAction from '../entity/LogAction';
 import { WEEKS_IN_SEASON } from '../util/constants';
 import { log } from '../util/logging';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @InputType({ description: 'Survivor pick data' })
 class MakeSurvivorPickInput implements Partial<SurvivorPick> {
@@ -51,7 +51,7 @@ class MakeSurvivorPickInput implements Partial<SurvivorPick> {
 export class SurvivorPickResolver {
 	@Authorized<TUserType>('survivorPlayer')
 	@Query(() => [SurvivorPick])
-	async getMySurvivorPicks (@Ctx() context: TCustomContext): Promise<Array<SurvivorPick>> {
+	async getMySurvivorPicks(@Ctx() context: TCustomContext): Promise<Array<SurvivorPick>> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
@@ -64,7 +64,7 @@ export class SurvivorPickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => SurvivorPick, { nullable: true })
-	async getMySurvivorPickForWeek (
+	async getMySurvivorPickForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<SurvivorPick | undefined> {
@@ -80,7 +80,7 @@ export class SurvivorPickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => Boolean)
-	async registerForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+	async registerForSurvivor(@Ctx() context: TCustomContext): Promise<boolean> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
@@ -92,7 +92,7 @@ export class SurvivorPickResolver {
 
 	@Authorized<TUserType>('survivorPlayer')
 	@Mutation(() => Boolean)
-	async unregisterForSurvivor (@Ctx() context: TCustomContext): Promise<boolean> {
+	async unregisterForSurvivor(@Ctx() context: TCustomContext): Promise<boolean> {
 		const { user } = context;
 
 		if (!user) throw new Error('Missing user from context');
@@ -104,7 +104,7 @@ export class SurvivorPickResolver {
 
 	@Authorized<TUserType>('survivorPlayer')
 	@Mutation(() => SurvivorPick)
-	async makeSurvivorPick (
+	async makeSurvivorPick(
 		@Arg('data') data: MakeSurvivorPickInput,
 		@Ctx() context: TCustomContext,
 	): Promise<SurvivorPick> {

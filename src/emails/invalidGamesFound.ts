@@ -14,10 +14,12 @@
  * Home: https://asitewithnoname.com/
  */
 import { parseTeamsFromApi } from '../api/util';
-import { TAPIResponseMatchup } from '../api/zod';
-import { Game, User } from '../entity';
+import type { TAPIResponseMatchup } from '../api/zod';
+import type { Game } from '../entity';
+import { User } from '../entity';
 import EmailType from '../entity/EmailType';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
 
 type AdminMessage = { game: string; reason: string };

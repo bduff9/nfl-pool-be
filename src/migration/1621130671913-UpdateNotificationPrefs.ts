@@ -13,13 +13,13 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { ADMIN_USER } from '../util/constants';
 
 // ts-prune-ignore-next
 export class UpdateNotificationPrefs1621130671913 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Users add column UserCommunicationsOptedOut boolean not null default false after UserAutoPickStrategy`,
 		);
@@ -56,7 +56,7 @@ export class UpdateNotificationPrefs1621130671913 implements MigrationInterface 
                     on update cascade on delete cascade`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table Notifications
             drop constraint fk_NotificationType`);
 		await queryRunner.query(

@@ -14,7 +14,7 @@
  * Home: https://asitewithnoname.com/
  */
 
-import { Pick as PoolPick, Team, Tiebreaker, User } from '../entity';
+import type { Pick as PoolPick, Team, Tiebreaker, User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { log } from '../util/logging';
 

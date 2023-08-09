@@ -13,7 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { League, User, UserLeague } from '../entity';
+import type { User } from '../entity';
+import { League, UserLeague } from '../entity';
 
 export const getPublicLeague = async (): Promise<number> => {
 	const league = await League.findOneOrFail({ where: { leagueName: 'public' } });

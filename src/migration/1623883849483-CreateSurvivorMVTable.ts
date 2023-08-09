@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class CreateSurvivorMVTable1623883849483 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`create table SurvivorMV (
             \`Rank\` integer not null default 0,
             Tied boolean not null default false,
@@ -72,7 +72,7 @@ export class CreateSurvivorMVTable1623883849483 implements MigrationInterface {
 		await queryRunner.query(`unlock tables`);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`drop table SurvivorMV`);
 	}
 }

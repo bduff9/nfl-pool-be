@@ -21,13 +21,13 @@ import { Game, Pick, Tiebreaker } from '../entity';
 import AutoPickStrategy from '../entity/AutoPickStrategy';
 import { log } from '../util/logging';
 import { getLowestUnusedPoint, shouldAutoPickHome } from '../util/pick';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 
 @Resolver(Pick)
 export class PickResolver {
 	@Authorized<TUserType>('registered')
 	@Query(() => [Pick])
-	async getAllPicksForWeek (@Arg('Week', () => Int) week: number): Promise<Array<Pick>> {
+	async getAllPicksForWeek(@Arg('Week', () => Int) week: number): Promise<Array<Pick>> {
 		return Pick.createQueryBuilder('P')
 			.innerJoinAndSelect('P.user', 'U')
 			.innerJoinAndSelect('P.game', 'G')
@@ -43,7 +43,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => [Pick])
-	async getMyPicksForWeek (
+	async getMyPicksForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<Array<Pick>> {
@@ -66,7 +66,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => Boolean)
-	async validatePicksForWeek (
+	async validatePicksForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Arg('Unused', () => String) unusedStr: string,
 		@Arg('LastScore', () => Int) lastScore: number,
@@ -81,11 +81,11 @@ export class PickResolver {
 			!unused || unused.length === 0
 				? 0
 				: await Pick.createQueryBuilder('P')
-					.innerJoin('P.game', 'G')
-					.where('P.UserID = :userID', { userID: user.userID })
-					.andWhere('G.GameWeek = :week', { week })
-					.andWhere('P.PickPoints in(:...unused)', { unused })
-					.getCount();
+						.innerJoin('P.game', 'G')
+						.where('P.UserID = :userID', { userID: user.userID })
+						.andWhere('G.GameWeek = :week', { week })
+						.andWhere('P.PickPoints in(:...unused)', { unused })
+						.getCount();
 
 		if (unusedCount > 0) throw new Error('Points unused on FE are used on BE');
 
@@ -102,7 +102,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => [Pick])
-	async resetMyPicksForWeek (
+	async resetMyPicksForWeek(
 		@Arg('Week', () => Int) week: number,
 		@Ctx() context: TCustomContext,
 	): Promise<Array<Pick>> {
@@ -124,7 +124,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => Pick, { nullable: true })
-	async setMyPick (
+	async setMyPick(
 		@Arg('Week', () => Int) week: number,
 		@Arg('GameID', () => Int, { nullable: true }) gameID: null | number,
 		@Arg('TeamID', () => Int, { nullable: true }) teamID: null | number,
@@ -190,7 +190,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => [Pick])
-	async autoPick (
+	async autoPick(
 		@Arg('Week', () => Int) week: number,
 		@Arg('Type', () => AutoPickStrategy) type: AutoPickStrategy,
 		@Ctx() context: TCustomContext,
@@ -250,7 +250,7 @@ export class PickResolver {
 
 	@Authorized<TUserType>('anonymous')
 	@Mutation(() => Boolean)
-	async quickPick (
+	async quickPick(
 		@Arg('UserID', () => Int) userID: number,
 		@Arg('TeamID', () => Int) teamID: number,
 		@Ctx() context: TCustomContext,

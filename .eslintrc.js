@@ -9,40 +9,31 @@ module.exports = {
 	parserOptions: {
 		ecmaFeatures: {
 			experimentalObjectRestSpread: true,
+			warnOnUnsupportedTypeScriptVersion: false,
 		},
-		warnOnUnsupportedTypeScriptVersion: false,
 		ecmaVersion: 7,
 		projects: ['./tsconfig.json', './azure/tsconfig.json'],
 		sourceType: 'module',
 	},
-	plugins: ['graphql', 'import', 'prettierx', '@typescript-eslint'],
-	settings: {
-		prettierx: {
-			usePrettierrc: false,
-		},
-	},
+	plugins: [
+		'@typescript-eslint',
+		'clean-regex',
+		'graphql',
+		'import',
+		'prettier',
+	],
+	settings: {},
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
+		'plugin:clean-regex/recommended',
 		'plugin:import/errors',
 		'plugin:import/typescript',
 		'plugin:import/warnings',
-		'plugin:prettierx/standardize',
-		'plugin:you-dont-need-momentjs/recommended',
+		'prettier',
 	],
 	rules: {
-		'prettierx/options': [
-			2,
-			{
-				alignObjectProperties: false,
-				endOfLine: 'auto',
-				semi: true,
-				singleQuote: true,
-				spaceBeforeFunctionParen: true,
-				trailingComma: 'all',
-				useTabs: true,
-			},
-		],
+    "prettier/prettier": "error",
 		'linebreak-style': 'off',
 		'no-console': 'off',
 		'no-constant-condition': 'off',
@@ -111,5 +102,9 @@ module.exports = {
 		'@typescript-eslint/ban-ts-comment': 'warn',
 		'@typescript-eslint/explicit-function-return-type': 'error',
 		'prefer-template': 'error',
+		'@typescript-eslint/consistent-type-imports': ['error', {
+			prefer: 'type-imports',
+			fixStyle: 'separate-type-imports',
+		}],
 	},
 };

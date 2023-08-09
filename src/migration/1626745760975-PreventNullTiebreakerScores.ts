@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class PreventNullTiebreakerScores1626745760975 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`update Tiebreakers set TiebreakerLastScore = 0 where TiebreakerLastScore is null`,
 		);
@@ -26,10 +26,12 @@ export class PreventNullTiebreakerScores1626745760975 implements MigrationInterf
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`update Tiebreakers set TiebreakerLastScore = null where TiebreakerLastScore = 0`,
 		);
-		await queryRunner.query(`alter table Tiebreakers modify TiebreakerLastScore int null`);
+		await queryRunner.query(
+			`alter table Tiebreakers modify TiebreakerLastScore int null`,
+		);
 	}
 }

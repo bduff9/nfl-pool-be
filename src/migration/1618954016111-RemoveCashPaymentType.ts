@@ -13,11 +13,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 // ts-prune-ignore-next
 export class RemoveCashPaymentType1618954016111 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Users modify UserPaymentType enum('Cash', 'Paypal', 'Venmo', 'Zelle') default 'Cash' null;`,
 		);
@@ -29,7 +29,7 @@ export class RemoveCashPaymentType1618954016111 implements MigrationInterface {
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`alter table Users modify UserPaymentType enum('Cash', 'Paypal', 'Venmo', 'Zelle') default 'Cash' null;`,
 		);

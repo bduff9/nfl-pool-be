@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { AzureFunction, Context } from '@azure/functions/Interfaces.d';
+import type { AzureFunction, Context } from '@azure/functions';
 import 'reflect-metadata';
 import { getManager } from 'typeorm';
 
@@ -41,7 +41,7 @@ import { populateWinnerHistory } from '../../src/util/history';
 import { updateLoggerForAzure, resetLogger } from '../../src/util/logging';
 import { resetPrizeAmounts, updateSystemYear } from '../../src/util/systemValue';
 import { resetTeams } from '../../src/util/team';
-import { MyTimer } from '../../src/util/types';
+import type { MyTimer } from '../../src/util/types';
 import { clearOldUserData, resetUsers } from '../../src/util/user';
 
 const { database, host, password, port, dbuser } = process.env;

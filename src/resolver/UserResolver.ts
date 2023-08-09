@@ -29,7 +29,7 @@ import {
 } from 'type-graphql';
 import { IsNull } from 'typeorm/find-options/operator/IsNull';
 import { Not } from 'typeorm/find-options/operator/Not';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import sendUntrustedEmail from '../emails/untrusted';
 import sendUserTrustedEmail from '../emails/userTrusted';
@@ -44,7 +44,7 @@ import { log } from '../util/logging';
 import { getUserPayments } from '../util/payment';
 import { registerForSurvivor, unregisterForSurvivor } from '../util/survivor';
 import { getPoolCost } from '../util/systemValue';
-import { TCustomContext, TUserType } from '../util/types';
+import type { TCustomContext, TUserType } from '../util/types';
 import { getUserAlerts, registerUser, isValidPaymentMethod } from '../util/user';
 
 @InputType({ description: 'User registration data' })
@@ -110,7 +110,7 @@ class EditMyProfileInput implements Partial<User> {
 export class UserResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => User)
-	async getCurrentUser (@Ctx() context: TCustomContext): Promise<User> {
+	async getCurrentUser(@Ctx() context: TCustomContext): Promise<User> {
 		if (!context.user) throw new Error('Missing user data!');
 
 		return context.user;
@@ -118,7 +118,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('anonymous')
 	@Query(() => [String])
-	async getMyAlerts (@Ctx() context: TCustomContext): Promise<Array<string>> {
+	async getMyAlerts(@Ctx() context: TCustomContext): Promise<Array<string>> {
 		const { user } = context;
 
 		if (!user) return [];
@@ -128,19 +128,19 @@ export class UserResolver {
 
 	@Authorized<TUserType>('admin')
 	@Query(() => Number)
-	async getRegisteredCount (): Promise<number> {
+	async getRegisteredCount(): Promise<number> {
 		return User.count({ userDoneRegistering: true });
 	}
 
 	@Authorized<TUserType>('admin')
 	@Query(() => Number)
-	async getSurvivorCount (): Promise<number> {
+	async getSurvivorCount(): Promise<number> {
 		return User.count({ userPlaysSurvivor: true });
 	}
 
 	@Authorized<TUserType>('admin')
 	@Query(() => [User])
-	async getUsersForAdmins (
+	async getUsersForAdmins(
 		@Arg('UserType', () => AdminUserType) userType: AdminUserType,
 		@Ctx() context: TCustomContext,
 	): Promise<Array<User>> {
@@ -228,7 +228,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('admin')
 	@Query(() => [User])
-	async getUserPaymentsForAdmin (): Promise<Array<User>> {
+	async getUserPaymentsForAdmin(): Promise<Array<User>> {
 		const qb = User.createQueryBuilder('U');
 		const userIDSubquery = qb
 			.subQuery()
@@ -249,7 +249,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('user')
 	@Mutation(() => User)
-	async finishRegistration (
+	async finishRegistration(
 		@Arg('data') data: FinishRegistrationInput,
 		@Ctx() context: TCustomContext,
 	): Promise<User> {
@@ -344,7 +344,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('registered')
 	@Mutation(() => User)
-	async editMyProfile (
+	async editMyProfile(
 		@Arg('data') data: EditMyProfileInput,
 		@Ctx() context: TCustomContext,
 	): Promise<User> {
@@ -374,7 +374,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('anonymous')
 	@Mutation(() => Boolean)
-	async unsubscribeEmail (
+	async unsubscribeEmail(
 		@Arg('email') email: string,
 		@Ctx() context: TCustomContext,
 	): Promise<boolean> {
@@ -408,7 +408,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async toggleSurvivor (
+	async toggleSurvivor(
 		@Arg('UserID', () => Int) userID: number,
 		@Arg('IsPlaying') isPlaying: boolean,
 		@Ctx() context: TCustomContext,
@@ -428,7 +428,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async trustUser (
+	async trustUser(
 		@Arg('UserID', () => Int) userID: number,
 		@Arg('ReferredByUserID', () => Int) referredBy: number,
 		@Ctx() context: TCustomContext,
@@ -460,7 +460,7 @@ export class UserResolver {
 
 	@Authorized<TUserType>('admin')
 	@Mutation(() => Boolean)
-	async removeUser (
+	async removeUser(
 		@Arg('UserID', () => Int) userID: number,
 		@Ctx() context: TCustomContext,
 	): Promise<boolean> {
@@ -482,32 +482,32 @@ export class UserResolver {
 	}
 
 	@FieldResolver()
-	async userPaid (@Root() user: User): Promise<number> {
+	async userPaid(@Root() user: User): Promise<number> {
 		return getUserPayments(user.userID, PaymentType.Paid);
 	}
 
 	@FieldResolver()
-	async userOwes (@Root() user: User): Promise<number> {
+	async userOwes(@Root() user: User): Promise<number> {
 		return getUserPayments(user.userID, PaymentType.Fee);
 	}
 
 	@FieldResolver()
-	async userWon (@Root() user: User): Promise<number> {
+	async userWon(@Root() user: User): Promise<number> {
 		return getUserPayments(user.userID, PaymentType.Prize);
 	}
 
 	@FieldResolver()
-	async userPaidOut (@Root() user: User): Promise<number> {
+	async userPaidOut(@Root() user: User): Promise<number> {
 		return getUserPayments(user.userID, PaymentType.Payout);
 	}
 
 	@FieldResolver()
-	async userBalance (@Root() user: User): Promise<number> {
+	async userBalance(@Root() user: User): Promise<number> {
 		return getUserPayments(user.userID);
 	}
 
 	@FieldResolver()
-	async yearsPlayed (@Root() user: User): Promise<string> {
+	async yearsPlayed(@Root() user: User): Promise<string> {
 		const result = await UserHistory.createQueryBuilder('UH')
 			.select('group_concat(UserHistoryYear)', 'yearsPlayed')
 			.where('UH.UserID = :userID', { userID: user.userID })
@@ -517,7 +517,7 @@ export class UserResolver {
 	}
 
 	@FieldResolver()
-	async accounts (@Root() user: User): Promise<Array<Account>> {
+	async accounts(@Root() user: User): Promise<Array<Account>> {
 		return Account.find({ where: { userID: user.userID } });
 	}
 }

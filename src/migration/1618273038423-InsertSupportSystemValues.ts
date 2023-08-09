@@ -13,13 +13,13 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { ADMIN_USER } from '../util/constants';
 
 // ts-prune-ignore-next
 export class InsertSupportSystemValues1618273038423 implements MigrationInterface {
-	public async up (queryRunner: QueryRunner): Promise<void> {
+	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`alter table SystemValues drop key uk_SystemValue`);
 		await queryRunner.query(
 			`alter table SystemValues modify column SystemValueValue varchar(255) null`,
@@ -37,11 +37,13 @@ export class InsertSupportSystemValues1618273038423 implements MigrationInterfac
 		);
 	}
 
-	public async down (queryRunner: QueryRunner): Promise<void> {
+	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(
 			`delete from SystemValues where SystemValueName = 'SupportEmail'`,
 		);
-		await queryRunner.query(`delete from SystemValues where SystemValueName = 'SlackLink'`);
+		await queryRunner.query(
+			`delete from SystemValues where SystemValueName = 'SlackLink'`,
+		);
 		await queryRunner.query(
 			`alter table SystemValues modify column SystemValueValue varchar(99) null`,
 		);

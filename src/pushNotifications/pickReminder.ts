@@ -13,7 +13,7 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { User } from '../entity';
+import type { User } from '../entity';
 import EmailType from '../entity/EmailType';
 import { log } from '../util/logging';
 

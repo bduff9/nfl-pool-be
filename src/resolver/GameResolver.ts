@@ -16,13 +16,13 @@
 import { Arg, Authorized, Int, Query, Resolver } from 'type-graphql';
 
 import { Game } from '../entity';
-import { TUserType } from '../util/types';
+import type { TUserType } from '../util/types';
 
 @Resolver(Game)
 export class GameResolver {
 	@Authorized<TUserType>('user')
 	@Query(() => Game)
-	async getGame (@Arg('GameID', () => Int) gameID: number): Promise<Game> {
+	async getGame(@Arg('GameID', () => Int) gameID: number): Promise<Game> {
 		return Game.findOneOrFail({
 			relations: ['homeTeam', 'visitorTeam'],
 			where: { gameID },
@@ -31,7 +31,7 @@ export class GameResolver {
 
 	@Authorized<TUserType>('registered')
 	@Query(() => [Game])
-	async getGamesForWeek (@Arg('Week', () => Int) gameWeek: number): Promise<Array<Game>> {
+	async getGamesForWeek(@Arg('Week', () => Int) gameWeek: number): Promise<Array<Game>> {
 		return Game.find({
 			order: { gameKickoff: 'ASC' },
 			relations: [

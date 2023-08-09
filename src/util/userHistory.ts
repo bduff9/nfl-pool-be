@@ -13,7 +13,8 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  * Home: https://asitewithnoname.com/
  */
-import { User, UserHistory } from '../entity';
+import type { User } from '../entity';
+import { UserHistory } from '../entity';
 
 import { getPublicLeague } from './league';
 import { getSystemYear } from './systemValue';

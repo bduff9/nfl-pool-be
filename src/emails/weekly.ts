@@ -15,11 +15,14 @@
  */
 import { LessThan } from 'typeorm';
 
-import { SurvivorMV, User, WeeklyMV } from '../entity';
+import type { User } from '../entity';
+import { SurvivorMV, WeeklyMV } from '../entity';
 import EmailType from '../entity/EmailType';
-import { EmailNotAllowedLocals, EmailView, previewEmail, sendEmail } from '../util/email';
+import type { EmailNotAllowedLocals, EmailView } from '../util/email';
+import { previewEmail, sendEmail } from '../util/email';
 import { log } from '../util/logging';
-import { APINewsArticle, getArticlesForWeek } from '../util/newsArticles';
+import type { APINewsArticle } from '../util/newsArticles';
+import { getArticlesForWeek } from '../util/newsArticles';
 import { addOrdinal } from '../util/numbers';
 import { getSurvivorPoolStatus } from '../util/survivor';
 import { getUserAlerts } from '../util/user';
@@ -41,7 +44,9 @@ const getWeeklyEmailData = async (
 	const userMessages: Array<string> = [];
 	const poolUpdates: Array<string> = [];
 	const survivorUpdates: Array<string> = [];
-	const myPoolRank = await WeeklyMV.findOneOrFail({ where: { week, userID: user.userID } });
+	const myPoolRank = await WeeklyMV.findOneOrFail({
+		where: { week, userID: user.userID },
+	});
 	const mySurvivorRank = await SurvivorMV.findOne({ where: { userID: user.userID } });
 	const poolRanks = await WeeklyMV.find({
 		relations: ['user'],
@@ -89,7 +94,8 @@ const getWeeklyEmailData = async (
 			.reduce((acc, name, i, list) => {
 				if (!acc) return name;
 
-				if (i === list.length - 1) return `${acc}${list.length > 2 ? ',' : ''} and ${name}`;
+				if (i === list.length - 1)
+					return `${acc}${list.length > 2 ? ',' : ''} and ${name}`;
 
 				return `${acc}, ${name}`;
 			}, '');

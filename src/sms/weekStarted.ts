@@ -14,7 +14,8 @@
  * Home: https://asitewithnoname.com/
  */
 
-import { Game, User } from '../entity';
+import type { User } from '../entity';
+import { Game } from '../entity';
 import EmailType from '../entity/EmailType';
 import { log } from '../util/logging';
 
