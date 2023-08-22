@@ -15,26 +15,41 @@
  */
 import type { Context } from '@azure/functions';
 import { Logger } from 'tslog';
+import type { IMeta } from 'tslog/dist/types/runtime/nodejs';
 
-export let log: Logger = new Logger({});
+type AzureLogger = {
+	_meta: IMeta;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: `${number}`]: any;
+};
+
+export let log = new Logger<AzureLogger>({ type: 'hidden' });
 
 // ts-prune-ignore-next
 export const resetLogger = (): void => {
-	log = new Logger({});
+	log = new Logger({ type: 'hidden' });
 };
 
 // ts-prune-ignore-next
-export const updateLoggerForAzure = (context: Context): void => {
-	log.attachTransport(
-		{
-			debug: logObject => context.log.info(JSON.stringify(logObject)),
-			error: logObject => context.log.error(JSON.stringify(logObject)),
-			fatal: logObject => context.log.error(JSON.stringify(logObject)),
-			info: logObject => context.log.info(JSON.stringify(logObject)),
-			silly: logObject => context.log.info(JSON.stringify(logObject)),
-			trace: logObject => context.log.info(JSON.stringify(logObject)),
-			warn: logObject => context.log.warn(JSON.stringify(logObject)),
-		},
-		'silly',
-	);
+export const updateLoggerForAzure = ({ log: logger }: Context): void => {
+	/**
+	 * These indexes point to levels:
+	 *   0: silly, 1: trace, 2: debug, 3: info, 4: warn, 5: error, 6: fatal
+	 */
+	const levels = [
+		logger.verbose,
+		logger.verbose,
+		logger.verbose,
+		logger.info,
+		logger.warn,
+		logger.error,
+		logger.error,
+	];
+
+	log.attachTransport(({ _meta, ...args }) => {
+		const level = _meta.logLevelId;
+		const logger = levels[level];
+
+		logger(...Object.values(args));
+	});
 };
