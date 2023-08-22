@@ -25,10 +25,12 @@ type AzureLogger = {
 
 export let log = new Logger<AzureLogger>({ type: 'hidden' });
 
+// ts-prune-ignore-next
 export const resetLogger = (): void => {
 	log = new Logger({ type: 'hidden' });
 };
 
+// ts-prune-ignore-next
 export const updateLoggerForAzure = ({ log: logger }: Context): void => {
 	/**
 	 * These indexes point to levels:
