@@ -60,7 +60,7 @@
     "email-templates": "8.0.8",
     "graphql": "15.8.0",
     "handlebars": "4.7.7",
-    "mjml": "4.10.2",
+    "mjml": "4.15.0",
     "mysql2": "2.3.0",
     "mysqldump": "3.2.0",
     "node-sass": "6.0.1",
