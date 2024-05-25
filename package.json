@@ -57,7 +57,7 @@
     "axios": "0.21.4",
     "class-validator": "0.13.1",
     "dynamoose": "2.8.1",
-    "email-templates": "8.0.8",
+    "email-templates": "11.1.1",
     "graphql": "15.8.0",
     "handlebars": "4.7.7",
     "mjml": "4.10.2",
