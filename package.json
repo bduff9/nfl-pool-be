@@ -51,7 +51,7 @@
     "@azure/storage-blob": "12.7.0",
     "@azure/storage-queue": "12.6.0",
     "@saeris/apollo-server-vercel": "0.4.0",
-    "@sentry/node": "6.12.0",
+    "@sentry/node": "7.75.0",
     "@sentry/tracing": "6.12.0",
     "aws-sdk": "2.986.0",
     "axios": "0.21.4",
